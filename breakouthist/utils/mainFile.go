@@ -76,10 +76,30 @@ func MainFunc() {
 }
 
 func (db DB) loadDailyBarsMem() {
-	tickers, err := db.GetTickersFromDB()
-	if err != nil {
-		log.Fatalln("error getting tickers", err)
+	tickers := []string{}
+
+	if len(os.Args) > 3 {
+		tickerInput := os.Args[3]
+
+		checkExistTicker, err := db.CheckTickerFromDB(tickerInput)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		if checkExistTicker {
+			tickers = []string{tickerInput}
+		} else {
+			tickers, err = db.GetTickersFromDB()
+		}
+	} else {
+		var err error
+		tickers, err = db.GetTickersFromDB()
+		if err != nil {
+			log.Fatalln("error getting tickers", err)
+		}
 	}
+
+	// tickers, err := db.GetTickersFromDB()
+
 	// tickers = []string{"AAPL"}
 	log.Println("START updateDailyBarsMem")
 
