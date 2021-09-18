@@ -21,7 +21,8 @@ func main() {
 	c := cron.New()
 	c.Start()
 	c.AddFunc("TZ=America/New_York 00 22 * * * *", func() {
-		currentTime := time.Now()
+		loc, _ := time.LoadLocation("America/New_York")
+		currentTime := time.Now().In(loc)
 		start = currentTime.AddDate(0, 0, -1).Format("2006-01-02")
 		end = currentTime.Format("2006-01-02")
 		cmd := exec.Command("sh", "run.sh", start, end)
