@@ -62,16 +62,10 @@ func InitDB() (*DB, error) {
 
 func MainFunc() {
 	db, err := InitDB()
+	var res []string
 	if err != nil {
 		log.Fatalln("Cannot init db", err)
 	}
-	wp := workerpool.New(20)
-	res, err := db.GetTickersFromDB()
-	// res := []string{"AAPL"}
-	//start, end := time.Now().AddDate(-1, 0, 0), time.Now()
-	// start := time.Now().AddDate(0, 0, -8)
-	// end := time.Now().AddDate(0, 0, -1)
-
 	loc, err := time.LoadLocation("America/New_York")
 	if err != nil {
 		log.Fatalln("Can't set timezone", err)
@@ -80,6 +74,27 @@ func MainFunc() {
 	log.Println("time=", time.Now())
 
 	scriptStart := time.Now()
+	if len(os.Args) > 3 {
+		tickerInput := os.Args[3]
+
+		checkExistTiker, err := db.CheckTickerFromDB(tickerInput)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		if checkExistTiker {
+			res = []string{tickerInput}
+		} else {
+			res, err = db.GetTickersFromDB()
+		}
+	} else {
+		res, err = db.GetTickersFromDB()
+	}
+
+	wp := workerpool.New(20)
+	// res := []string{"AAPL"}
+	//start, end := time.Now().AddDate(-1, 0, 0), time.Now()
+	// start := time.Now().AddDate(0, 0, -8)
+	// end := time.Now().AddDate(0, 0, -1)
 
 	// start := time.Now().AddDate(0, 0, -4)
 	// start, _ := time.Parse("2006-01-02", "2019-01-01")
@@ -94,7 +109,7 @@ func MainFunc() {
 		stock := st
 		wp.Submit(func() {
 			fmt.Println("getting for", stock)
-			err := db.getData(stock, start.AddDate(0,0,+1), end)
+			err := db.getData(stock, start.AddDate(0, 0, +1), end)
 			if err != nil {
 				log.Println("ERROR", stock, err)
 			}
@@ -115,7 +130,7 @@ func (d DB) getData(ticker string, start time.Time, end time.Time) error {
 		return errors.Wrap(err, "getData")
 	}
 	res = td.Results
-	fmt.Println("=====",ticker, res) // daily bars in res
+	fmt.Println("=====", ticker, res) // daily bars in res
 
 	for i, r := range res {
 		t := time.Unix(r.T/1000, 0)

@@ -44,6 +44,20 @@ func (db DB) GetTickersFromDB() ([]string, error) {
 	return res, err
 }
 
+func (db DB) CheckTickerFromDB(tickerInput string) (bool, error) {
+	var ticker string
+	// "SELECT userId, username, password FROM user WHERE username=?", userLogin.Username
+	err := db.QueryRow("SELECT distinct symbol FROM tickers where symbol = $1 and exchange in ('XASE', 'XNAS', 'EDGA', 'EDGX', 'XCHI', 'XNYS', 'ARCX', 'NXGS', 'IEXG', 'PHLX', 'BATY', 'BATS')", tickerInput).Scan(&ticker)
+
+	if err != nil {
+		return false, errors.Wrap(err, "Not found ticker")
+	}
+	if ticker != "" {
+		return true, nil
+	}
+	return false, nil
+}
+
 func (db *DB) getTickers() ([]string, error) {
 	var result []string
 	raws, err := db.Query(`select distinct(ticker) from dailybars`)

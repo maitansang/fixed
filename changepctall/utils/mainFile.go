@@ -13,6 +13,7 @@ import (
 
 func MainFunc() {
 	loc, err := time.LoadLocation("EST")
+	var tickers []string
 	if err != nil {
 		log.Fatalln("Can't set timezone", err)
 	}
@@ -32,8 +33,21 @@ func MainFunc() {
 	if err != nil {
 		log.Fatalln("Can't parse time", err, os.Args[1], "Time must be in the format 2006-01-02")
 	}
+	if len(os.Args) > 3 {
+		tickerInput := os.Args[3]
 
-	tickers, err := db.GetTickersFromDB()
+		checkExistTiker, err := db.CheckTickerFromDB(tickerInput)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		if checkExistTiker {
+			tickers = []string{tickerInput}
+		} else {
+			tickers, err = db.GetTickersFromDB()
+		}
+	} else {
+		tickers, err = db.GetTickersFromDB()
+	}
 	// tickers := []string{"AAPL"}
 	if err != nil {
 		log.Fatalln("Cant get tickers", err)
