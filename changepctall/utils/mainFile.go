@@ -46,12 +46,13 @@ func MainFunc() {
 	if err != nil {
 		log.Fatalln("Can't parse time", err, os.Args[2], "Time must be in the format 2006-01-02")
 	}
-	for t := start.AddDate(0,0,+1); t.Before(end) || t.Equal(end); t = t.AddDate(0, 0, +1) {
+	for t := start.AddDate(0, 0, +1); t.Before(end) || t.Equal(end); t = t.AddDate(0, 0, +1) {
 		// t := t
 		// wp.Submit(func() {
 		if t.Weekday() == 0 || t.Weekday() == 6 {
 			continue
 		}
+		updateDailybarsDuplicatesChanges(db)
 		err := db.updateChange(t.Format("2006-01-02"), tickers)
 		if err != nil {
 			log.Println("UPDATE CHANGE ERROR", err)
@@ -66,6 +67,28 @@ type line struct {
 	date  time.Time
 	high  float64
 	close float64
+}
+
+func updateDailybarsDuplicatesChanges(db *DB) {
+	// get latest date for dailybars
+	rows, err := db.Query(`select max(date) from dailybars_duplicate`)
+	if err != nil {
+		log.Println("unable to get the oldest date")
+		return
+	}
+
+	rows.Next()
+	var end time.Time
+	err = rows.Scan(&end)
+	if err != nil {
+		log.Println("unable to get the oldest date")
+		return
+	}
+
+	_, err = db.Exec("insert into dailybars_duplicate select * from dailybars where date>=$1", end.AddDate(0, 0, 1))
+	if err != nil {
+		log.Println("Unable to insert into duplicates")
+	}
 }
 
 func (db DB) updateChange(date string, tickers []string) error {
