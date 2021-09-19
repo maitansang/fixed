@@ -30,6 +30,7 @@ func MainFunc() {
 	}
 
 	start, err := time.Parse("2006-01-02", os.Args[1])
+	start = start.AddDate(0, 0, +1)
 	if err != nil {
 		log.Fatalln("Can't parse time", err, os.Args[1], "Time must be in the format 2006-01-02")
 	}
@@ -60,10 +61,9 @@ func MainFunc() {
 	if err != nil {
 		log.Fatalln("Can't parse time", err, os.Args[2], "Time must be in the format 2006-01-02")
 	}
-
 	db.updateDailybarsDuplicates(tickers, start.Format("2006-01-02"), end.Format("2006-01-02"))
 
-	for t := start.AddDate(0, 0, +1); t.Before(end) || t.Equal(end); t = t.AddDate(0, 0, +1) {
+	for t := start; t.Before(end) || t.Equal(end); t = t.AddDate(0, 0, +1) {
 		// t := t
 		// wp.Submit(func() {
 		if t.Weekday() == 0 || t.Weekday() == 6 {
