@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -25,18 +26,30 @@ func (db TransDB) InsertDataTableTransactions(ticker string, r *[]Result) error 
 	if err != nil {
 		return errors.Wrap(err, "Cannot begin transactions")
 	}
-	
+	log.Println("insert run")
 	for _, data := range *r {
-		timeName := time.Unix(data.T/1000, 0)
-		log.Println("Create table ",timeName )
-		
-		if _, err := tx.Exec(`CREATE TABLE IF NOT EXISTS transactions_` + timeName + `;`); err != nil {
+		timeName := time.Unix(0, data.T)
+		month := int(timeName.Month())
+		var monthString string
+		if month < 10 {
+			monthString = "0" + strconv.Itoa(month)
+		} else {
+			monthString = strconv.Itoa(month)
+		}
+		timeString := fmt.Sprintf("%d%s%s%s%d", timeName.Year(), "_", monthString, "_", timeName.Day())
+		log.Println("time string ", timeString)
+		queryStr := fmt.Sprintf("%s%s%s", "CREATE TABLE IF NOT EXISTS transactions_", timeString, "()")
+		log.Println(queryStr)
+		result, err := tx.Exec(queryStr)
+		if err != nil {
 			log.Println("can not create table: ", err)
 		}
-		log.Println("Insert table ",timeName )
+		if result != nil {
+			log.Println("creatae table ss ", result)
+		}
 
-		qry := fmt.Sprintf(`INSERT INTO transactions_%s (date,ticker,t,q,i,c,p,s,e,x,r,z,time,transaction_type) 
-				VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`, timeName)
+		qry := fmt.Sprintf(`INSERT INTO transactions_%s (date,ticker,t,q,i,c,p,s,e,x,r,z,time,transaction_type)
+					VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`, timeString)
 		_, err = tx.Exec(
 			qry,
 			time.Unix(data.T/1000, 0),
@@ -44,7 +57,7 @@ func (db TransDB) InsertDataTableTransactions(ticker string, r *[]Result) error 
 			data.T,
 			data.Q,
 			data.I,
-			data.C,
+			string(data.C),
 			data.P,
 			data.S,
 			data.E,
@@ -56,6 +69,7 @@ func (db TransDB) InsertDataTableTransactions(ticker string, r *[]Result) error 
 		)
 
 		if err != nil {
+			log.Println("can not insert data table: ", err)
 			return errors.Wrap(err, "Cannot add query")
 		} else {
 			log.Println("inserted  data ", data.T/1000)
