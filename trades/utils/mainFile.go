@@ -18,11 +18,22 @@ import (
 type DB struct {
 	*sqlx.DB
 }
+type TransDB struct {
+	*sqlx.DB
+}
 
-func InitDB() (*DB, error) {
+func InitDB() (*DB, *TransDB, error) {
 	db, err := sqlx.Open("postgres", "host=52.116.150.66 user=postgres dbname=stockmarket password=P`AgD!9g!%~hz3M< sslmode=disable")
 	if err != nil {
-		return nil, errors.Wrap(err, "connect to postgres:")
+		return nil, nil,errors.Wrap(err, "connect to postgres:")
+	}
+	db.SetMaxOpenConns(150)
+	db.SetMaxIdleConns(20)
+	db.SetConnMaxLifetime(60 * time.Minute)
+
+	tdb, err := sqlx.Open("postgres", "host=52.116.150.66 port=5433 user=dev_user dbname=transaction_db password=Dev$54321")
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "connect to postgres:")
 	}
 	db.SetMaxOpenConns(150)
 	db.SetMaxIdleConns(20)
@@ -31,7 +42,10 @@ func InitDB() (*DB, error) {
 	d := &DB{
 		db,
 	}
-	return d, nil
+	transDB := &TransDB{
+		tdb,
+	}
+	return d, transDB, nil
 }
 
 func MainFunc() {
@@ -42,7 +56,9 @@ func MainFunc() {
 	time.Local = loc // -> this is setting the global timezone
 	log.Println("time=", time.Now())
 
-	db, err := InitDB()
+	db, transDB, err := InitDB()
+	log.Println(transDB.Ping())
+	// return
 	if err != nil {
 		log.Fatalln("Can't open db", err)
 	} else {
