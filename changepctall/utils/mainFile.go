@@ -61,7 +61,7 @@ func MainFunc() {
 		log.Fatalln("Can't parse time", err, os.Args[2], "Time must be in the format 2006-01-02")
 	}
 
-	db.updateDailybarsDuplicates(tickers, start, end)
+	db.updateDailybarsDuplicates(tickers, start.Format("2006-01-02"), end.Format("2006-01-02"))
 
 	for t := start.AddDate(0, 0, +1); t.Before(end) || t.Equal(end); t = t.AddDate(0, 0, +1) {
 		// t := t
@@ -85,9 +85,10 @@ type line struct {
 	close float64
 }
 
-func (db *DB) updateDailybarsDuplicates(tickers []string, start time.Time, end time.Time) {
-	wpUpdateDuplicates := workerpool.New(768)
+func (db *DB) updateDailybarsDuplicates(tickers []string, start string, end string) {
+	wpUpdateDuplicates := workerpool.New(100)
 	for _, ticker := range tickers {
+		ticker := ticker
 		wpUpdateDuplicates.Submit(func() {
 			_, err := db.Exec("delete from dailybars_duplicate where ticker=$1 and date>=$2 and date<=$3", ticker, start, end)
 			if err != nil {
