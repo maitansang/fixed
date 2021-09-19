@@ -22,6 +22,7 @@ type TransDB struct {
 	*sqlx.DB
 }
 
+
 func InitDB() (*DB, *TransDB, error) {
 	db, err := sqlx.Open("postgres", "host=52.116.150.66 user=postgres dbname=stockmarket password=P`AgD!9g!%~hz3M< sslmode=disable")
 	if err != nil {
@@ -66,7 +67,8 @@ func MainFunc() {
 	}
 	defer db.Close()
 
-	tickers, err := db.GetTickersFromDB()
+	// tickers, err := db.GetTickersFromDB()
+	tickers := []string{"AAPL"}
 	if err != nil {
 		log.Fatalln("Can't get tickers", err)
 	}
@@ -92,7 +94,7 @@ func MainFunc() {
 					continue
 				}
 				log.Println("GETTRADES", tickerSUB, t)
-				db.getTrades(tickerSUB, t)
+				db.getTrades(tickerSUB, t, transDB)
 				// if err != nil {
 				// 	log.Println("ERROR download data", err)
 				// }
@@ -112,28 +114,19 @@ const URL_TRADES_ADDITIONAL = `https://api.polygon.io/v2/ticks/stocks/trades/%s/
 
 // json fields in struct must be exported
 type Result struct {
-	// II int64   `json:"I,omitempy"`
 	X int64   `json:"x"` // x
 	P float64 `json:"p"` //  p*s
-	//I string  `json:"i"`
-	// E  int64   `json:"e"`
-	// R  int64   `json:"r"`
-	T int64 `json:"t"` //
-	// Y  int64   `json:"y"`
-	// F  int64   `json:"f"`
-	// Q  int64   `json:"q"`
-	C []int `json:"c"` // c
-	S int64 `json:"s"` // s
-	Z int64 `json:"z"`
-	/*
-		x integer,
-		i bigint,
-		z integer,
-		p real,
-		s bigint,
-		c integer[],
-		t bigint
-	*/
+	I string  `json:"i"`
+	E int64   `json:"e"`
+	R int64   `json:"r"`
+	T int64   `json:"t"` //
+// 	Y int64   `json:"y"`
+// 	F int64   `json:"f"`
+	Q int64   `json:"q"`
+	C []int   `json:"c"` // c
+	S int64   `json:"s"` // s
+	Z int64   `json:"z"`
+
 }
 
 type TradesData struct {
@@ -145,7 +138,8 @@ type TradesData struct {
 	//Map          map[string]interface{} `json:"map"`
 }
 
-func (db DB) getTrades(ticker string, start time.Time) {
+func (db DB) getTrades(ticker string, start time.Time, transDB *TransDB) {
+	log.Println("============")
 	var res []Result
 	url := fmt.Sprintf(URL_TRADES, ticker, start.Format("2006-01-02"))
 	td := TradesData{}
@@ -160,6 +154,11 @@ func (db DB) getTrades(ticker string, start time.Time) {
 	}
 	log.Println("got", ticker, start, url)
 	res = append(res, td.Results...)
+	// fmt.Println("----------",res)
+	// return
+	if err := transDB.InsertDataTableTransactions(ticker,&res); err != nil {
+		log.Println("Can not insert data table transaction")
+	} 
 	l := len(td.Results)
 	//fmt.Println("got", len(d.Results))
 	if len(td.Results) == 0 {
