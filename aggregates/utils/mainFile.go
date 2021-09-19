@@ -102,16 +102,18 @@ func MainFunc() {
 	// end, _ := time.Parse("2006-01-02", "2021-05-09")
 
 	start, _ := time.Parse("2006-01-02", os.Args[1])
+	start = start.AddDate(0, 0, +1)
 	end, _ := time.Parse("2006-01-02", os.Args[2])
 	// end := time.Now()
 	log.Println("start: ", start, "end: ", end)
+	db.deleteDataBeforeInsert(res, start.Format("2006-01-02"), end.Format("2006-01-02"))
 	for _, st := range res {
 		stock := st
 		wp.Submit(func() {
 			fmt.Println("getting for", stock)
-			err := db.getData(stock, start.AddDate(0, 0, +1), end)
+			err := db.getData(stock, start, end)
 			if err != nil {
-				log.Println("ERROR", stock, err)
+				log.Println("ERROR12312312", stock, err)
 			}
 		})
 	}
@@ -149,6 +151,21 @@ func (d DB) getData(ticker string, start time.Time, end time.Time) error {
 		return errors.Wrap(err, "insert failed")
 	}
 	return nil
+}
+func (db *DB) deleteDataBeforeInsert(tickers []string, start string, end string) {
+	wpUpdateDuplicates := workerpool.New(100)
+	for _, ticker := range tickers {
+		ticker := ticker
+		wpUpdateDuplicates.Submit(func() {
+			_, err := db.Exec("delete from dailybars where ticker=$1 and date>=$2 and date<=$3", ticker, start, end)
+			log.Println("delete from duplicates", ticker, start, end)
+			if err != nil {
+				log.Fatalln("unable to delete from duplicates")
+				return
+			}
+		})
+	}
+	wpUpdateDuplicates.StopWait()
 }
 
 func (d DB) InsertData(ticker string, r *[]Result) error {
