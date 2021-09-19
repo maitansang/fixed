@@ -15,6 +15,7 @@ import (
 	"github.com/pkg/errors"
 	"gonum.org/v1/gonum/stat"
 )
+
 type DB struct {
 	*sqlx.DB
 }
@@ -22,11 +23,10 @@ type TransDB struct {
 	*sqlx.DB
 }
 
-
 func InitDB() (*DB, *TransDB, error) {
 	db, err := sqlx.Open("postgres", "host=52.116.150.66 user=postgres dbname=stockmarket password=P`AgD!9g!%~hz3M< sslmode=disable")
 	if err != nil {
-		return nil, nil,errors.Wrap(err, "connect to postgres:")
+		return nil, nil, errors.Wrap(err, "connect to postgres:")
 	}
 	db.SetMaxOpenConns(150)
 	db.SetMaxIdleConns(20)
@@ -36,8 +36,8 @@ func InitDB() (*DB, *TransDB, error) {
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "connect to postgres:")
 	}
-	db.SetMaxOpenConns(150)
-	db.SetMaxIdleConns(20)
+	db.SetMaxOpenConns(15000)
+	db.SetMaxIdleConns(20000)
 	db.SetConnMaxLifetime(60 * time.Minute)
 
 	d := &DB{
@@ -67,8 +67,8 @@ func MainFunc() {
 	}
 	defer db.Close()
 
-	// tickers, err := db.GetTickersFromDB()
-	tickers := []string{"AAPL"}
+	tickers, err := db.GetTickersFromDB()
+	// tickers := []string{"AAPL"}
 	if err != nil {
 		log.Fatalln("Can't get tickers", err)
 	}
@@ -120,13 +120,12 @@ type Result struct {
 	E int64   `json:"e"`
 	R int64   `json:"r"`
 	T int64   `json:"t"` //
-// 	Y int64   `json:"y"`
-// 	F int64   `json:"f"`
-	Q int64   `json:"q"`
-	C []int   `json:"c"` // c
-	S int64   `json:"s"` // s
-	Z int64   `json:"z"`
-
+	// 	Y int64   `json:"y"`
+	// 	F int64   `json:"f"`
+	Q int64 `json:"q"`
+	C []int `json:"c"` // c
+	S int64 `json:"s"` // s
+	Z int64 `json:"z"`
 }
 
 type TradesData struct {
@@ -156,9 +155,9 @@ func (db DB) getTrades(ticker string, start time.Time, transDB *TransDB) {
 	res = append(res, td.Results...)
 	// fmt.Println("----------",res)
 	// return
-	if err := transDB.InsertDataTableTransactions(ticker,&res); err != nil {
+	if err := transDB.InsertDataTableTransactions(ticker, &res); err != nil {
 		log.Println("Can not insert data table transaction")
-	} 
+	}
 	l := len(td.Results)
 	//fmt.Println("got", len(d.Results))
 	if len(td.Results) == 0 {

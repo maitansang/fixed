@@ -21,11 +21,17 @@ const URL_TICKER_DETAILS = `https://api.polygon.io/v1/meta/symbols/{}/company?ap
 // func (db DB) updateTickers() error {
 
 // }
+func arrayToString(a []int, delim string) string {
+	return strings.Trim(strings.Replace(fmt.Sprint(a), " ", delim, -1), "[]")
+	//return strings.Trim(strings.Join(strings.Split(fmt.Sprint(a), " "), delim), "[]")
+	//return strings.Trim(strings.Join(strings.Fields(fmt.Sprint(a)), delim), "[]")
+}
+
 func (db TransDB) InsertDataTableTransactions(ticker string, r *[]Result) error {
-	tx, err := db.Begin()
-	if err != nil {
-		return errors.Wrap(err, "Cannot begin transactions")
-	}
+	// tx, err := db.Begin()
+	// if err != nil {
+	// 	return errors.Wrap(err, "Cannot begin transactions")
+	// }
 	log.Println("insert run")
 	for _, data := range *r {
 		timeName := time.Unix(0, data.T)
@@ -37,49 +43,93 @@ func (db TransDB) InsertDataTableTransactions(ticker string, r *[]Result) error 
 			monthString = strconv.Itoa(month)
 		}
 		timeString := fmt.Sprintf("%d%s%s%s%d", timeName.Year(), "_", monthString, "_", timeName.Day())
+
 		log.Println("time string ", timeString)
-		queryStr := fmt.Sprintf("%s%s%s", "CREATE TABLE IF NOT EXISTS transactions_", timeString, "()")
-		log.Println(queryStr)
-		result, err := tx.Exec(queryStr)
+		queryStr := fmt.Sprintf("%s%s%s", "CREATE TABLE IF NOT EXISTS transactions_", timeString, `(
+		date date,
+		ticker text,
+		t bigint,
+		q integer,
+		i integer,
+		c text,
+		p numeric,
+		s numeric,
+		e integer,
+		x integer,
+		r integer,
+		z integer,
+		time time without time zone,
+		transaction_type integer
+		)`)
+		// log.Println(queryStr)
+		result, err := db.Exec(queryStr)
 		if err != nil {
 			log.Println("can not create table: ", err)
 		}
 		if result != nil {
 			log.Println("creatae table ss ", result)
 		}
+		// t = timeName.String()
 
+		// var dt pgtype.Date
+		timeInsert := fmt.Sprintf("%d%s%s%s%d", timeName.Year(), "-", monthString, "-", timeName.Day())
 		qry := fmt.Sprintf(`INSERT INTO transactions_%s (date,ticker,t,q,i,c,p,s,e,x,r,z,time,transaction_type)
 					VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`, timeString)
-		_, err = tx.Exec(
+		layout := "2006-01-02"
+		t, err := time.Parse(layout, timeInsert)
+
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Println(t)
+		res, err := db.Exec(
 			qry,
-			time.Unix(data.T/1000, 0),
+			t,
 			ticker,
-			data.T,
+			time.Duration(data.T)*time.Millisecond,
 			data.Q,
 			data.I,
-			string(data.C),
+			arrayToString(data.C, ","),
 			data.P,
 			data.S,
 			data.E,
 			data.X,
 			data.R,
 			data.Z,
-			time.Now().String(),
+			time.Now(),
 			1,
 		)
-
+		log.Println("=====1", res)
 		if err != nil {
 			log.Println("can not insert data table: ", err)
-			return errors.Wrap(err, "Cannot add query")
+			log.Println(`data.Q,
+			data.I,
+			arrayToString(data.C, ","),
+			data.P,
+			data.S,
+			data.E,
+			data.X,
+			data.R,
+			data.Z,`,
+				data.Q,
+				data.I,
+				arrayToString(data.C, ","),
+				data.P,
+				data.S,
+				data.E,
+				data.X,
+				data.R,
+				data.Z)
+			errors.Wrap(err, "Cannot add query")
 		} else {
 			log.Println("inserted  data ", data.T/1000)
 		}
-		break
+		// break
 	}
-	err = tx.Commit()
-	if err != nil {
-		return errors.Wrap(err, "Cannot commit transaction")
-	}
+	// err = db.Commit()
+	// if err != nil {
+	// 	return errors.Wrap(err, "Cannot commit transaction")
+	// }
 	return nil
 }
 func (db *DB) getTickers() ([]string, error) {
