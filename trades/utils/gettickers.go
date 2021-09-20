@@ -50,7 +50,7 @@ func (db TransDB) InsertDataTableTransactions(ticker string, r *[]Result) error 
 		ticker text,
 		t bigint,
 		q integer,
-		i integer,
+		i bigint,
 		c text,
 		p numeric,
 		s numeric,
@@ -86,7 +86,7 @@ func (db TransDB) InsertDataTableTransactions(ticker string, r *[]Result) error 
 			qry,
 			t,
 			ticker,
-			time.Duration(data.T)*time.Millisecond,
+			data.T,
 			data.Q,
 			data.I,
 			arrayToString(data.C, ","),
@@ -101,25 +101,25 @@ func (db TransDB) InsertDataTableTransactions(ticker string, r *[]Result) error 
 		)
 		log.Println("=====1", res)
 		if err != nil {
-			log.Println("can not insert data table: ", err)
-			log.Println(`data.Q,
-			data.I,
-			arrayToString(data.C, ","),
-			data.P,
-			data.S,
-			data.E,
-			data.X,
-			data.R,
-			data.Z,`,
-				data.Q,
-				data.I,
-				arrayToString(data.C, ","),
-				data.P,
-				data.S,
-				data.E,
-				data.X,
-				data.R,
-				data.Z)
+			log.Println("can not insert data table: ", err, data.I)
+			// log.Println(`data.Q,
+			// data.I,
+			// arrayToString(data.C, ","),
+			// data.P,
+			// data.S,
+			// data.E,
+			// data.X,
+			// data.R,
+			// data.Z,`,
+			// 	data.Q,
+			// 	data.I,
+			// 	arrayToString(data.C, ","),
+			// 	data.P,
+			// 	data.S,
+			// 	data.E,
+			// 	data.X,
+			// 	data.R,
+			// 	data.Z)
 			errors.Wrap(err, "Cannot add query")
 		} else {
 			log.Println("inserted  data ", data.T/1000)

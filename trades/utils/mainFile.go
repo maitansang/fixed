@@ -36,7 +36,7 @@ func InitDB() (*DB, *TransDB, error) {
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "connect to postgres:")
 	}
-	db.SetMaxOpenConns(15000)
+	db.SetMaxOpenConns(500)
 	db.SetMaxIdleConns(20000)
 	db.SetConnMaxLifetime(60 * time.Minute)
 
