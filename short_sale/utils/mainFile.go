@@ -2,16 +2,39 @@ package utils
 
 import (
 	"archive/zip"
+	"bufio"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
+
+	// "net/http"
 	"os"
 	"path/filepath"
 	"strings"
-)
 
+	"github.com/google/uuid"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+)
+type  Short_Sale_Transactions1 struct {
+	ID string `gorm:"primaryKey;autoIncrement:false"`
+	MarketCenter string `json:"marketcenter" `
+	Symbol string `json:"symbol" `
+	Date string `json:"dt" `
+	Time string `json:"tm" `
+	ShortType string `json:"shorttype" `
+	Size string `json:"size" `
+	Price string `json:"price" `
+	// LinkIndicator string `json:"" `
+}
+// func (user *Short_Sale_Transactions1) BeforeCreate(scope *gorm.Scope) error {
+//     scope.SetColumn("ID", uuid.NewV4())
+//     return nil
+// }
 func Unzip(src, dest string) error {
+
+	
 	r, err := zip.OpenReader(src)
 	if err != nil {
 		return err
@@ -77,8 +100,20 @@ func Unzip(src, dest string) error {
 
 func MainFunc() {
 	fmt.Println("Ok")
-	specUrl := "https://cdn.finra.org/equity/regsho/monthly/FNSQsh202108_1.zip"
-	resp, err := http.Get(specUrl)
+	if len(os.Args)==1{
+		log.Println("please enter specUrl")
+		return
+	}
+	specUrl := os.Args[1]
+	log.Println("----",specUrl)
+	// urlField := strings.Split(specUrl,"/")
+	// nameFile := urlField[6]
+	// nameFile = strings.Split(nameFile,".")[0]
+	// log.Println("======", nameFile)
+
+	// return
+
+	resp, err := http.Get("https://cdn.finra.org/equity/regsho/monthly/"+specUrl+".zip")
 	if err != nil {
 		fmt.Printf("err: %s", err)
 	}
@@ -90,7 +125,7 @@ func MainFunc() {
 	}
 
 	// Create the file
-	out, err := os.Create("test.zip")
+	out, err := os.Create(specUrl+".zip")
 	if err != nil {
 		fmt.Printf("err: %s", err)
 	}
@@ -99,8 +134,88 @@ func MainFunc() {
 	// Write the body to file
 	_, err = io.Copy(out, resp.Body)
 
-	err = Unzip("test.zip", "extract")
+	err = Unzip(specUrl+".zip", "extract/")
 	if err != nil {
 		log.Println("err when extract ", err)
 	}
+
+	// handle db
+	dsn := "host=52.116.150.66 user=dev_user password=Dev$54321 dbname=transaction_db port=5433 sslmode=disable"
+	 db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	 if err != nil {
+		log.Println("can not open db")
+	}
+
+	data := Short_Sale_Transactions1{}
+	db.Take(&data)
+
+	absPath, _ := filepath.Abs("../short_sale/extract/"+specUrl + ".txt")
+	text,err:=ReadFileLineByLine(absPath)
+	if err != nil {
+		log.Println("can not read file")
+	}
+
+	arrTrans := ParseData(text)
+	db.AutoMigrate(&Short_Sale_Transactions1{})
+	db.Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(&Short_Sale_Transactions1{})
+		db.Create(&arrTrans)
+}
+
+func ParseData(text []string)[]Short_Sale_Transactions1{
+	var arrTrans []Short_Sale_Transactions1 
+	for _, t := range text[1:] {
+		fields := strings.Split(t, "|")
+		trans := Short_Sale_Transactions1{
+			ID: uuid.NewString(),
+			MarketCenter: fields[0],
+			Symbol: fields[1],
+			Date: fields[2],
+			Time: fields[3],
+			ShortType: fields[4],
+			Size: fields[5],
+			Price: fields[6],
+		}
+		arrTrans = append(arrTrans, trans)
+	}
+	return arrTrans
+}
+func ReadFileLineByLine(nameFile string) ([]string, error){
+	// os.Open() opens specific file in 
+    // read-only mode and this return 
+    // a pointer of type os.
+    file, err := os.Open(nameFile)
+  
+    if err != nil {
+        log.Fatalf("failed to open", err)
+  
+    }
+  
+    // The bufio.NewScanner() function is called in which the
+    // object os.File passed as its parameter and this returns a
+    // object bufio.Scanner which is further used on the
+    // bufio.Scanner.Split() method.
+    scanner := bufio.NewScanner(file)
+  
+    // The bufio.ScanLines is used as an 
+    // input to the method bufio.Scanner.Split()
+    // and then the scanning forwards to each
+    // new line using the bufio.Scanner.Scan()
+    // method.
+    scanner.Split(bufio.ScanLines)
+    var text []string
+  
+    for scanner.Scan() {
+        text = append(text, scanner.Text())
+    }
+  
+    // The method os.File.Close() is called
+    // on the os.File object to close the file
+    file.Close()
+  
+    // and then a loop iterates through 
+    // and prints each of the slice values.
+    for _, each_ln := range text {
+        fmt.Println(each_ln)
+    }
+	return text, err
 }
