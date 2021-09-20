@@ -26,6 +26,7 @@ type  Short_Sale_Transactions1 struct {
 	ShortType string `json:"shorttype" `
 	Size string `json:"size" `
 	Price string `json:"price" `
+	FileName string `json: "filename"`
 	// LinkIndicator string `json:"" `
 }
 // func (user *Short_Sale_Transactions1) BeforeCreate(scope *gorm.Scope) error {
@@ -97,8 +98,22 @@ func Unzip(src, dest string) error {
 
 	return nil
 }
+func ClearFile(specUrl string) error{
+	absPath1, _ := filepath.Abs("../short_sale/extract/"+ specUrl + ".txt")
+	absPath2, _ := filepath.Abs("../short_sale/"+ specUrl + ".zip")
 
+	e := os.Remove(absPath1)
+    if e != nil {
+        log.Println(e)
+    }
+	e = os.Remove(absPath2)
+    if e != nil {
+        log.Println(e)
+    }
+	return e
+}
 func MainFunc() {
+	
 	fmt.Println("Ok")
 	if len(os.Args)==1{
 		log.Println("please enter specUrl")
@@ -106,12 +121,12 @@ func MainFunc() {
 	}
 	specUrl := os.Args[1]
 	log.Println("----",specUrl)
-	// urlField := strings.Split(specUrl,"/")
-	// nameFile := urlField[6]
-	// nameFile = strings.Split(nameFile,".")[0]
-	// log.Println("======", nameFile)
 
-	// return
+	err :=ClearFile(specUrl)
+	if err != nil {
+		log.Println(err)
+	}
+	
 
 	resp, err := http.Get("https://cdn.finra.org/equity/regsho/monthly/"+specUrl+".zip")
 	if err != nil {
@@ -155,13 +170,17 @@ func MainFunc() {
 		log.Println("can not read file")
 	}
 
-	arrTrans := ParseData(text)
+	arrTrans := ParseData(text, specUrl)
 	db.AutoMigrate(&Short_Sale_Transactions1{})
-	db.Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(&Short_Sale_Transactions1{})
-		db.Create(&arrTrans)
+	db.Session(&gorm.Session{AllowGlobalUpdate: true}).Where("filename = ?", specUrl) .Delete(&Short_Sale_Transactions1{})
+	db.Create(&arrTrans)
+	err =ClearFile(specUrl)
+	if err != nil {
+		log.Println(err)
+	}
 }
 
-func ParseData(text []string)[]Short_Sale_Transactions1{
+func ParseData(text []string, specUrl string)[]Short_Sale_Transactions1{
 	var arrTrans []Short_Sale_Transactions1 
 	for _, t := range text[1:] {
 		fields := strings.Split(t, "|")
@@ -174,6 +193,7 @@ func ParseData(text []string)[]Short_Sale_Transactions1{
 			ShortType: fields[4],
 			Size: fields[5],
 			Price: fields[6],
+			FileName: specUrl,
 		}
 		arrTrans = append(arrTrans, trans)
 	}
