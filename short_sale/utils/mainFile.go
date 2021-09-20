@@ -182,7 +182,7 @@ func MainFunc() {
 
 func ParseData(text []string, specUrl string)[]Short_Sale_Transactions1{
 	var arrTrans []Short_Sale_Transactions1 
-	for _, t := range text[1:] {
+	for _, t := range text[1:len(text)-1] {
 		fields := strings.Split(t, "|")
 		trans := Short_Sale_Transactions1{
 			ID: uuid.NewString(),
