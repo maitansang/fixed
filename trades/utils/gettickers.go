@@ -33,42 +33,47 @@ func (db TransDB) InsertDataTableTransactions(ticker string, r *[]Result) error 
 	// 	return errors.Wrap(err, "Cannot begin transactions")
 	// }
 	log.Println("insert run")
-	for _, data := range *r {
-		timeName := time.Unix(0, data.T)
-		month := int(timeName.Month())
-		var monthString string
-		if month < 10 {
-			monthString = "0" + strconv.Itoa(month)
-		} else {
-			monthString = strconv.Itoa(month)
-		}
-		timeString := fmt.Sprintf("%d%s%s%s%d", timeName.Year(), "_", monthString, "_", timeName.Day())
+	dateInsert := (*r)[0].T
+	timeName := time.Unix(0, dateInsert)
+	month := int(timeName.Month())
+	var monthString string
+	if month < 10 {
+		monthString = "0" + strconv.Itoa(month)
+	} else {
+		monthString = strconv.Itoa(month)
+	}
+	timeString := fmt.Sprintf("%d%s%s%s%d", timeName.Year(), "_", monthString, "_", timeName.Day())
 
-		log.Println("time string ", timeString)
-		queryStr := fmt.Sprintf("%s%s%s", "CREATE TABLE IF NOT EXISTS transactions_", timeString, `(
-		date date,
-		ticker text,
-		t bigint,
-		q integer,
-		i bigint,
-		c text,
-		p numeric,
-		s numeric,
-		e integer,
-		x integer,
-		r integer,
-		z integer,
-		time time without time zone,
-		transaction_type integer
-		)`)
-		// log.Println(queryStr)
-		result, err := db.Exec(queryStr)
-		if err != nil {
-			log.Println("can not create table: ", err)
-		}
-		if result != nil {
-			log.Println("creatae table ss ", result)
-		}
+	dropTable := fmt.Sprintf("%s%s", "DROP TABLE IF EXISTS transactions_", timeString)
+	_, err := db.Exec(dropTable)
+	if err != nil {
+		log.Println("can not drop table: ", err)
+	}
+	queryStr := fmt.Sprintf("%s%s%s", "CREATE TABLE IF NOT EXISTS transactions_", timeString, `(
+	date date,
+	ticker text,
+	t bigint,
+	q integer,
+	i bigint,
+	c text,
+	p numeric,
+	s numeric,
+	e integer,
+	x integer,
+	r integer,
+	z integer,
+	time time without time zone,
+	transaction_type integer
+	)`)
+	// log.Println(queryStr)
+	result, err := db.Exec(queryStr)
+	if err != nil {
+		log.Println("can not create table: ", err)
+	}
+	if result != nil {
+		log.Println("creatae table ss ", result)
+	}
+	for _, data := range *r {
 		// t = timeName.String()
 
 		// var dt pgtype.Date
