@@ -160,19 +160,20 @@ func MainFunc() {
 	if err != nil {
 		log.Println("can not open db")
 	}
+	db.Session(&gorm.Session{AllowGlobalUpdate: true}).Where("filename = ?", specUrl).Delete(&Short_Sale_Transactions1{})
 
-	data := Short_Sale_Transactions1{}
-	db.Take(&data)
+	// data := Short_Sale_Transactions1{}
+	// db.Take(&data)
+
+	db.AutoMigrate(&Short_Sale_Transactions1{})
 
 	absPath, _ := filepath.Abs("../short_sale/extract/" + specUrl + ".txt")
-	text, err := ReadFileLineByLine(absPath)
+	_, err = ReadFileLineByLine(absPath, specUrl,db)
 	if err != nil {
 		log.Println("can not read file")
 	}
 
-	db.AutoMigrate(&Short_Sale_Transactions1{})
-	ParseData(text, specUrl, db)
-	db.Session(&gorm.Session{AllowGlobalUpdate: true}).Where("filename = ?", specUrl).Delete(&Short_Sale_Transactions1{})
+	// ParseData(text, specUrl, db)
 	
 	err = ClearFile(specUrl)
 	if err != nil {
@@ -180,10 +181,10 @@ func MainFunc() {
 	}
 }
 
-func ParseData(text []string, specUrl string, db *gorm.DB)  {
+func ParseData(text string, specUrl string, db *gorm.DB)  {
 	// var arrTrans []Short_Sale_Transactions1
-	for _, t := range text[1 : len(text)-1] {
-		fields := strings.Split(t, "|")
+	// for _, t := range text[1 : len(text)-1] {
+		fields := strings.Split(text, "|")
 		trans := Short_Sale_Transactions1{
 			ID:           uuid.NewString(),
 			MarketCenter: fields[0],
@@ -198,10 +199,10 @@ func ParseData(text []string, specUrl string, db *gorm.DB)  {
 		// arrTrans = append(arrTrans, trans)
 		db.Create(&trans)
 
-	}
+	// }
 	// return arrTrans
 }
-func ReadFileLineByLine(nameFile string) ([]string, error) {
+func ReadFileLineByLine(nameFile string, specUrl string, db *gorm.DB) ([]string, error) {
 	// os.Open() opens specific file in
 	// read-only mode and this return
 	// a pointer of type os.
@@ -227,6 +228,7 @@ func ReadFileLineByLine(nameFile string) ([]string, error) {
 	var text []string
 
 	for scanner.Scan() {
+		ParseData(scanner.Text(), specUrl, db)
 		text = append(text, scanner.Text())
 	}
 
