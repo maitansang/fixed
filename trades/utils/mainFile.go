@@ -88,19 +88,19 @@ func MainFunc() {
 	for _, ticker := range tickers {
 		tickerSUB := ticker // create copy of ticker
 		wp.Submit(func() {
-			log.Println("START WORKER", tickerSUB)
+			// log.Println("START WORKER", tickerSUB)
 			for t := start; t.After(end); t = t.AddDate(0, 0, -1) {
 				if t.Weekday() == 0 || t.Weekday() == 6 {
 					continue
 				}
-				log.Println("GETTRADES", tickerSUB, t)
+				// log.Println("GETTRADES", tickerSUB, t)
 				db.getTrades(tickerSUB, t, transDB)
 				// if err != nil {
 				// 	log.Println("ERROR download data", err)
 				// }
 
 			}
-			log.Println("END WORKER", tickerSUB)
+			// log.Println("END WORKER", tickerSUB)
 		})
 	}
 	wp.StopWait()
@@ -168,7 +168,7 @@ type NewTradesData struct {
 	//Map          map[string]interface{} `json:"map"`
 }
 func (db DB) getTrades(ticker string, start time.Time, transDB *TransDB) {
-	log.Println("============")
+	log.Println("============", ticker)
 	var res []OldResult
 	var newRes []NewResult
 

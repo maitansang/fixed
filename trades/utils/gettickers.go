@@ -33,6 +33,9 @@ func (db TransDB) InsertDataTableTransactions(ticker string, r *[]NewResult) err
 	// 	return errors.Wrap(err, "Cannot begin transactions")
 	// }
 	log.Println("insert run")
+	if len(*r) == 0 {
+		return nil
+	}
 	dateInsert := (*r)[0].T
 	timeName := time.Unix(0, dateInsert)
 	month := int(timeName.Month())
