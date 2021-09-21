@@ -27,7 +27,7 @@ func arrayToString(a []int, delim string) string {
 	//return strings.Trim(strings.Join(strings.Fields(fmt.Sprint(a)), delim), "[]")
 }
 
-func (db TransDB) InsertDataTableTransactions(ticker string, r *[]Result) error {
+func (db TransDB) InsertDataTableTransactions(ticker string, r *[]NewResult) error {
 	// tx, err := db.Begin()
 	// if err != nil {
 	// 	return errors.Wrap(err, "Cannot begin transactions")

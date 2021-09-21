@@ -113,7 +113,7 @@ const URL_TRADES = `https://api.polygon.io/v2/ticks/stocks/trades/%s/%s?limit=50
 const URL_TRADES_ADDITIONAL = `https://api.polygon.io/v2/ticks/stocks/trades/%s/%s?timestamp=%d&limit=50000&apiKey=6irkrzg7Nf9_s7qVpAscTAMeesF8eFu0`
 
 // json fields in struct must be exported
-type Result struct {
+type NewResult struct {
 	X int64   `json:"x"` // x
 	P float64 `json:"p"` //  p*s
 	I string  `json:"i"`
@@ -127,21 +127,55 @@ type Result struct {
 	S int64 `json:"s"` // s
 	Z int64 `json:"z"`
 }
-
+type OldResult struct {
+	// II int64   `json:"I,omitempy"`
+	X int64   `json:"x"` // x
+	P float64 `json:"p"` //  p*s
+	//I string  `json:"i"`
+	// E  int64   `json:"e"`
+	// R  int64   `json:"r"`
+	T int64 `json:"t"` //
+	// Y  int64   `json:"y"`
+	// F  int64   `json:"f"`
+	// Q  int64   `json:"q"`
+	C []int `json:"c"` // c
+	S int64 `json:"s"` // s
+	Z int64 `json:"z"`
+	/*
+		x integer,
+		i bigint,
+		z integer,
+		p real,
+		s bigint,
+		c integer[],
+		t bigint
+	*/
+}
 type TradesData struct {
 	Ticker       string   `json:"ticker"`
 	ResultsCount int64    `json:"results_count"`
 	DBLatency    int      `json:"db_latency"`
 	Success      bool     `json:"success"`
-	Results      []Result `json:"results"`
+	Results      []OldResult `json:"results"`
 	//Map          map[string]interface{} `json:"map"`
 }
-
+type NewTradesData struct {
+	Ticker       string   `json:"ticker"`
+	ResultsCount int64    `json:"results_count"`
+	DBLatency    int      `json:"db_latency"`
+	Success      bool     `json:"success"`
+	Results      []NewResult `json:"results"`
+	//Map          map[string]interface{} `json:"map"`
+}
 func (db DB) getTrades(ticker string, start time.Time, transDB *TransDB) {
 	log.Println("============")
-	var res []Result
+	var res []OldResult
+	var newRes []NewResult
+
 	url := fmt.Sprintf(URL_TRADES, ticker, start.Format("2006-01-02"))
 	td := TradesData{}
+	newTd := NewTradesData{}
+
 	//startTime := time.Now()
 	err := getJson(url, &td)
 	if err != nil {
@@ -151,11 +185,23 @@ func (db DB) getTrades(ticker string, start time.Time, transDB *TransDB) {
 			log.Fatalln("cannot get json", err)
 		}
 	}
+	err = getJson(url, &newTd)
+	if err != nil {
+		myClient = &http.Client{Timeout: 60 * time.Second}
+		err = getJson(url, &td)
+		if err != nil {
+			log.Fatalln("cannot get json", err)
+		}
+	}
 	log.Println("got", ticker, start, url)
 	res = append(res, td.Results...)
-	// fmt.Println("----------",res)
+	newRes = append(newRes, newTd.Results...)
+
+	fmt.Println("----------0",len(res))
+	fmt.Println("----------1",len(newRes))
+
 	// return
-	if err := transDB.InsertDataTableTransactions(ticker, &res); err != nil {
+	if err := transDB.InsertDataTableTransactions(ticker, &newRes); err != nil {
 		log.Println("Can not insert data table transaction")
 	}
 	l := len(td.Results)
@@ -183,7 +229,7 @@ func (db DB) getTrades(ticker string, start time.Time, transDB *TransDB) {
 		}
 	}
 	log.Println("got data", ticker, start)
-	var largestOrder Result
+	var largestOrder OldResult
 	var sum int64
 	var sumPrice float64
 	var resFloat []float64
@@ -365,7 +411,7 @@ func (db *DB) persistTradeFeatures(in []TradeFeatures) {
 	}
 }
 
-func getMoreTrades(ticker string, start time.Time, offset int64) ([]Result, error) {
+func getMoreTrades(ticker string, start time.Time, offset int64) ([]OldResult, error) {
 	url := fmt.Sprintf(URL_TRADES_ADDITIONAL, ticker, start.Format("2006-01-02"), offset)
 	d := TradesData{}
 	err := getJson(url, &d)
@@ -373,7 +419,7 @@ func getMoreTrades(ticker string, start time.Time, offset int64) ([]Result, erro
 		myClient = &http.Client{Timeout: 60 * time.Second}
 		err = getJson(url, &d)
 		if err != nil {
-			return []Result{}, errors.Wrap(err, "cannot read body")
+			return []OldResult{}, errors.Wrap(err, "cannot read body")
 		}
 	}
 	return d.Results, nil
