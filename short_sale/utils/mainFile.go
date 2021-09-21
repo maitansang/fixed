@@ -168,6 +168,8 @@ func MainFunc() {
 	db.Session(&gorm.Session{AllowGlobalUpdate: true}).Where("filename = ?", specUrl).Delete(&Short_Sale_Transactions1{})
 
 	absPath, _ := filepath.Abs("../short_sale/extract/" + specUrl + ".txt")
+	fmt.Println("==============begin read line==============")
+
 	_, err = ReadFileLineByLine(absPath, specUrl,db)
 	if err != nil {
 		log.Println("can not read file")
@@ -226,8 +228,11 @@ func ReadFileLineByLine(nameFile string, specUrl string, db *gorm.DB) ([]string,
 	// method.
 	scanner.Split(bufio.ScanLines)
 	var text []string
+	fmt.Println("==============begin read line==============")
 
 	for scanner.Scan() {
+		fmt.Println(scanner.Text())
+
 		ParseData(scanner.Text(), specUrl, db)
 		text = append(text, scanner.Text())
 	}
@@ -238,8 +243,8 @@ func ReadFileLineByLine(nameFile string, specUrl string, db *gorm.DB) ([]string,
 
 	// and then a loop iterates through
 	// and prints each of the slice values.
-	for _, each_ln := range text {
-		fmt.Println(each_ln)
-	}
+	// for _, each_ln := range text {
+	// 	fmt.Println(each_ln)
+	// }
 	return text, err
 }
