@@ -160,12 +160,12 @@ func MainFunc() {
 	if err != nil {
 		log.Println("can not open db")
 	}
-	db.Session(&gorm.Session{AllowGlobalUpdate: true}).Where("filename = ?", specUrl).Delete(&Short_Sale_Transactions1{})
 
 	// data := Short_Sale_Transactions1{}
 	// db.Take(&data)
 
 	db.AutoMigrate(&Short_Sale_Transactions1{})
+	db.Session(&gorm.Session{AllowGlobalUpdate: true}).Where("filename = ?", specUrl).Delete(&Short_Sale_Transactions1{})
 
 	absPath, _ := filepath.Abs("../short_sale/extract/" + specUrl + ".txt")
 	_, err = ReadFileLineByLine(absPath, specUrl,db)
