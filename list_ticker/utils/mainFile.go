@@ -1,8 +1,12 @@
 package utils
 
 import (
+	"bufio"
+	"fmt"
 	"log"
+	"os"
 
+	"github.com/gammazero/workerpool"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -24,25 +28,14 @@ func InitDB() (*DB, error) {
 	return DB, nil
 }
 
-type Ticker struct {
-	ID     string `gorm:"primaryKey;autoIncrement:false"`
-	Symbol string `json:"symbol" `
-}
-type Dailybar struct {
-	ID     string `gorm:"primaryKey;autoIncrement:false"`
-	Ticker string `json:"ticker" `
-	V      string `json:"v"`
-}
-type Largestoder struct {
-	ID     string `gorm:"primaryKey;autoIncrement:false"`
-	Ticker string `json:"ticker" `
-	// V      string `json:"v"`
-}
-
-type ShortInterest struct {
-	ID     string `gorm:"primaryKey;autoIncrement:false"`
-	Ticker string `json:"ticker" `
-	// V      string `json:"v"`
+func (db DB) getAllTicker() ([]string, error) {
+	var tickers []string
+	if err := db.DB.Table("tickers").
+		Select("symbol").Scan(&tickers).Error; err != nil {
+		log.Println("Error when get all ticker ", err)
+		return nil, err
+	}
+	return tickers, nil
 }
 
 func MainFunc() {
@@ -51,70 +44,157 @@ func MainFunc() {
 		log.Println("can not init db", err)
 	}
 
-	tickers, err := condition1(db)
+	tickers, err := db.getAllTicker()
+
+	tickers = []string{"ALTV", "A", "AAPL"}
 	if err != nil {
-		log.Println("get condition1 error", err)
+		log.Println("Error when get all ticker", err)
 	}
-	log.Println("=====tickers condition1=====", tickers, err)
+
+	wpool := workerpool.New(100)
+	for _, ticker := range tickers {
+		ticker := ticker
+		wpool.Submit(func() {
+			if !db.condition1(ticker) || !db.condition2(ticker) || !db.condition3(ticker) || !db.condition4(ticker) || !db.condition5(ticker) || !condition6(ticker) {
+				removeItem(tickers, ticker)
+			}
+		})
+	}
+	wpool.StopWait()
+	writeFile(tickers)
 }
 
 // 1 Ticker name must be there in dailybars, largest_orders and short_interest and in each table it's row count must be 700
-func condition1(db *DB) ([]Ticker, error) {
-	log.Println("----begin condition1----")
-	var tickers []Ticker
+func (db *DB) condition1(ticker string) bool {
+	var count1, count2, count3 int64
 
-	var tickersDailybar []Dailybar
-	var tickersLargestoder []Largestoder
-	var tickersShortInterest []ShortInterest
-
-	db.Distinct("symbol").Order("symbol desc").Find(&tickers)
-
-	db.Raw(`SELECT *
-		FROM dailybars 
-		WHERE ticker IN (SELECT ticker
-					   FROM dailybars
-					   GROUP BY ticker HAVING COUNT(*) = 700)`).Scan(&tickersDailybar)
-	db.Raw(`SELECT *
-		FROM largest_orders 
-		WHERE ticker IN (SELECT ticker
-					   FROM largest_orders
-					   GROUP BY ticker HAVING COUNT(*) = 700)`).Scan(&tickersLargestoder)
-	db.Raw(`SELECT *
-		FROM short_interest 
-		WHERE ticker IN (SELECT ticker
-					   FROM short_interest
-					   GROUP BY ticker HAVING COUNT(*) = 700)`).Scan(&tickersShortInterest)
-	
-	for _, t := range tickers {
-		check := false
-		for _, td := range tickersDailybar {
-			if t.Symbol == td.Ticker {
-				check = true
-			}
-		}
-		for _, tl := range tickersLargestoder {
-			if t.Symbol == tl.Ticker {
-				check = true
-			}
-		}
-		for _, ts := range tickersShortInterest {
-			if t.Symbol == ts.Ticker {
-				check = true
-			}
-		}
-		if !check {
-			tickers = removeItem(tickers, t)
-		}
+	err := db.DB.Table("dailybars").
+		Select("count(*)").
+		Where("ticker = ?", ticker).
+		Count(&count1).
+		Error
+	if err != nil {
+		log.Fatalln("Error when find ticker has change greater than 700", err)
+		return false
 	}
 
-	return tickers, nil
+	err = db.DB.Table("largestorders").
+		Select("count(*)").
+		Where("ticker = ?", ticker).
+		Count(&count2).
+		Error
+	if err != nil {
+		log.Fatalln("Error when find ticker has change greater than 700", err)
+		return false
+	}
+
+	err = db.DB.Table("short_interest").
+		Select("count(*)").
+		Where("ticker = ?", ticker).
+		Count(&count3).
+		Error
+	if err != nil {
+		log.Fatalln("Error when find ticker has change greater than 700", err)
+		return false
+	}
+
+	return count1 >= 700 && count2 >= 700 && count3 >= 700
 }
 
-func removeItem(tickers []Ticker, ticker Ticker)[]Ticker{
+// 2 Ticker must have lastest date closing price below 10
+func (db *DB) condition2(ticker string) bool {
+	var closingPrice float64
+	err := db.DB.Raw("SELECT c FROM dailybars WHERE DATE=(SELECT MAX(DATE) FROM dailybars) AND ticker='AAPL'").Scan(&closingPrice).Error
+	if err != nil {
+		log.Println("Error when ticket has lastest date closing price below 10 ", err)
+		return false
+	}
+	return closingPrice < 10
+}
+
+// 3 Ticker must have latest date volume greater than 50,000, volume is "v" in dailybars
+func (db *DB) condition3(ticker string) bool {
+	var count int64
+	err := db.DB.Table("dailybars_duplicate").
+		Select("count(*)").
+		Where("v>5000 AND ticker = ?", ticker).Count(&count).Error
+	if err != nil {
+		log.Println("Error when count ticket has volume greater than 50000 ", err)
+		return false
+	}
+	return count >= 1
+}
+
+// 4 Ticker must have at least 10 rows where it's change3 value is greater than 30 (dailybars_duplicate)
+func (db *DB) condition4(ticker string) bool {
+	var count int64
+	err := db.DB.Table("dailybars_duplicate").
+		Select("count(*)").
+		Where("change3>30 AND ticker = ?", ticker).Count(&count).Error
+	if err != nil {
+		log.Println("Error ticker must have at least 10 rows where it's change3 value is greater than 30 ", err)
+		return false
+	}
+	return count >= 10
+}
+
+// 5 Ticker must have atleast 100 rows where it's change value is either greater than 3 or below -3
+func (db *DB) condition5(ticker string) bool {
+	var count int64
+	err := db.DB.Table("dailybars").
+		Select("count(*)").
+		Where("(change > 3 OR change < 3) AND ticker = ?", ticker).
+		Count(&count).
+		Error
+	if err != nil {
+		log.Println("Error when find ticker has change greater than 100", err)
+		return false
+	}
+	return count >= 100
+}
+
+// 6 Ticker name must also be there in input_ticker.txt file
+func condition6(ticker string) bool {
+	file, err := os.Open("input_ticker.txt")
+	if err != nil {
+		log.Println("Error when get ticker from text file", err.Error())
+		return false
+	}
+	defer file.Close()
+
+	var inputTickers []string
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		inputTickers = append(inputTickers, scanner.Text())
+	}
+	fmt.Println(inputTickers)
+	for _, t := range inputTickers {
+		if t == ticker {
+			return true
+		}
+	}
+	return false
+}
+
+func removeItem(tickers []string, ticker string) []string {
+	fmt.Println(tickers)
+	fmt.Println(ticker)
 	for i, t := range tickers {
-		if t.Symbol == ticker.Symbol {
+		if t == ticker {
 			tickers = append(tickers[:i], tickers[i+1:]...)
 		}
 	}
 	return tickers
+}
+
+func writeFile(tickers []string) error {
+	fmt.Println(tickers)
+	file, err := os.Create("ticker.txt")
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	w := bufio.NewWriter(file)
+	return w.Flush()
 }
