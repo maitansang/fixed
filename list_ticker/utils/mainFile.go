@@ -45,18 +45,17 @@ func MainFunc() {
 	}
 
 	tickers, err := db.getAllTicker()
-
-	tickers = []string{"ALTV", "A", "AAPL"}
 	if err != nil {
 		log.Println("Error when get all ticker", err)
 	}
 
 	wpool := workerpool.New(100)
 	for i, ticker := range tickers {
+		index := i
 		ticker := ticker
 		wpool.Submit(func() {
-			if !condition6(ticker) {
-				removeItem(tickers, i)
+			if !db.condition1(ticker) || !db.condition2(ticker) || !db.condition3(ticker) || !db.condition4(ticker) || !db.condition5(ticker) || !condition6(ticker) {
+				removeItem(tickers, index)
 			}
 		})
 	}
