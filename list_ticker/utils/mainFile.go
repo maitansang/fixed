@@ -52,11 +52,11 @@ func MainFunc() {
 	}
 
 	wpool := workerpool.New(100)
-	for _, ticker := range tickers {
+	for i, ticker := range tickers {
 		ticker := ticker
 		wpool.Submit(func() {
 			if !condition6(ticker) {
-				removeItem(tickers, ticker)
+				removeItem(tickers, i)
 			}
 		})
 	}
@@ -175,13 +175,9 @@ func condition6(ticker string) bool {
 	return false
 }
 
-func removeItem(tickers []string, ticker string) []string {
-	for i, t := range tickers {
-		if t == ticker {
-			tickers = append(tickers[:i], tickers[i+1:]...)
-		}
-	}
-	return tickers
+func removeItem(tickers []string, i int) []string {
+	copy(tickers[i:], tickers[i+1:])
+	return tickers[:len(tickers)-1]
 }
 
 func writeFile(tickers []string) error {
