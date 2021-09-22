@@ -1,6 +1,7 @@
 #!/bin/bash
 arg1=$1
 arg2=$2
+arg3=$3
 
 cd tickers
 go run main.go
@@ -19,7 +20,7 @@ go run main.go $arg1 $arg2
 cd ..
 
 cd changepctall
-go run main.go $arg1 $arg2
+go run main.go $arg3 $arg2
 cd ..
 
 cd trades
