@@ -55,7 +55,7 @@ func MainFunc() {
 	for _, ticker := range tickers {
 		ticker := ticker
 		wpool.Submit(func() {
-			if !db.condition1(ticker) || !db.condition2(ticker) || !db.condition3(ticker) || !db.condition4(ticker) || !db.condition5(ticker) || !condition6(ticker) {
+			if !condition6(ticker) {
 				removeItem(tickers, ticker)
 			}
 		})
@@ -167,7 +167,6 @@ func condition6(ticker string) bool {
 	for scanner.Scan() {
 		inputTickers = append(inputTickers, scanner.Text())
 	}
-	fmt.Println(inputTickers)
 	for _, t := range inputTickers {
 		if t == ticker {
 			return true
@@ -177,8 +176,6 @@ func condition6(ticker string) bool {
 }
 
 func removeItem(tickers []string, ticker string) []string {
-	fmt.Println(tickers)
-	fmt.Println(ticker)
 	for i, t := range tickers {
 		if t == ticker {
 			tickers = append(tickers[:i], tickers[i+1:]...)
@@ -196,5 +193,8 @@ func writeFile(tickers []string) error {
 	defer file.Close()
 
 	w := bufio.NewWriter(file)
+	for _, ticker := range tickers {
+		fmt.Fprintln(w, ticker)
+	}
 	return w.Flush()
 }
