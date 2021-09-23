@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
+	"time"
 
 	"github.com/gammazero/workerpool"
 	"gorm.io/driver/postgres"
@@ -15,6 +17,8 @@ type DB struct {
 	*gorm.DB
 }
 
+var conditions []string
+
 func InitDB() (*DB, error) {
 	// handle db
 	dsn := "host=52.116.150.66 user=postgres password=P`AgD!9g!%~hz3M< dbname=stockmarket port=5432 sslmode=disable"
@@ -22,6 +26,13 @@ func InitDB() (*DB, error) {
 	if err != nil {
 		log.Println("can not open db")
 	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		log.Println("Error when init sql db")
+	}
+	sqlDB.SetMaxOpenConns(150)
+	sqlDB.SetMaxIdleConns(20)
+	sqlDB.SetConnMaxLifetime(60 * time.Minute)
 	DB := &DB{
 		db,
 	}
@@ -44,27 +55,53 @@ func MainFunc() {
 		log.Println("can not init db", err)
 	}
 
+	sqlDB, err := db.DB.DB()
+	if err != nil {
+		log.Println("Error when init sql db")
+	}
+	defer sqlDB.Close()
+
+	conditionString := os.Args[1]
+	conditions = strings.Split(conditionString, ",")
+	fmt.Println(!isValid("6"))
+
 	tickers, err := db.getAllTicker()
 	if err != nil {
 		log.Println("Error when get all ticker", err)
 	}
 
+	tickers = []string{"AAPL", "A", "LVRA", "AABA", "AAA", "AA", "AAALF"}
+
 	wpool := workerpool.New(400)
-	for i, ticker := range tickers {
-		index := i
+	var newTickers []string
+	for _, ticker := range tickers {
+		// index := i
 		ticker := ticker
 		wpool.Submit(func() {
 			if !db.condition1(ticker) || !db.condition2(ticker) || !db.condition3(ticker) || !db.condition4(ticker) || !db.condition5(ticker) || !condition6(ticker) {
-				removeItem(tickers, index)
+			} else {
+				newTickers = append(newTickers, ticker)
 			}
 		})
 	}
 	wpool.StopWait()
-	writeFile(tickers)
+	writeFile(newTickers)
+}
+
+func isValid(condition string) bool {
+	for _, c := range conditions {
+		if c == condition {
+			return true
+		}
+	}
+	return false
 }
 
 // 1 Ticker name must be there in dailybars, largest_orders and short_interest and in each table it's row count must be 700
 func (db *DB) condition1(ticker string) bool {
+	if !isValid("1") {
+		return false
+	}
 	var count1, count2, count3 int64
 
 	err := db.DB.Table("dailybars").
@@ -102,6 +139,9 @@ func (db *DB) condition1(ticker string) bool {
 
 // 2 Ticker must have lastest date closing price below 10
 func (db *DB) condition2(ticker string) bool {
+	if !isValid("2") {
+		return false
+	}
 	var closingPrice float64
 	err := db.DB.Raw("SELECT c FROM dailybars WHERE DATE=(SELECT MAX(DATE) FROM dailybars) AND ticker='AAPL'").Scan(&closingPrice).Error
 	if err != nil {
@@ -113,6 +153,9 @@ func (db *DB) condition2(ticker string) bool {
 
 // 3 Ticker must have latest date volume greater than 50,000, volume is "v" in dailybars
 func (db *DB) condition3(ticker string) bool {
+	if !isValid("3") {
+		return false
+	}
 	var count int64
 	err := db.DB.Table("dailybars_duplicate").
 		Select("count(*)").
@@ -126,6 +169,9 @@ func (db *DB) condition3(ticker string) bool {
 
 // 4 Ticker must have at least 10 rows where it's change3 value is greater than 30 (dailybars_duplicate)
 func (db *DB) condition4(ticker string) bool {
+	if !isValid("4") {
+		return false
+	}
 	var count int64
 	err := db.DB.Table("dailybars_duplicate").
 		Select("count(*)").
@@ -139,6 +185,9 @@ func (db *DB) condition4(ticker string) bool {
 
 // 5 Ticker must have atleast 100 rows where it's change value is either greater than 3 or below -3
 func (db *DB) condition5(ticker string) bool {
+	if !isValid("5") {
+		return false
+	}
 	var count int64
 	err := db.DB.Table("dailybars").
 		Select("count(*)").
@@ -154,6 +203,9 @@ func (db *DB) condition5(ticker string) bool {
 
 // 6 Ticker name must also be there in input_ticker.txt file
 func condition6(ticker string) bool {
+	if !isValid("6") {
+		return false
+	}
 	file, err := os.Open("input_ticker.txt")
 	if err != nil {
 		log.Println("Error when get ticker from text file", err.Error())
@@ -174,13 +226,7 @@ func condition6(ticker string) bool {
 	return false
 }
 
-func removeItem(tickers []string, i int) []string {
-	copy(tickers[i:], tickers[i+1:])
-	return tickers[:len(tickers)-1]
-}
-
 func writeFile(tickers []string) error {
-	fmt.Println(tickers)
 	file, err := os.Create("ticker.txt")
 	if err != nil {
 		return err
