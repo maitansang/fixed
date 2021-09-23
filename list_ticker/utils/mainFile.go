@@ -49,7 +49,7 @@ func MainFunc() {
 		log.Println("Error when get all ticker", err)
 	}
 
-	wpool := workerpool.New(100)
+	wpool := workerpool.New(400)
 	for i, ticker := range tickers {
 		index := i
 		ticker := ticker
