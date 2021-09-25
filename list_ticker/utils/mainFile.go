@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gammazero/workerpool"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -67,8 +66,9 @@ func MainFunc() {
 
 	conditionString := os.Args[1]
 	conditions = strings.Split(conditionString, ",")
+	var tickerResource []string
 	fmt.Println(!isValid("6"))
-	allTickers, err := db.getAllTicker()
+	// allTickers, err := db.getAllTicker()
 	if err != nil {
 		log.Println("Error when get all ticker", err)
 	}
@@ -108,33 +108,60 @@ func MainFunc() {
 		log.Fatal("Err condition 6 ", err)
 	}
 	fmt.Println("len 6", len(tickersCondition6))
-
-	wpool := workerpool.New(3000)
-	var resultTickers []string
-	fmt.Println("is valid 1", !isValid("1"))
-	isInvalid1 := !isValid("1")
-	isInvalid2 := !isValid("2")
-	isInvalid3 := !isValid("3")
-	isInvalid4 := !isValid("4")
-	isInvalid5 := !isValid("5")
-	isInvalid6 := !isValid("6")
-
-	for _, item := range allTickers {
-		item := item
-		wpool.Submit(func() {
-			if (contains(tickersCondition1, item) || isInvalid1) && (contains(tickersCondition2, item) || isInvalid2) && (contains(tickersCondition3, item) || isInvalid3) && (contains(tickersCondition4, item) || isInvalid4) && (contains(tickersCondition5, item) || isInvalid5) && (contains(tickersCondition6, item) || isInvalid6) {
-				resultTickers = append(resultTickers, item)
-			}
-		})
+	switch conditions[0] {
+	case "1":
+		tickerResource = tickersCondition1
+	case "2":
+		tickerResource = tickersCondition2
+	case "3":
+		tickerResource = tickersCondition3
+	case "4":
+		tickerResource = tickersCondition4
+	case "5":
+		tickerResource = tickersCondition5
+	case "6":
+		tickerResource = tickersCondition6
 	}
-
-	wpool.StopWait()
+	mapTickerCondition := make(map[string][]string)
+	for _, v := range conditions {
+		switch v {
+		case "1":
+			mapTickerCondition[v] = tickersCondition1
+		case "2":
+			mapTickerCondition[v] = tickersCondition2
+		case "3":
+			mapTickerCondition[v] = tickersCondition3
+		case "4":
+			mapTickerCondition[v] = tickersCondition4
+		case "5":
+			mapTickerCondition[v] = tickersCondition5
+		case "6":
+			mapTickerCondition[v] = tickersCondition6
+		}
+	}
+	var resultTickers []string
+	for _, item := range tickerResource {
+		if containsMap(mapTickerCondition, item) {
+			resultTickers = append(resultTickers, item)
+		}
+	}
 	writeFile(resultTickers)
 	fmt.Println("Result", resultTickers)
 	fmt.Println("Len result", len(resultTickers))
 
 }
-
+func containsMap(mapTickerCondition map[string][]string, str string) bool {
+	var status bool
+	for _, v := range mapTickerCondition {
+		if contains(v, str) {
+			status = true
+		} else {
+			status = false
+			break
+		}
+	}
+	return status
+}
 func writeFile(tickers []string) error {
 	file, err := os.Create("ticker.txt")
 	if err != nil {
@@ -221,7 +248,7 @@ func (db *DB) condition3() ([]string, error) {
 	var tickers []string
 
 	if !isValid("3") {
-		return tickers, fmt.Errorf("Invalid condition")
+		return tickers, nil
 	}
 
 	var maxDate string
@@ -248,7 +275,7 @@ func (db *DB) condition3() ([]string, error) {
 func (db *DB) condition4() ([]string, error) {
 	var tickers []string
 	if !isValid("4") {
-		return tickers, fmt.Errorf("Invalid condition")
+		return tickers, nil
 	}
 
 	err := db.DB.Raw("Select ticker from dailybars_duplicate where change3>30 group by ticker having count(ticker)>=10").Scan(&tickers).Error
