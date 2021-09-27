@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"log"
 	"os/exec"
 	"sync"
@@ -12,7 +11,7 @@ import (
 	"gopkg.in/robfig/cron.v2"
 )
 
-func InitDB() (*sql.DB, error) {
+func InitDB() (*sqlx.DB, error) {
 	db, err := sqlx.Open("postgres", "host=52.116.150.66 user=postgres dbname=stockmarket password=P`AgD!9g!%~hz3M< sslmode=disable")
 	if err != nil {
 		return nil, errors.Wrap(err, "connect to postgres:")
