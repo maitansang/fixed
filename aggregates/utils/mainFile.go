@@ -66,6 +66,7 @@ func MainFunc() {
 	if err != nil {
 		log.Fatalln("Cannot init db", err)
 	}
+	defer db.Close()
 	loc, err := time.LoadLocation("America/New_York")
 	if err != nil {
 		log.Fatalln("Can't set timezone", err)

@@ -62,6 +62,7 @@ func MainFunc() {
 	if err != nil {
 		log.Fatalln("Cannot init db", err)
 	}
+	defer db.Close()
 	insert = make(chan *ins, 15000)
 	db.SetMaxOpenConns(150)
 	db.SetMaxIdleConns(20)

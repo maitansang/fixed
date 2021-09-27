@@ -28,6 +28,7 @@ func MainFunc() {
 	if err != nil {
 		log.Fatalln("Can't init db", err)
 	}
+	defer db.Close()
 
 	start, err := time.Parse("2006-01-02", os.Args[1])
 	start = start.AddDate(0, 0, +1)

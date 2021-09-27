@@ -26,7 +26,7 @@ func main() {
 		currentTime := time.Now().In(loc)
 		start = currentTime.AddDate(0, 0, -1).Format("2006-01-02")
 		end = currentTime.Format("2006-01-02")
-		specify = currentTime.AddDate(0, 0, -25).Format("2006-01-02")
+		specify = currentTime.AddDate(0, 0, -30).Format("2006-01-02")
 		log.Println("Wait a minute to execute the script!")
 		cmd := exec.Command("sh", "run.sh", start, end, specify)
 		err := cmd.Run()

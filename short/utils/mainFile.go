@@ -94,6 +94,7 @@ func MainFunc() {
 		log.Fatalln("cant open DB", err)
 	}
 	_ = db
+	defer db.Close()
 	// shares, err := db.getFloat("AAPL")
 	// if err != nil {
 	// 	log.Fatalln("EERRROR:", err)

@@ -11,14 +11,14 @@ import (
 )
 
 type loRecord struct {
-	Date string  `db:"date"`
-	Ticker  string  `db:"ticker"`
-	S    int64   `db:"s"`
-	P    float64 `db:"p"`
+	Date   string  `db:"date"`
+	Ticker string  `db:"ticker"`
+	S      int64   `db:"s"`
+	P      float64 `db:"p"`
 }
 
 type averages struct {
-	Ticker      string          `db:"ticker"`
+	Ticker   string          `db:"ticker"`
 	Avg      sql.NullFloat64 `db:"avg"`
 	AvgPrice sql.NullFloat64 `db:"avg_price"`
 }
@@ -39,6 +39,8 @@ func GetLos() {
 	db.SetMaxOpenConns(150)
 	db.SetMaxIdleConns(20)
 	db.SetConnMaxLifetime(60 * time.Minute)
+
+	defer db.Close()
 
 	// get tickers
 	tickers, err := db.GetTickersFromDB()

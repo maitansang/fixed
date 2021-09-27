@@ -161,6 +161,13 @@ func MainFunc() {
 		log.Println("can not open db")
 	}
 
+	sqlDB, err := db.DB()
+	if err != nil {
+		log.Println("Error when init sql db")
+	}
+
+	defer sqlDB.Close()
+
 	// data := Short_Sale_Transactions1{}
 	// db.Take(&data)
 
@@ -170,36 +177,36 @@ func MainFunc() {
 	absPath, _ := filepath.Abs("../short_sale/extract/" + specUrl + ".txt")
 	fmt.Println("==============begin read line==============")
 
-	_, err = ReadFileLineByLine(absPath, specUrl,db)
+	_, err = ReadFileLineByLine(absPath, specUrl, db)
 	if err != nil {
 		log.Println("can not read file")
 	}
 
 	// ParseData(text, specUrl, db)
-	
+
 	err = ClearFile(specUrl)
 	if err != nil {
 		log.Println(err)
 	}
 }
 
-func ParseData(text string, specUrl string, db *gorm.DB)  {
+func ParseData(text string, specUrl string, db *gorm.DB) {
 	// var arrTrans []Short_Sale_Transactions1
 	// for _, t := range text[1 : len(text)-1] {
-		fields := strings.Split(text, "|")
-		trans := Short_Sale_Transactions1{
-			ID:           uuid.NewString(),
-			MarketCenter: fields[0],
-			Symbol:       fields[1],
-			Date:         fields[2],
-			Time:         fields[3],
-			ShortType:    fields[4],
-			Size:         fields[5],
-			Price:        fields[6],
-			FileName:     specUrl,
-		}
-		// arrTrans = append(arrTrans, trans)
-		db.Create(&trans)
+	fields := strings.Split(text, "|")
+	trans := Short_Sale_Transactions1{
+		ID:           uuid.NewString(),
+		MarketCenter: fields[0],
+		Symbol:       fields[1],
+		Date:         fields[2],
+		Time:         fields[3],
+		ShortType:    fields[4],
+		Size:         fields[5],
+		Price:        fields[6],
+		FileName:     specUrl,
+	}
+	// arrTrans = append(arrTrans, trans)
+	db.Create(&trans)
 
 	// }
 	// return arrTrans

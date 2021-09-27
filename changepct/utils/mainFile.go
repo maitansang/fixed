@@ -10,7 +10,7 @@ import (
 )
 
 func MainFunc() {
-	var tickers []string 
+	var tickers []string
 	loc, err := time.LoadLocation("EST")
 	if err != nil {
 		log.Fatalln("Can't set timezone", err)
@@ -26,6 +26,8 @@ func MainFunc() {
 	if err != nil {
 		log.Fatalln("Can't init db", err)
 	}
+
+	defer db.Close()
 
 	start, err := time.Parse("2006-01-02", os.Args[1])
 	if err != nil {
@@ -43,13 +45,13 @@ func MainFunc() {
 		} else {
 			tickers, err = db.GetTickersFromDB()
 			if err != nil {
-				log.Fatalln("Can not get tickers from db",err)
+				log.Fatalln("Can not get tickers from db", err)
 			}
 		}
 	} else {
 		tickers, err = db.GetTickersFromDB()
 		if err != nil {
-			log.Fatalln("Can not get tickers from db",err)
+			log.Fatalln("Can not get tickers from db", err)
 		}
 	}
 
@@ -57,7 +59,7 @@ func MainFunc() {
 	if err != nil {
 		log.Fatalln("Can't parse time", err, os.Args[2], "Time must be in the format 2006-01-02")
 	}
-	for t := start.AddDate(0,0,+1); t.Before(end) || t.Equal(end); t = t.AddDate(0, 0, +1) {
+	for t := start.AddDate(0, 0, +1); t.Before(end) || t.Equal(end); t = t.AddDate(0, 0, +1) {
 		if t.Weekday() == 0 || t.Weekday() == 6 {
 			continue
 		}
