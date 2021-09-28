@@ -11,7 +11,7 @@ import (
 
 func MainFunc() {
 	var tickers []string
-	loc, err := time.LoadLocation("EST")
+	loc, err := time.LoadLocation("America/New_York")
 	if err != nil {
 		log.Fatalln("Can't set timezone", err)
 	}
