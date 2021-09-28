@@ -7,11 +7,12 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 	"github.com/pkg/errors"
 	"gopkg.in/robfig/cron.v2"
 )
 
-func InitDB() (*sqlx.DB, error) {
+func initDB() (*sqlx.DB, error) {
 	db, err := sqlx.Open("postgres", "host=52.116.150.66 user=postgres dbname=stockmarket password=P`AgD!9g!%~hz3M< sslmode=disable")
 	if err != nil {
 		return nil, errors.Wrap(err, "connect to postgres:")
@@ -27,7 +28,7 @@ func main() {
 		specify string
 	)
 
-	db, err := InitDB()
+	db, err := initDB()
 	if err != nil {
 		log.Fatalln("Cannot init db", err)
 	}
