@@ -232,11 +232,6 @@ func (db DB) getTrades(ticker string, start time.Time, transDB *TransDB) {
 
 	fmt.Println("----------2", len(newRes))
 
-	// return
-	if err := transDB.InsertDataTableTransactions(ticker, &newRes); err != nil {
-		log.Println("Can not insert data table transaction")
-	}
-
 	l := len(newTd.Results)
 	//fmt.Println("got", len(d.Results))
 	if len(newTd.Results) == 0 {
@@ -262,6 +257,12 @@ func (db DB) getTrades(ticker string, start time.Time, transDB *TransDB) {
 		}
 	}
 	log.Println("got data", ticker, start)
+
+	// return
+	if err := transDB.InsertDataTableTransactions(ticker, &newRes); err != nil {
+		log.Println("Can not insert data table transaction")
+	}
+
 	var largestOrder NewResult
 	var sum int64
 	var sumPrice float64
