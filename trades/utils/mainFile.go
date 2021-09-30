@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gammazero/workerpool"
@@ -84,7 +85,47 @@ func MainFunc() {
 	// end, _ := time.Parse("2006-01-02", "2019-01-01")
 	start, _ := time.Parse("2006-01-02", os.Args[2])
 	end, _ := time.Parse("2006-01-02", os.Args[1])
-	wp := workerpool.New(192)
+
+	for t := start; t.After(end); t = t.AddDate(0, 0, -1) {
+		if t.Weekday() == 0 || t.Weekday() == 6 {
+			continue
+		}
+
+		timeString := t.Format("2006-01-02")
+		timeString = strings.Replace(timeString, "-", "_", 2)
+		fmt.Println(timeString)
+		dropTable := fmt.Sprintf("%s%s", "DROP TABLE IF EXISTS transactions_", timeString)
+		_, err := transDB.Exec(dropTable)
+		if err != nil {
+			log.Println("can not drop table: ", err)
+		}
+		queryStr := fmt.Sprintf("%s%s%s", "CREATE TABLE IF NOT EXISTS transactions_", timeString, `(
+		date date,
+		ticker text,
+		t bigint,
+		q integer,
+		i bigint,
+		c text,
+		p numeric,
+		s numeric,
+		e integer,
+		x integer,
+		r integer,
+		z integer,
+		time time without time zone,
+		transaction_type integer
+		)`)
+		// log.Println(queryStr)
+		result, err := transDB.Exec(queryStr)
+		if err != nil {
+			log.Println("can not create table: ", err)
+		}
+		if result != nil {
+			log.Println("creatae table ss ", result)
+		}
+	}
+
+	wp := workerpool.New(80)
 	for _, ticker := range tickers {
 		tickerSUB := ticker // create copy of ticker
 		wp.Submit(func() {
@@ -152,65 +193,56 @@ type OldResult struct {
 	*/
 }
 type TradesData struct {
-	Ticker       string   `json:"ticker"`
-	ResultsCount int64    `json:"results_count"`
-	DBLatency    int      `json:"db_latency"`
-	Success      bool     `json:"success"`
+	Ticker       string      `json:"ticker"`
+	ResultsCount int64       `json:"results_count"`
+	DBLatency    int         `json:"db_latency"`
+	Success      bool        `json:"success"`
 	Results      []OldResult `json:"results"`
 	//Map          map[string]interface{} `json:"map"`
 }
 type NewTradesData struct {
-	Ticker       string   `json:"ticker"`
-	ResultsCount int64    `json:"results_count"`
-	DBLatency    int      `json:"db_latency"`
-	Success      bool     `json:"success"`
+	Ticker       string      `json:"ticker"`
+	ResultsCount int64       `json:"results_count"`
+	DBLatency    int         `json:"db_latency"`
+	Success      bool        `json:"success"`
 	Results      []NewResult `json:"results"`
 	//Map          map[string]interface{} `json:"map"`
 }
+
 func (db DB) getTrades(ticker string, start time.Time, transDB *TransDB) {
 	log.Println("============", ticker)
-	var res []OldResult
 	var newRes []NewResult
 
 	url := fmt.Sprintf(URL_TRADES, ticker, start.Format("2006-01-02"))
-	td := TradesData{}
 	newTd := NewTradesData{}
 
 	//startTime := time.Now()
-	err := getJson(url, &td)
+	err := getJson(url, &newTd)
 	if err != nil {
+		log.Fatalln("cannot get json 111111", err)
 		myClient = &http.Client{Timeout: 60 * time.Second}
-		err = getJson(url, &td)
-		if err != nil {
-			log.Fatalln("cannot get json", err)
-		}
-	}
-	err = getJson(url, &newTd)
-	if err != nil {
-		myClient = &http.Client{Timeout: 60 * time.Second}
-		err = getJson(url, &td)
+		err = getJson(url, &newTd)
 		if err != nil {
 			log.Fatalln("cannot get json", err)
 		}
 	}
 	log.Println("got", ticker, start, url)
-	res = append(res, td.Results...)
 	newRes = append(newRes, newTd.Results...)
 
-	fmt.Println("----------0",len(res))
-	fmt.Println("----------1",len(newRes))
+	fmt.Println("----------2", len(newRes))
 
 	// return
 	if err := transDB.InsertDataTableTransactions(ticker, &newRes); err != nil {
 		log.Println("Can not insert data table transaction")
 	}
-	l := len(td.Results)
+
+	l := len(newTd.Results)
 	//fmt.Println("got", len(d.Results))
-	if len(td.Results) == 0 {
+	if len(newTd.Results) == 0 {
 		//fmt.Println(ticker, start.Format("2006-01-02"), "total trades", len(res), "average=", 0, "time this run", time.Since(startTime))
 		return
 	}
-	offset := td.Results[len(td.Results)-1].T
+	offset := newTd.Results[len(newTd.Results)-1].T
 
 	for l == 50000 {
 		fmt.Println(ticker, "offset=", offset)
@@ -219,7 +251,7 @@ func (db DB) getTrades(ticker string, start time.Time, transDB *TransDB) {
 			log.Fatalln("!!!!!!!!!!!! cannot read body", err)
 		}
 		//fmt.Println("got", len(d1))
-		res = append(res, td1...)
+		newRes = append(newRes, td1...)
 		if len(td1) == 0 {
 			l = len(td1)
 		} else {
@@ -229,11 +261,11 @@ func (db DB) getTrades(ticker string, start time.Time, transDB *TransDB) {
 		}
 	}
 	log.Println("got data", ticker, start)
-	var largestOrder OldResult
+	var largestOrder NewResult
 	var sum int64
 	var sumPrice float64
 	var resFloat []float64
-	for _, r := range res {
+	for _, r := range newRes {
 		sum += r.S
 		sumPrice += r.P
 		if r.S > largestOrder.S {
@@ -241,9 +273,9 @@ func (db DB) getTrades(ticker string, start time.Time, transDB *TransDB) {
 		}
 		resFloat = append(resFloat, float64(r.S))
 	}
-	count := len(res)
-	average := float64(sum) / float64(len(res))
-	averagePrice := sumPrice / float64(len(res))
+	count := len(newRes)
+	average := float64(sum) / float64(len(newRes))
+	averagePrice := sumPrice / float64(len(newRes))
 	stddev := stat.StdDev(resFloat, nil)
 	mean := stat.Mean(resFloat, nil)
 
@@ -298,7 +330,7 @@ func (db DB) getTrades(ticker string, start time.Time, transDB *TransDB) {
 		log.Println("INSERTED AVERAGE ", date, ticker, average)
 	}
 
-	db.persistTradeFeatures(db.extractTradesFeatures(ticker, res))
+	db.persistTradeFeatures(db.extractTradesFeatures(ticker, newRes))
 	// sort.Slice(res, func(i, j int) bool {
 	// 	return res[i].S > res[j].S
 	// })
@@ -411,15 +443,15 @@ func (db *DB) persistTradeFeatures(in []TradeFeatures) {
 	}
 }
 
-func getMoreTrades(ticker string, start time.Time, offset int64) ([]OldResult, error) {
+func getMoreTrades(ticker string, start time.Time, offset int64) ([]NewResult, error) {
 	url := fmt.Sprintf(URL_TRADES_ADDITIONAL, ticker, start.Format("2006-01-02"), offset)
-	d := TradesData{}
+	d := NewTradesData{}
 	err := getJson(url, &d)
 	if err != nil {
 		myClient = &http.Client{Timeout: 60 * time.Second}
 		err = getJson(url, &d)
 		if err != nil {
-			return []OldResult{}, errors.Wrap(err, "cannot read body")
+			return []NewResult{}, errors.Wrap(err, "cannot read body")
 		}
 	}
 	return d.Results, nil
