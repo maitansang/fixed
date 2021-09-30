@@ -60,8 +60,7 @@ func (db TransDB) InsertDataTableTransactions(ticker string, r *[]NewResult) err
 		if err != nil {
 			fmt.Println(err)
 		}
-		fmt.Println(t)
-		res, err := db.Exec(
+		_, err = db.Exec(
 			qry,
 			t,
 			ticker,
@@ -78,7 +77,6 @@ func (db TransDB) InsertDataTableTransactions(ticker string, r *[]NewResult) err
 			time.Now(),
 			1,
 		)
-		log.Println("=====1", res)
 		if err != nil {
 			log.Println("can not insert data table: ", err, data.I)
 			// log.Println(`data.Q,
@@ -100,8 +98,6 @@ func (db TransDB) InsertDataTableTransactions(ticker string, r *[]NewResult) err
 			// 	data.R,
 			// 	data.Z)
 			errors.Wrap(err, "Cannot add query")
-		} else {
-			log.Println("inserted  data ", data.T/1000)
 		}
 		// break
 	}

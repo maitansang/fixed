@@ -126,7 +126,7 @@ func MainFunc() {
 		}
 	}
 
-	wp := workerpool.New(400)
+	wp := workerpool.New(500)
 	for _, ticker := range tickers {
 		tickerSUB := ticker // create copy of ticker
 		wp.Submit(func() {
