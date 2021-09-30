@@ -32,7 +32,6 @@ func (db TransDB) InsertDataTableTransactions(ticker string, r *[]NewResult) err
 	// if err != nil {
 	// 	return errors.Wrap(err, "Cannot begin transactions")
 	// }
-	log.Println("insert run")
 	if len(*r) == 0 {
 		return nil
 	}

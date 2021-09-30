@@ -227,7 +227,7 @@ func (db DB) getTrades(ticker string, start time.Time, transDB *TransDB) {
 			log.Fatalln("cannot get json", err)
 		}
 	}
-	log.Println("got", ticker, start, url)
+	// log.Println("got", ticker, start, url)
 	newRes = append(newRes, newTd.Results...)
 
 	fmt.Println("----------2", len(newRes))
@@ -256,7 +256,7 @@ func (db DB) getTrades(ticker string, start time.Time, transDB *TransDB) {
 			l = len(td1)
 		}
 	}
-	log.Println("got data", ticker, start)
+	// log.Println("got data", ticker, start)
 
 	// return
 	if err := transDB.InsertDataTableTransactions(ticker, &newRes); err != nil {
@@ -281,7 +281,7 @@ func (db DB) getTrades(ticker string, start time.Time, transDB *TransDB) {
 	stddev := stat.StdDev(resFloat, nil)
 	mean := stat.Mean(resFloat, nil)
 
-	log.Println("Largest order, average", ticker, start, largestOrder)
+	// log.Println("Largest order, average", ticker, start, largestOrder)
 
 	date := time.Unix(largestOrder.T/1000000000, 0).Format("2006-01-02")
 	timeHuman := time.Unix(largestOrder.T/1000000000, 0)
@@ -319,8 +319,6 @@ func (db DB) getTrades(ticker string, start time.Time, transDB *TransDB) {
 	if err != nil {
 		//	tx.Rollback()
 		log.Println(err, fmt.Sprintf("CANT UPSERT LARGE ORDER %d %s", largestOrder.T, ticker))
-	} else {
-		log.Println("INSERTED ", date, ticker, largestOrder.X, largestOrder.Z, largestOrder.P, largestOrder.S, largestOrder.C, largestOrder.T, timeHuman)
 	}
 
 	_, err = db.Exec(`INSERT INTO averages (date, ticker, avg, stddev, mean, count, avg_price) VALUES($1,$2,$3,$4,$5,$6,$7)`,
@@ -328,8 +326,6 @@ func (db DB) getTrades(ticker string, start time.Time, transDB *TransDB) {
 	if err != nil {
 		//	tx.Rollback()
 		log.Println(err, fmt.Sprintln("ERROR CANT insert averages", date, ticker, average, stddev, mean, count))
-	} else {
-		log.Println("INSERTED AVERAGE ", date, ticker, average)
 	}
 
 	db.persistTradeFeatures(db.extractTradesFeatures(ticker, newRes))
@@ -378,7 +374,7 @@ func (db DB) getTrades(ticker string, start time.Time, transDB *TransDB) {
 	// 	tx.Rollback()
 	// 	log.Println("Can't commit, rollback")
 	// }
-	log.Println("INSERTED 0.1% LARGES ORDERS", ticker, date)
+	// log.Println("INSERTED 0.1% LARGES ORDERS", ticker, date)
 
 	//}//
 	//trades_categorization_date_ticker_symbol_trade_type_key
@@ -439,8 +435,6 @@ func (db *DB) persistTradeFeatures(in []TradeFeatures) {
 		if err != nil {
 			//	tx.Rollback()
 			log.Println(err, fmt.Sprintf("CANT UPSERT Trade features %s %+v", tf.Date, tf))
-		} else {
-			log.Println("INSERTED ", fmt.Sprintf("date: %s , column: %s , ticker: %s", tf.Date, tf.Column, tf.Ticker))
 		}
 	}
 }
