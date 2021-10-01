@@ -67,6 +67,7 @@ func MainFunc() {
 		log.Println("db connected ...")
 	}
 	defer db.Close()
+	defer transDB.Close()
 
 	tickers, err := db.GetTickersFromDB()
 	// tickers := []string{"AAPL"}
