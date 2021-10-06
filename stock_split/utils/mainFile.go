@@ -38,26 +38,31 @@ func GetStockSplit() {
 	time.Local = loc // -> this is setting the global timezone
 	log.Println("time=", time.Now())
 
-	start := time.Now()
-
-	// splitEnd := start.AddDate(0, 0, -1)
-
 	splitEnd, err := time.Parse("2006-01-02", os.Args[1])
 	if err != nil {
 		log.Fatalln("Can't parse time", err, os.Args[1], "Time must be in the format 2006-01-02")
 	}
 
+	f, err := os.OpenFile("tickerlog", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		fmt.Printf("error opening file: %v", err)
+	}
+	defer f.Close()
+
+	log.SetOutput(f)
+	log.Println("--------------------------------")
+	log.Println("----------", splitEnd.Format("2006-01-02"), "----------")
+	log.Println("--------------------------------")
+
 	for _, ticker := range tickers {
 		ticker := ticker
-		// ticker = "AA"
 		wp.Submit(func() {
-			// fmt.Println("getting for", ticker)
 			stockSplit, err := db.getStockSplits(ticker)
 			if err != nil {
 				log.Println("ERROR", ticker, err)
 			}
 			if stockSplit != nil {
-
+				log.Println(ticker)
 				latestDate, err := time.Parse("2006-01-02", stockSplit.ExDate)
 				if err != nil {
 					fmt.Println("unable to parse date")
@@ -66,7 +71,7 @@ func GetStockSplit() {
 				// fmt.Println(*stockSplit, latestDate)
 				// getEverything(ticker, db)
 
-				if latestDate.After(splitEnd) && !latestDate.Equal(splitEnd){
+				if latestDate.After(splitEnd) && !latestDate.Equal(splitEnd) {
 					fmt.Println(*stockSplit, latestDate, ticker)
 					getEverything(ticker, db)
 				}
@@ -75,7 +80,9 @@ func GetStockSplit() {
 	}
 	wp.StopWait()
 
-	log.Println("Time to load dailybars", time.Since(start))
+	log.Println("-----------------------")
+	log.Println("----------END----------")
+	log.Println("-----------------------")
 }
 
 func (db DB) getStockSplits(ticker string) (*StockSplit, error) {
@@ -83,21 +90,21 @@ func (db DB) getStockSplits(ticker string) (*StockSplit, error) {
 	results := StockSplitResult{}
 	err := getJson(url, &results)
 	if err != nil {
-	  return &StockSplit{}, errors.Wrap(err, "can't get json "+url)
+		return &StockSplit{}, errors.Wrap(err, "can't get json "+url)
 	}
 	if len(results.StockSplits) > 0 {
-	  for _, stockSplit := range results.StockSplits {
-		exDate, err := time.Parse("2006-01-02", stockSplit.ExDate)
-		if err != nil {
-		  fmt.Println("unable to parse date")
+		for _, stockSplit := range results.StockSplits {
+			exDate, err := time.Parse("2006-01-02", stockSplit.ExDate)
+			if err != nil {
+				fmt.Println("unable to parse date")
+			}
+			if exDate.Before(time.Now()) {
+				return &stockSplit, nil
+			}
 		}
-		if exDate.Before(time.Now()) {
-		  return &stockSplit, nil
-		}
-	  }
 	}
 	return nil, nil
-  }
+}
 
 // TODO: dailybars duplicate
 // TODO: check if oneminvol and v are correct
@@ -134,12 +141,10 @@ func updateDailybars(ticker string, db *DB) {
 		log.Println("unable to delete ticker", ticker, err)
 	}
 
-	res, err := db.GetDailybarsData(ticker, start, end)
+	_, err = db.GetDailybarsData(ticker, start, end)
 	if err != nil {
 		log.Println("ERROR", ticker, err)
 	}
-
-	fmt.Println(res)
 }
 
 func updateTickerChanges(ticker string, db *DB) {

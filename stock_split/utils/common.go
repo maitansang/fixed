@@ -62,7 +62,6 @@ func getJson(url string, target interface{}) error {
 	for ; err != nil; r, err = myClient.Get(url) { //|| r.StatusCode != 200
 		time.Sleep(1 * time.Second)
 		i++
-		fmt.Println("!!!!!!!!!!!!!!!! RETRYING ", i, err)
 	}
 	defer r.Body.Close()
 	//fmt.Println("getJson", url, r.StatusCode)
@@ -107,7 +106,6 @@ func (d DB) GetDailybarsData(ticker string, start time.Time, end time.Time) ([]D
 		return nil, errors.Wrap(err, "getData")
 	}
 	res = td.Results
-	//fmt.Println(ticker, res) // daily bars in res
 
 	for i, r := range res {
 		t := time.Unix(r.T/1000, 0)
@@ -119,7 +117,6 @@ func (d DB) GetDailybarsData(ticker string, start time.Time, end time.Time) ([]D
 		tmp.OneMinV = oneMinV
 		res[i] = tmp
 	}
-	//fmt.Println(ticker, res)
 	log.Println("Got", ticker)
 	err = d.InsertDailybarsData(ticker, &res)
 	if err != nil {
@@ -143,7 +140,6 @@ func getData1Min(ticker string, start time.Time) (float64, error) {
 			max = r.V
 		}
 	}
-	//fmt.Println(start.Format("2006-01-02"), max)
 	return max, nil
 }
 
@@ -191,7 +187,6 @@ func (db DB) updateChangeDuplicate(date string, tickers []string) error {
 	for i, ticker := range tickers {
 		ticker := ticker
 		wpUpdate.Submit(func() {
-			//fmt.Println(tickers)
 			//ticker := tickers[i]
 
 			log.Println("updating", i, ticker, date)
@@ -276,7 +271,6 @@ func (db DB) updateChange(date string, tickers []string) error {
 	//log.Println(t)
 
 	for i, ticker := range tickers {
-		//fmt.Println(tickers)
 		//ticker := tickers[i]
 
 		log.Println("updating", i, ticker, date)
@@ -522,7 +516,6 @@ func (db DB) getTrades(ticker string, start time.Time) {
 	offset := td.Results[len(td.Results)-1].T
 
 	for l == 50000 {
-		fmt.Println(ticker, "offset=", offset)
 		td1, err := getMoreTrades(ticker, start, offset)
 		if err != nil {
 			log.Fatalln("!!!!!!!!!!!! cannot read body", err)
@@ -623,15 +616,15 @@ func getMoreTrades(ticker string, start time.Time, offset int64) ([]Result, erro
 }
 
 type resScanLo struct {
-	Date time.Time `db:"date"`
-	Ticker  string    `db:"ticker"`
-	S    int64     `db:"s"`
+	Date   time.Time `db:"date"`
+	Ticker string    `db:"ticker"`
+	S      int64     `db:"s"`
 }
 
 type resLo struct {
-	Date string `db:"date"`
-	Ticker  string `db:"ticker"`
-	S    int64  `db:"s"`
+	Date   string `db:"date"`
+	Ticker string `db:"ticker"`
+	S      int64  `db:"s"`
 }
 
 func (db DB) findLargestordersBreakoutsUpdates(date, ticker string) {
@@ -647,9 +640,9 @@ func (db DB) findLargestordersBreakoutsUpdates(date, ticker string) {
 			log.Fatalln("CANNOT STRUCTSCAN", err)
 		}
 		los = append(los, resLo{
-			Date: r.Date.Format("2006-01-02"),
-			Ticker:  r.Ticker,
-			S:    r.S,
+			Date:   r.Date.Format("2006-01-02"),
+			Ticker: r.Ticker,
+			S:      r.S,
 		})
 	}
 
@@ -730,14 +723,14 @@ func fetchRow(rows *sqlx.Rows) map[string]interface{} {
 }
 
 type loRecord struct {
-	Date string  `db:"date"`
-	Ticker  string  `db:"ticker"`
-	S    int64   `db:"s"`
-	P    float64 `db:"p"`
+	Date   string  `db:"date"`
+	Ticker string  `db:"ticker"`
+	S      int64   `db:"s"`
+	P      float64 `db:"p"`
 }
 
 type averages struct {
-	Ticker      string          `db:"ticker"`
+	Ticker   string          `db:"ticker"`
 	Avg      sql.NullFloat64 `db:"avg"`
 	AvgPrice sql.NullFloat64 `db:"avg_price"`
 }
