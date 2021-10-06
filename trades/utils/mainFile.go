@@ -92,7 +92,7 @@ func MainFunc() {
 			continue
 		}
 
-		timeString := t.Format("2006-01-02")
+		timeString := t.Format("2006-01-2")
 		timeString = strings.Replace(timeString, "-", "_", 2)
 		fmt.Println(timeString)
 		dropTable := fmt.Sprintf("%s%s", "DROP TABLE IF EXISTS transactions_", timeString)
