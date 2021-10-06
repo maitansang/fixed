@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
@@ -37,20 +36,13 @@ func (db TransDB) InsertDataTableTransactions(ticker string, r *[]NewResult) err
 	}
 	dateInsert := (*r)[0].T
 	timeName := time.Unix(0, dateInsert)
-	month := int(timeName.Month())
-	var monthString string
-	if month < 10 {
-		monthString = "0" + strconv.Itoa(month)
-	} else {
-		monthString = strconv.Itoa(month)
-	}
-	timeString := fmt.Sprintf("%d%s%s%s%d", timeName.Year(), "_", monthString, "_", timeName.Day())
+	timeInsert := timeName.Format("2006-01-02")
+	timeString := strings.Replace(timeInsert, "-", "_", 2)
 
 	for _, data := range *r {
 		// t = timeName.String()
 
 		// var dt pgtype.Date
-		timeInsert := fmt.Sprintf("%d%s%s%s%d", timeName.Year(), "-", monthString, "-", timeName.Day())
 		qry := fmt.Sprintf(`INSERT INTO transactions_%s (date,ticker,t,q,i,c,p,s,e,x,r,z,time,transaction_type)
 					VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`, timeString)
 		layout := "2006-01-02"

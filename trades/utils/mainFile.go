@@ -50,57 +50,13 @@ func InitDB() (*DB, *TransDB, error) {
 	return d, transDB, nil
 }
 
-func MainFunc() {
-	loc, err := time.LoadLocation("America/New_York")
+func createTable(transDB *TransDB, timeString string) error {
+	dropTable := fmt.Sprintf("%s%s", "DROP TABLE IF EXISTS transactions_", timeString)
+	_, err := transDB.Exec(dropTable)
 	if err != nil {
-		log.Fatalln("Can't set timezone", err)
+		log.Println("can not drop table: ", err)
 	}
-	time.Local = loc // -> this is setting the global timezone
-	log.Println("time=", time.Now())
-
-	db, transDB, err := InitDB()
-	log.Println(transDB.Ping())
-	// return
-	if err != nil {
-		log.Fatalln("Can't open db", err)
-	} else {
-		log.Println("db connected ...")
-	}
-	defer db.Close()
-	defer transDB.Close()
-
-	tickers, err := db.GetTickersFromDB()
-	// tickers := []string{"AAPL"}
-	if err != nil {
-		log.Fatalln("Can't get tickers", err)
-	}
-
-	//tickers := []string{"AAPL"}
-
-	// start, err := time.Parse("2006-01-02", os.Args[1])
-	// if err != nil {
-	// 	log.Fatalln("Can't parse time", err, os.Args[1], "Time must be in the format 2006-01-02")
-	// }
-
-	// end := start.AddDate(0, 0, -8)
-	// end, _ := time.Parse("2006-01-02", "2019-01-01")
-	start, _ := time.Parse("2006-01-02", os.Args[2])
-	end, _ := time.Parse("2006-01-02", os.Args[1])
-
-	for t := start; t.After(end); t = t.AddDate(0, 0, -1) {
-		if t.Weekday() == 0 || t.Weekday() == 6 {
-			continue
-		}
-
-		timeString := t.Format("2006-01-2")
-		timeString = strings.Replace(timeString, "-", "_", 2)
-		fmt.Println(timeString)
-		dropTable := fmt.Sprintf("%s%s", "DROP TABLE IF EXISTS transactions_", timeString)
-		_, err := transDB.Exec(dropTable)
-		if err != nil {
-			log.Println("can not drop table: ", err)
-		}
-		queryStr := fmt.Sprintf("%s%s%s", "CREATE TABLE IF NOT EXISTS transactions_", timeString, `(
+	queryStr := fmt.Sprintf("%s%s%s", "CREATE TABLE IF NOT EXISTS transactions_", timeString, `(
 		date date,
 		ticker text,
 		t bigint,
@@ -116,14 +72,53 @@ func MainFunc() {
 		time time without time zone,
 		transaction_type integer
 		)`)
-		// log.Println(queryStr)
-		result, err := transDB.Exec(queryStr)
-		if err != nil {
-			log.Println("can not create table: ", err)
+	result, err := transDB.Exec(queryStr)
+	if err != nil {
+		return err
+	}
+	if result != nil {
+		return err
+	}
+
+	return nil
+}
+
+func MainFunc() {
+	loc, err := time.LoadLocation("America/New_York")
+	if err != nil {
+		log.Fatalln("Can't set timezone", err)
+	}
+	time.Local = loc // -> this is setting the global timezone
+	log.Println("time=", time.Now())
+
+	db, transDB, err := InitDB()
+	log.Println(transDB.Ping())
+	if err != nil {
+		log.Fatalln("Can't open db", err)
+	} else {
+		log.Println("db connected ...")
+	}
+	defer db.Close()
+	defer transDB.Close()
+
+	tickers, err := db.GetTickersFromDB()
+	// tickers := []string{"AAPL"}
+	if err != nil {
+		log.Fatalln("Can't get tickers", err)
+	}
+
+	start, _ := time.Parse("2006-01-02", os.Args[2])
+	end, _ := time.Parse("2006-01-02", os.Args[1])
+
+	for t := start; t.After(end); t = t.AddDate(0, 0, -1) {
+		if t.Weekday() == 0 || t.Weekday() == 6 {
+			continue
 		}
-		if result != nil {
-			log.Println("creatae table ss ", result)
-		}
+
+		timeString := t.Format("2006-01-02")
+		timeString = strings.Replace(timeString, "-", "_", 2)
+
+		createTable(transDB, timeString)
 	}
 
 	wp := workerpool.New(500)
