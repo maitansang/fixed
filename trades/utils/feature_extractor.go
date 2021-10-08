@@ -2,10 +2,11 @@ package utils
 
 import (
 	"fmt"
-	"gonum.org/v1/gonum/stat"
 	"math"
 	"sort"
 	"time"
+
+	"gonum.org/v1/gonum/stat"
 )
 
 const (
@@ -145,6 +146,8 @@ func calculateFeatures(ticker string, date string, in []NewResult) []TradeFeatur
 	var calcInX, calcInP, calcInS, calcInZ []float64
 	var mins, maxs = newMinMax()
 	var mappedC = make(map[string]int64)
+	var listCalcX = make(map[int64][]float64)
+	var listCalcC = make(map[int][]float64)
 	for index := range in {
 		rec := in[index]
 		if count == 0 {
@@ -154,12 +157,25 @@ func calculateFeatures(ticker string, date string, in []NewResult) []TradeFeatur
 		calcInZ = append(calcInZ, float64(rec.Z))
 		calcInP = append(calcInP, rec.P)
 		calcInS = append(calcInS, float64(rec.S))
+		listCalcX[rec.X] = append(listCalcX[rec.X], float64(rec.S))
+		for _, v := range rec.C {
+			listCalcC[v] = append(listCalcC[v], float64(rec.S))
+		}
 		mappedC[arrToStr(rec.C)] += 1
 		count++
 		mins.updateMins(rec)
 		maxs.updateMaxs(rec)
 	}
-
+	for _, v := range listCalcX {
+		sort.Slice(v, func(i, j int) bool {
+			return v[i] < v[j]
+		})
+	}
+	for _, v := range listCalcC {
+		sort.Slice(v, func(i, j int) bool {
+			return v[i] < v[j]
+		})
+	}
 	sort.Slice(calcInX, func(i, j int) bool {
 		return calcInX[i] < calcInX[j]
 	})
@@ -265,6 +281,49 @@ func calculateFeatures(ticker string, date string, in []NewResult) []TradeFeatur
 		Q3:     math.NaN(),
 		Max:    math.NaN(),
 	})
-
+	for i, v := range listCalcX {
+		if i > 20 {
+			continue
+		}
+		columnx := fmt.Sprintf("x%d", i)
+		tf = append(tf, TradeFeatures{
+			Ticker: ticker,
+			Column: columnx,
+			Date:   date,
+			Count:  count,
+			Unique: math.NaN(),
+			Top:    "NaN",
+			Freq:   math.NaN(),
+			Mean:   stat.Mean(v, nil),
+			StdDev: stat.StdDev(v, nil),
+			Min:    mins.Min(columnx),
+			Q1:     stat.Quantile(firstQuartile, stat.Empirical, v, nil),
+			Q2:     stat.Quantile(secondQuartile, stat.Empirical, v, nil),
+			Q3:     stat.Quantile(thirdQuartile, stat.Empirical, v, nil),
+			Max:    maxs.Max(columnx),
+		})
+	}
+	for i, v := range listCalcC {
+		if i > 65 {
+			continue
+		}
+		columnc := fmt.Sprintf("c%d", i)
+		tf = append(tf, TradeFeatures{
+			Ticker: ticker,
+			Column: columnc,
+			Date:   date,
+			Count:  count,
+			Unique: math.NaN(),
+			Top:    "NaN",
+			Freq:   math.NaN(),
+			Mean:   stat.Mean(v, nil),
+			StdDev: stat.StdDev(v, nil),
+			Min:    mins.Min(columnc),
+			Q1:     stat.Quantile(firstQuartile, stat.Empirical, v, nil),
+			Q2:     stat.Quantile(secondQuartile, stat.Empirical, v, nil),
+			Q3:     stat.Quantile(thirdQuartile, stat.Empirical, v, nil),
+			Max:    maxs.Max(columnc),
+		})
+	}
 	return tf
 }
