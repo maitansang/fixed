@@ -26,11 +26,7 @@ func arrayToString(a []int, delim string) string {
 	//return strings.Trim(strings.Join(strings.Fields(fmt.Sprint(a)), delim), "[]")
 }
 
-func (db TransDB) InsertDataTableTransactions(ticker string, r *[]NewResult) error {
-	// tx, err := db.Begin()
-	// if err != nil {
-	// 	return errors.Wrap(err, "Cannot begin transactions")
-	// }
+func (db TransDB) InsertDataTableTransactions(ticker string, r *[]Result) error {
 	if len(*r) == 0 {
 		return nil
 	}
@@ -40,9 +36,7 @@ func (db TransDB) InsertDataTableTransactions(ticker string, r *[]NewResult) err
 	timeString := strings.Replace(timeInsert, "-", "_", 2)
 
 	for _, data := range *r {
-		// t = timeName.String()
 
-		// var dt pgtype.Date
 		qry := fmt.Sprintf(`INSERT INTO transactions_%s (date,ticker,t,q,i,c,p,s,e,x,r,z,time,transaction_type)
 					VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`, timeString)
 		layout := "2006-01-02"
@@ -70,32 +64,10 @@ func (db TransDB) InsertDataTableTransactions(ticker string, r *[]NewResult) err
 		)
 		if err != nil {
 			log.Println("can not insert data table: ", err, data.I)
-			// log.Println(`data.Q,
-			// data.I,
-			// arrayToString(data.C, ","),
-			// data.P,
-			// data.S,
-			// data.E,
-			// data.X,
-			// data.R,
-			// data.Z,`,
-			// 	data.Q,
-			// 	data.I,
-			// 	arrayToString(data.C, ","),
-			// 	data.P,
-			// 	data.S,
-			// 	data.E,
-			// 	data.X,
-			// 	data.R,
-			// 	data.Z)
 			errors.Wrap(err, "Cannot add query")
 		}
 		// break
 	}
-	// err = db.Commit()
-	// if err != nil {
-	// 	return errors.Wrap(err, "Cannot commit transaction")
-	// }
 	return nil
 }
 func (db *DB) getTickers() ([]string, error) {

@@ -38,15 +38,15 @@ type TradeFeatures struct {
 	Max    float64
 }
 
-func (db DB) extractTradesFeatures(ticker string, in []NewResult) (out []TradeFeatures) {
-	resMap := make(map[string][]NewResult) // map[date][]OldResult
+func (db DB) extractTradesFeatures(ticker string, in []Result) (out []TradeFeatures) {
+	resMap := make(map[string][]Result) // map[date][]OldResult
 	out = make([]TradeFeatures, 0)
 	for index := range in {
 		res := in[index]
 		date := time.Unix(res.T/1000000000, 0).Format("2006-01-02")
 		rec, ok := resMap[date]
 		if !ok {
-			rec = make([]NewResult, 0)
+			rec = make([]Result, 0)
 		}
 		rec = append(rec, res)
 		resMap[date] = rec
@@ -61,7 +61,7 @@ func (db DB) extractTradesFeatures(ticker string, in []NewResult) (out []TradeFe
 
 type mins []float64
 
-func (m mins) updateMins(rec NewResult) {
+func (m mins) updateMins(rec Result) {
 	if float64(rec.X) < m[0] {
 		m[0] = float64(rec.X)
 	}
@@ -76,7 +76,7 @@ func (m mins) updateMins(rec NewResult) {
 	}
 }
 
-func (m mins) initialize(rec NewResult) {
+func (m mins) initialize(rec Result) {
 	m[0] = float64(rec.X)
 	m[1] = rec.P
 	m[2] = float64(rec.Z)
@@ -104,7 +104,7 @@ func newMinMax() (mins, maxs) {
 
 type maxs []float64
 
-func (m maxs) updateMaxs(rec NewResult) {
+func (m maxs) updateMaxs(rec Result) {
 	if float64(rec.X) > m[0] {
 		m[0] = float64(rec.X)
 	}
@@ -141,7 +141,7 @@ func arrToStr(in []int) string {
 	return fmt.Sprintf("%v", in)
 }
 
-func calculateFeatures(ticker string, date string, in []NewResult) []TradeFeatures {
+func calculateFeatures(ticker string, date string, in []Result) []TradeFeatures {
 	var count int64
 	var calcInX, calcInP, calcInS, calcInZ []float64
 	var mins, maxs = newMinMax()

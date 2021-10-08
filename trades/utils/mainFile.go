@@ -50,7 +50,7 @@ func InitDB() (*DB, *TransDB, error) {
 	return d, transDB, nil
 }
 
-func createTable(transDB *TransDB, timeString string) error {
+func createTransactionTable(transDB *TransDB, timeString string) error {
 	dropTable := fmt.Sprintf("%s%s", "DROP TABLE IF EXISTS transactions_", timeString)
 	_, err := transDB.Exec(dropTable)
 	if err != nil {
@@ -118,26 +118,19 @@ func MainFunc() {
 		timeString := t.Format("2006-01-02")
 		timeString = strings.Replace(timeString, "-", "_", 2)
 
-		createTable(transDB, timeString)
+		createTransactionTable(transDB, timeString)
 	}
 
 	wp := workerpool.New(500)
 	for _, ticker := range tickers {
 		tickerSUB := ticker // create copy of ticker
 		wp.Submit(func() {
-			// log.Println("START WORKER", tickerSUB)
 			for t := start; t.After(end); t = t.AddDate(0, 0, -1) {
 				if t.Weekday() == 0 || t.Weekday() == 6 {
 					continue
 				}
-				// log.Println("GETTRADES", tickerSUB, t)
 				db.getTrades(tickerSUB, t, transDB)
-				// if err != nil {
-				// 	log.Println("ERROR download data", err)
-				// }
-
 			}
-			// log.Println("END WORKER", tickerSUB)
 		})
 	}
 	wp.StopWait()
@@ -150,7 +143,7 @@ const URL_TRADES = `https://api.polygon.io/v2/ticks/stocks/trades/%s/%s?limit=50
 const URL_TRADES_ADDITIONAL = `https://api.polygon.io/v2/ticks/stocks/trades/%s/%s?timestamp=%d&limit=50000&apiKey=6irkrzg7Nf9_s7qVpAscTAMeesF8eFu0`
 
 // json fields in struct must be exported
-type NewResult struct {
+type Result struct {
 	X int64   `json:"x"` // x
 	P float64 `json:"p"` //  p*s
 	I string  `json:"i"`
@@ -164,53 +157,21 @@ type NewResult struct {
 	S int64 `json:"s"` // s
 	Z int64 `json:"z"`
 }
-type OldResult struct {
-	// II int64   `json:"I,omitempy"`
-	X int64   `json:"x"` // x
-	P float64 `json:"p"` //  p*s
-	//I string  `json:"i"`
-	// E  int64   `json:"e"`
-	// R  int64   `json:"r"`
-	T int64 `json:"t"` //
-	// Y  int64   `json:"y"`
-	// F  int64   `json:"f"`
-	// Q  int64   `json:"q"`
-	C []int `json:"c"` // c
-	S int64 `json:"s"` // s
-	Z int64 `json:"z"`
-	/*
-		x integer,
-		i bigint,
-		z integer,
-		p real,
-		s bigint,
-		c integer[],
-		t bigint
-	*/
-}
 type TradesData struct {
 	Ticker       string      `json:"ticker"`
 	ResultsCount int64       `json:"results_count"`
 	DBLatency    int         `json:"db_latency"`
 	Success      bool        `json:"success"`
-	Results      []OldResult `json:"results"`
-	//Map          map[string]interface{} `json:"map"`
-}
-type NewTradesData struct {
-	Ticker       string      `json:"ticker"`
-	ResultsCount int64       `json:"results_count"`
-	DBLatency    int         `json:"db_latency"`
-	Success      bool        `json:"success"`
-	Results      []NewResult `json:"results"`
+	Results      []Result `json:"results"`
 	//Map          map[string]interface{} `json:"map"`
 }
 
 func (db DB) getTrades(ticker string, start time.Time, transDB *TransDB) {
 	log.Println("============", ticker)
-	var newRes []NewResult
+	var newRes []Result
 
 	url := fmt.Sprintf(URL_TRADES, ticker, start.Format("2006-01-02"))
-	newTd := NewTradesData{}
+	newTd := TradesData{}
 
 	//startTime := time.Now()
 	err := getJson(url, &newTd)
@@ -258,7 +219,7 @@ func (db DB) getTrades(ticker string, start time.Time, transDB *TransDB) {
 		log.Println("Can not insert data table transaction")
 	}
 
-	var largestOrder NewResult
+	var largestOrder Result
 	var sum int64
 	var sumPrice float64
 	var resFloat []float64
@@ -434,15 +395,15 @@ func (db *DB) persistTradeFeatures(in []TradeFeatures) {
 	}
 }
 
-func getMoreTrades(ticker string, start time.Time, offset int64) ([]NewResult, error) {
+func getMoreTrades(ticker string, start time.Time, offset int64) ([]Result, error) {
 	url := fmt.Sprintf(URL_TRADES_ADDITIONAL, ticker, start.Format("2006-01-02"), offset)
-	d := NewTradesData{}
+	d := TradesData{}
 	err := getJson(url, &d)
 	if err != nil {
 		myClient = &http.Client{Timeout: 60 * time.Second}
 		err = getJson(url, &d)
 		if err != nil {
-			return []NewResult{}, errors.Wrap(err, "cannot read body")
+			return []Result{}, errors.Wrap(err, "cannot read body")
 		}
 	}
 	return d.Results, nil
