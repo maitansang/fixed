@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -17,6 +18,13 @@ import (
 
 type DB struct {
 	*sqlx.DB
+}
+type tickerData struct {
+	Ticker    string  `db:"ticker"`
+	Date      string  `db:"date"`
+	High      float64 `db:"h"`
+	Vol       int64   `db:"v"`
+	Oneminvol int64   `db:"oneminvol"`
 }
 
 func InitDB() (*DB, error) {
@@ -179,13 +187,24 @@ func (db DB) getShortIneterest(date string) error {
 	fmt.Println(" len=", len(lines))
 	for _, line := range lines[1:] {
 		fields := strings.Split(line, "|")
-		//fmt.Println(fields)
+		log.Println("*** fields : ", fields)
+		var tmp tickerData
+		dateTime, err := time.Parse("20060102", date)
+		err = db.Get(&tmp, "SELECT to_char(date, 'YYYY-MM-DD') as date,h,v,oneminvol,ticker FROM dailybars WHERE ticker=$1 AND date=$2 limit 1", fields[1], dateTime.Format("2006-01-02"))
+		if err != nil {
+			log.Println(err, "ERROR loadAllTickersData SELECT")
+		}
+		if err != nil {
+			log.Println(err, "ERROR loadAlltickerData StructScan")
+		}
 		if len(fields) < 4 {
 			continue
 		}
-		//fmt.Println(fields[1], fields[2])
-		_, err := db.Exec("INSERT INTO short_interest (date,ticker,short,shortexempt) VALUES($1,$2,$3,$4)",
-			date, fields[1], fields[2], fields[3])
+		short, _ := strconv.Atoi(fields[2])
+		shortRatio := (float64(short) / float64(tmp.Vol)) * 100
+		s := fmt.Sprintf("%.2f", shortRatio)
+		_, err = db.Exec("INSERT INTO short_interest (date,ticker,short,shortexempt,short_ratio) VALUES($1,$2,$3,$4,$5)",
+			date, fields[1], fields[2], fields[3], s)
 		if err != nil {
 			log.Println("ERROR INSERTING", err)
 		}
