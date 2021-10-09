@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gammazero/workerpool"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"github.com/pkg/errors"
@@ -185,30 +186,38 @@ func (db DB) getShortIneterest(date string) error {
 	newbody = strings.ReplaceAll(newbody, "\r", "")
 	lines := strings.Split(newbody, "\n")
 	fmt.Println(" len=", len(lines))
+	wp := workerpool.New(120)
 	for _, line := range lines[1:] {
+		line := line
 		fields := strings.Split(line, "|")
 		log.Println("*** fields : ", fields)
-		var tmp tickerData
-		dateTime, err := time.Parse("20060102", date)
-		err = db.Get(&tmp, "SELECT to_char(date, 'YYYY-MM-DD') as date,h,v,oneminvol,ticker FROM dailybars WHERE ticker=$1 AND date=$2 limit 1", fields[1], dateTime.Format("2006-01-02"))
-		if err != nil {
-			log.Println(err, "ERROR loadAllTickersData SELECT")
-		}
-		if err != nil {
-			log.Println(err, "ERROR loadAlltickerData StructScan")
-		}
 		if len(fields) < 4 {
 			continue
 		}
-		short, _ := strconv.Atoi(fields[2])
-		shortRatio := (float64(short) / float64(tmp.Vol)) * 100
-		s := fmt.Sprintf("%.2f", shortRatio)
-		_, err = db.Exec("INSERT INTO short_interest (date,ticker,short,shortexempt,short_ratio) VALUES($1,$2,$3,$4,$5)",
-			date, fields[1], fields[2], fields[3], s)
-		if err != nil {
-			log.Println("ERROR INSERTING", err)
-		}
+		wp.Submit(func() {
+			var tmp tickerData
+			dateTime, err := time.Parse("20060102", date)
+			if err != nil {
+				log.Println(err)
+			}
+			err = db.Get(&tmp, "SELECT to_char(date, 'YYYY-MM-DD') as date,h,v,oneminvol,ticker FROM dailybars WHERE ticker=$1 AND date=$2 limit 1", fields[1], dateTime.Format("2006-01-02"))
+			if err != nil {
+				log.Println(err, "ERROR loadAllTickersData SELECT")
+			}
+			if err != nil {
+				log.Println(err, "ERROR loadAlltickerData StructScan")
+			}
+			short, _ := strconv.Atoi(fields[2])
+			shortRatio := (float64(short) / float64(tmp.Vol)) * 100
+			s := fmt.Sprintf("%.2f", shortRatio)
+			_, err = db.Exec("INSERT INTO short_interest (date,ticker,short,shortexempt,short_ratio) VALUES($1,$2,$3,$4,$5)",
+				date, fields[1], fields[2], fields[3], s)
+			if err != nil {
+				log.Println("ERROR INSERTING", err)
+			}
+		})
 	}
+	wp.StopWait()
 	return nil
 }
 
