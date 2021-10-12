@@ -36,55 +36,6 @@ func InitDB() (*DB, error) {
 	db.SetMaxOpenConns(150)
 	db.SetMaxIdleConns(20)
 	db.SetConnMaxLifetime(60 * time.Minute)
-	/*
-			qry := `CREATE TABLE IF NOT EXISTS short_interest (
-			id BIGSERIAL PRIMARY KEY,
-			date date,
-			ticker text,
-			short bigint,
-			shortexempt bigint,
-
-			UNIQUE(date,sym)
-			)
-
-		qry := `CREATE TABLE IF NOT EXISTS tradesraw_top01 (
-			id BIGSERIAL PRIMARY KEY,
-			date date,
-			ticker text,
-			x integer,
-			z integer,
-			p real,
-			s bigint,
-			c integer[],
-			t bigint,
-			time time,
-			UNIQUE(sym,t)
-		)`
-
-		_, err = db.Exec(qry)
-		if err != nil {
-			log.Fatalln("cannot create table tradesraw_top01", err)
-		}
-	*/
-	// for i := 0; i < 12; i++ {
-	// 	qry := fmt.Sprintf(`CREATE TABLE IF NOT EXISTS tradesraw_temp%d (
-	// 		id BIGSERIAL PRIMARY KEY,
-	// 		ev text,
-	// 		ticker text,
-	// 		x integer,
-	// 		i bigint,
-	// 		z integer,
-	// 		p real,
-	// 		s bigint,
-	// 		c integer[],
-	// 		t bigint
-	// 	)`, i)
-	// 	_, err = db.Exec(qry)
-	// 	if err != nil {
-	// 		log.Fatalln("cannot create able", i, err)
-	// 	}
-	// }
-
 	return &DB{
 		db,
 	}, nil
@@ -104,25 +55,16 @@ func MainFunc() {
 	}
 	_ = db
 	defer db.Close()
-	// shares, err := db.getFloat("AAPL")
-	// if err != nil {
-	// 	log.Fatalln("EERRROR:", err)
-	// }
-	// log.Println("got", "AAPL", shares)
+
 	start, err := time.Parse("2006-01-02", os.Args[2])
 	if err != nil {
 		log.Fatalln("Can't parse time", err, os.Args[2], "Time must be in the format 2006-01-02")
 	}
 
-	// end := start.AddDate(0, 0, -4)
-	// end, _ := time.Parse("2006-01-02", "2019-01-01")
-	// end, _ := time.Parse("2006-01-02", "2018-08-26")
 	end, err := time.Parse("2006-01-02", os.Args[1])
 	if err != nil {
 		log.Fatalln("Can't parse time", err, os.Args[1], "Time must be in the format 2006-01-02")
 	}
-
-	//log.Fatalln(db.getShortIneterest(`20210129`))
 
 	for t := start; t.After(end); t = t.AddDate(0, 0, -1) {
 		if t.Weekday() == 0 || t.Weekday() == 6 {

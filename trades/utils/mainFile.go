@@ -118,7 +118,10 @@ func MainFunc() {
 		timeString := t.Format("2006-01-02")
 		timeString = strings.Replace(timeString, "-", "_", 2)
 
-		createTransactionTable(transDB, timeString)
+		err := createTransactionTable(transDB, timeString)
+		if err != nil {
+			log.Fatalln("Can't create table", err)
+		}
 	}
 
 	wp := workerpool.New(500)
