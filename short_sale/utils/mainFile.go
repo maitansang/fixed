@@ -7,28 +7,47 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"time"
 
-	// "net/http"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/gammazero/workerpool"
 	"github.com/google/uuid"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	"github.com/jmoiron/sqlx"
+	"github.com/pkg/errors"
 )
 
-type Short_Sale_Transactions1 struct {
+type Short_Sale_Transactions struct {
 	ID           string `gorm:"primaryKey;autoIncrement:false"`
 	MarketCenter string `json:"marketcenter" `
 	Symbol       string `json:"symbol" `
-	Date         string `json:"dt" `
 	Time         string `json:"tm" `
 	ShortType    string `json:"shorttype" `
 	Size         string `json:"size" `
 	Price        string `json:"price" `
 	FileName     string `json: "filename"`
 	// LinkIndicator string `json:"" `
+}
+
+type DB struct {
+	*sqlx.DB
+}
+
+func InitDB() (*DB, error) {
+	db, err := sqlx.Open("postgres", "host=52.116.150.66 port=5433 user=dev_user dbname=transaction_db password=Dev$54321")
+	if err != nil {
+		return nil, errors.Wrap(err, "connect to postgres:")
+	}
+	db.SetMaxOpenConns(500)
+	db.SetMaxIdleConns(20000)
+	db.SetConnMaxLifetime(60 * time.Minute)
+
+	d := &DB{
+		db,
+	}
+	return d, nil
 }
 
 func Unzip(src, dest string) error {
@@ -147,30 +166,18 @@ func MainFunc() {
 		log.Println("err when extract ", err)
 	}
 
-	// handle db
-	dsn := "host=52.116.150.66 user=dev_user password=Dev$54321 dbname=transaction_db port=5433 sslmode=disable"
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err := InitDB()
 	if err != nil {
-		log.Println("can not open db")
+		log.Fatalln("Can't open db", err)
+	} else {
+		log.Println("db connected ...")
 	}
-
-	sqlDB, err := db.DB()
-	if err != nil {
-		log.Println("Error when init sql db")
-	}
-
-	defer sqlDB.Close()
-
-	// data := Short_Sale_Transactions1{}
-	// db.Take(&data)
-
-	db.AutoMigrate(&Short_Sale_Transactions1{})
-	db.Session(&gorm.Session{AllowGlobalUpdate: true}).Where("filename = ?", specUrl).Delete(&Short_Sale_Transactions1{})
+	defer db.Close()
 
 	absPath, _ := filepath.Abs("../short_sale/extract/" + specUrl + ".txt")
 	fmt.Println("==============begin read line==============")
 
-	_, err = ReadFileLineByLine(absPath, specUrl, db)
+	err = ReadFileLineByLine(absPath, specUrl, db)
 	if err != nil {
 		log.Println("can not read file")
 	}
@@ -183,68 +190,112 @@ func MainFunc() {
 	}
 }
 
-func ParseData(text string, specUrl string, db *gorm.DB) {
-	// var arrTrans []Short_Sale_Transactions1
-	// for _, t := range text[1 : len(text)-1] {
+func ParseData(text string, arr map[string][]Short_Sale_Transactions, specUrl string) map[string][]Short_Sale_Transactions {
+
 	fields := strings.Split(text, "|")
-	trans := Short_Sale_Transactions1{
+	dateTime, err := time.Parse("20060102", fields[2])
+	if err != nil {
+		log.Println(err)
+	}
+
+	dateString := dateTime.Format("2006-01-02")
+
+	trans := Short_Sale_Transactions{
 		ID:           uuid.NewString(),
 		MarketCenter: fields[0],
 		Symbol:       fields[1],
-		Date:         fields[2],
 		Time:         fields[3],
 		ShortType:    fields[4],
 		Size:         fields[5],
 		Price:        fields[6],
 		FileName:     specUrl,
 	}
-	// arrTrans = append(arrTrans, trans)
-	db.Create(&trans)
 
-	// }
-	// return arrTrans
+	arr[dateString] = append(arr[dateString], trans)
+	return arr
 }
-func ReadFileLineByLine(nameFile string, specUrl string, db *gorm.DB) ([]string, error) {
-	// os.Open() opens specific file in
-	// read-only mode and this return
-	// a pointer of type os.
+
+func ReadFileLineByLine(nameFile string, specUrl string, db *DB) error {
+	var mapShortSale = make(map[string][]Short_Sale_Transactions)
+
 	file, err := os.Open(nameFile)
 
 	if err != nil {
 		log.Fatalf("failed to open", err)
-
 	}
 
-	// The bufio.NewScanner() function is called in which the
-	// object os.File passed as its parameter and this returns a
-	// object bufio.Scanner which is further used on the
-	// bufio.Scanner.Split() method.
 	scanner := bufio.NewScanner(file)
 
-	// The bufio.ScanLines is used as an
-	// input to the method bufio.Scanner.Split()
-	// and then the scanning forwards to each
-	// new line using the bufio.Scanner.Scan()
-	// method.
 	scanner.Split(bufio.ScanLines)
-	var text []string
 	fmt.Println("==============begin read line==============")
 
 	for scanner.Scan() {
-		fmt.Println(scanner.Text())
-
-		ParseData(scanner.Text(), specUrl, db)
-		text = append(text, scanner.Text())
+		mapShortSale = ParseData(scanner.Text(), mapShortSale, specUrl)
 	}
 
-	// The method os.File.Close() is called
-	// on the os.File object to close the file
-	file.Close()
+	for date, _ := range mapShortSale {
+		err := createShortSaleTable(db, date)
+		if err != nil {
+			return err
+		}
+	}
 
-	// and then a loop iterates through
-	// and prints each of the slice values.
-	// for _, each_ln := range text {
-	// 	fmt.Println(each_ln)
-	// }
-	return text, err
+	inserter := workerpool.New(500)
+	for date, arr := range mapShortSale {
+		date := date
+		arr := arr
+		inserter.Submit(func() {
+			insertData(db, arr, date)
+		})
+	}
+	inserter.StopWait()
+
+	file.Close()
+	return err
+}
+
+func createShortSaleTable(db *DB, date string) error {
+	queryStr := fmt.Sprintf("%s%s%s", "CREATE TABLE IF NOT EXISTS short_sale_", date, `(
+		date date,
+		marketcenter text,
+		symbol text,
+		tm text,
+		shorttype text,
+		size integer,
+		price real,
+		filename text,
+		)`)
+	_, err := db.Exec(queryStr)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func insertData(db *DB, arr []Short_Sale_Transactions, date string) error {
+	dateTable := strings.Replace(date, "-", "_", 2)
+	qry := fmt.Sprintf(`INSERT INTO transactions_%s (date,marketcenter,symbol,tm,shorttype,size,price,filename)
+					VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`, dateTable)
+	for _, v := range arr {
+		_, err := db.Exec(
+			qry,
+			date,
+			v.MarketCenter,
+			v.Symbol,
+			v.Time,
+			v.ShortType,
+			v.Size,
+			v.Price,
+			v.FileName,
+			time.Now().Format("15:04:05"),
+			1,
+		)
+		if err != nil {
+			log.Println("can not insert data table: ", err)
+			errors.Wrap(err, "Cannot add query")
+		}
+	}
+
+	return nil
 }
