@@ -31,12 +31,7 @@ type Short_Sale_Transactions1 struct {
 	// LinkIndicator string `json:"" `
 }
 
-// func (user *Short_Sale_Transactions1) BeforeCreate(scope *gorm.Scope) error {
-//     scope.SetColumn("ID", uuid.NewV4())
-//     return nil
-// }
 func Unzip(src, dest string) error {
-
 	r, err := zip.OpenReader(src)
 	if err != nil {
 		return err
@@ -99,6 +94,7 @@ func Unzip(src, dest string) error {
 
 	return nil
 }
+
 func ClearFile(specUrl string) error {
 	absPath1, _ := filepath.Abs("../short_sale/extract/" + specUrl + ".txt")
 	absPath2, _ := filepath.Abs("../short_sale/" + specUrl + ".zip")
@@ -113,15 +109,13 @@ func ClearFile(specUrl string) error {
 	}
 	return e
 }
-func MainFunc() {
 
-	fmt.Println("Ok")
+func MainFunc() {
 	if len(os.Args) == 1 {
 		log.Println("please enter specUrl")
 		return
 	}
 	specUrl := os.Args[1]
-	log.Println("----", specUrl)
 
 	err := ClearFile(specUrl)
 	if err != nil {
@@ -134,7 +128,6 @@ func MainFunc() {
 	}
 
 	defer resp.Body.Close()
-	fmt.Println("status", resp.Status)
 	if resp.StatusCode != 200 {
 		return
 	}

@@ -17,13 +17,8 @@ const URL_TICKER_DETAILS = `https://api.polygon.io/v1/meta/symbols/{}/company?ap
 
 //const URL_TICKERS = `https://api.polygon.io/v2/reference/tickers?sort=ticker&perpage=50&page=%d&apiKey=wSriypADR8wfUaoyqqaZj_7pMDdRMp1p`
 
-// func (db DB) updateTickers() error {
-
-// }
 func arrayToString(a []int, delim string) string {
 	return strings.Trim(strings.Replace(fmt.Sprint(a), " ", delim, -1), "[]")
-	//return strings.Trim(strings.Join(strings.Split(fmt.Sprint(a), " "), delim), "[]")
-	//return strings.Trim(strings.Join(strings.Fields(fmt.Sprint(a)), delim), "[]")
 }
 
 func (db TransDB) InsertDataTableTransactions(ticker string, r *[]Result) error {
@@ -59,7 +54,7 @@ func (db TransDB) InsertDataTableTransactions(ticker string, r *[]Result) error 
 			data.X,
 			data.R,
 			data.Z,
-			time.Now(),
+			time.Now().Format("15:04:05"),
 			1,
 		)
 		if err != nil {

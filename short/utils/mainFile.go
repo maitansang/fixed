@@ -171,17 +171,7 @@ func (db DB) getShortIneterest(date string) error {
 	if err != nil {
 		return errors.Wrap(err, "GET SHORT URL READ BODY")
 	}
-	//fmt.Println("BODY", string(body))
-	// var lines []string
-	// scanner := bufio.NewScanner(resp.Body)
-	// scanner.Split(ScanLinesWithCR)
-	// for scanner.Scan() {
-	// 	lines = append(lines, scanner.Text())
-	// }
-	// if scanner.Err() != nil {
-	// 	return errors.Wrap(err, "Can't scan body")
-	// }
-	//lines := strings.Split(strings.Replace(string(body), "\r\n", "\n", -1), "\n")
+
 	newbody := string(body)
 	newbody = strings.ReplaceAll(newbody, "\r", "")
 	lines := strings.Split(newbody, "\n")

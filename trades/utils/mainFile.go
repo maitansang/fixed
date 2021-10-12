@@ -158,10 +158,10 @@ type Result struct {
 	Z int64 `json:"z"`
 }
 type TradesData struct {
-	Ticker       string      `json:"ticker"`
-	ResultsCount int64       `json:"results_count"`
-	DBLatency    int         `json:"db_latency"`
-	Success      bool        `json:"success"`
+	Ticker       string   `json:"ticker"`
+	ResultsCount int64    `json:"results_count"`
+	DBLatency    int      `json:"db_latency"`
+	Success      bool     `json:"success"`
 	Results      []Result `json:"results"`
 	//Map          map[string]interface{} `json:"map"`
 }
@@ -173,7 +173,6 @@ func (db DB) getTrades(ticker string, start time.Time, transDB *TransDB) {
 	url := fmt.Sprintf(URL_TRADES, ticker, start.Format("2006-01-02"))
 	newTd := TradesData{}
 
-	//startTime := time.Now()
 	err := getJson(url, &newTd)
 	if err != nil {
 		log.Fatalln("cannot get json 111111", err)
@@ -183,13 +182,11 @@ func (db DB) getTrades(ticker string, start time.Time, transDB *TransDB) {
 			log.Fatalln("cannot get json", err)
 		}
 	}
-	// log.Println("got", ticker, start, url)
 	newRes = append(newRes, newTd.Results...)
 
-	fmt.Println("----------2", len(newRes))
+	fmt.Println("ok")
 
 	l := len(newTd.Results)
-	//fmt.Println("got", len(d.Results))
 	if len(newTd.Results) == 0 {
 		//fmt.Println(ticker, start.Format("2006-01-02"), "total trades", len(res), "average=", 0, "time this run", time.Since(startTime))
 		return
@@ -202,7 +199,6 @@ func (db DB) getTrades(ticker string, start time.Time, transDB *TransDB) {
 		if err != nil {
 			log.Fatalln("!!!!!!!!!!!! cannot read body", err)
 		}
-		//fmt.Println("got", len(d1))
 		newRes = append(newRes, td1...)
 		if len(td1) == 0 {
 			l = len(td1)
