@@ -31,6 +31,7 @@ func (db TransDB) InsertDataTableTransactions(ticker string, r *[]Result) error 
 	timeString := strings.Replace(timeInsert, "-", "_", 2)
 
 	for _, data := range *r {
+		timeHuman := time.Unix(data.T/1000000000, 0)
 
 		qry := fmt.Sprintf(`INSERT INTO transactions_%s (date,ticker,t,q,i,c,p,s,e,x,r,z,time,transaction_type)
 					VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`, timeString)
@@ -54,7 +55,7 @@ func (db TransDB) InsertDataTableTransactions(ticker string, r *[]Result) error 
 			data.X,
 			data.R,
 			data.Z,
-			time.Now().Format("15:04:05"),
+			timeHuman,
 			1,
 		)
 		if err != nil {

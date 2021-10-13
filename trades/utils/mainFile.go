@@ -178,7 +178,7 @@ func (db DB) getTrades(ticker string, start time.Time, transDB *TransDB) {
 
 	err := getJson(url, &newTd)
 	if err != nil {
-		log.Fatalln("cannot get json 111111", err)
+		log.Fatalln("cannot get json ", err)
 		myClient = &http.Client{Timeout: 60 * time.Second}
 		err = getJson(url, &newTd)
 		if err != nil {
@@ -187,11 +187,8 @@ func (db DB) getTrades(ticker string, start time.Time, transDB *TransDB) {
 	}
 	newRes = append(newRes, newTd.Results...)
 
-	fmt.Println("ok")
-
 	l := len(newTd.Results)
 	if len(newTd.Results) == 0 {
-		//fmt.Println(ticker, start.Format("2006-01-02"), "total trades", len(res), "average=", 0, "time this run", time.Since(startTime))
 		return
 	}
 	offset := newTd.Results[len(newTd.Results)-1].T
