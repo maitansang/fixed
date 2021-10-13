@@ -361,9 +361,10 @@ func (db *DB) persistTradeFeatures(in []TradeFeatures) {
 			"max",
 		  	"uniq",
 		 	"top",
-		 	"freq"
+		 	"freq",
+			"sum"
 		)
-		VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9,$10,$11,$12,$13,$14) ON CONFLICT ON CONSTRAINT trades_features_ticker_date_column_key
+		VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9,$10,$11,$12,$13,$14,$15) ON CONFLICT ON CONSTRAINT trades_features_ticker_date_column_key
 		DO
 			UPDATE
 			SET
@@ -380,9 +381,10 @@ func (db *DB) persistTradeFeatures(in []TradeFeatures) {
 				"max"=$11,
 				"uniq"=$12,
 				"top"=$13,
-				"freq"=$14`,
+				"freq"=$14,
+				"sum"=$15`,
 			tf.Date, tf.Ticker, tf.Column, tf.Count, tf.Mean, tf.StdDev, tf.Min, tf.Q1, tf.Q2, tf.Q3, tf.Max, tf.Unique,
-			tf.Top, tf.Freq)
+			tf.Top, tf.Freq, tf.Sum)
 
 		if err != nil {
 			//	tx.Rollback()

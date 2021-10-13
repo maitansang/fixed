@@ -36,6 +36,7 @@ type TradeFeatures struct {
 	Q2     float64
 	Q3     float64
 	Max    float64
+	Sum    float64
 }
 
 func (db DB) extractTradesFeatures(ticker string, in []Result) (out []TradeFeatures) {
@@ -143,11 +144,13 @@ func arrToStr(in []int) string {
 
 func calculateFeatures(ticker string, date string, in []Result) []TradeFeatures {
 	var count int64
+	var sumX, sumC float64
 	var calcInX, calcInP, calcInS, calcInZ []float64
 	var mins, maxs = newMinMax()
 	var mappedC = make(map[string]int64)
 	var listCalcX = make(map[int64][]float64)
 	var listCalcC = make(map[int][]float64)
+
 	for index := range in {
 		rec := in[index]
 		if count == 0 {
@@ -166,6 +169,7 @@ func calculateFeatures(ticker string, date string, in []Result) []TradeFeatures 
 		mins.updateMins(rec)
 		maxs.updateMaxs(rec)
 	}
+
 	for _, v := range listCalcX {
 		sort.Slice(v, func(i, j int) bool {
 			return v[i] < v[j]
@@ -192,6 +196,18 @@ func calculateFeatures(ticker string, date string, in []Result) []TradeFeatures 
 		return calcInZ[i] < calcInZ[j]
 	})
 
+	//Get all of s value
+	for _, v := range listCalcX {
+		for _, p := range v {
+			sumX += p
+		}
+	}
+	for _, v := range listCalcC {
+		for _, p := range v {
+			sumC += p
+		}
+	}
+
 	tf := make([]TradeFeatures, 0)
 	tf = append(tf, TradeFeatures{
 		Ticker: ticker,
@@ -208,6 +224,7 @@ func calculateFeatures(ticker string, date string, in []Result) []TradeFeatures 
 		Q2:     stat.Quantile(secondQuartile, stat.Empirical, calcInX, nil),
 		Q3:     stat.Quantile(thirdQuartile, stat.Empirical, calcInX, nil),
 		Max:    maxs.Max(columnX),
+		Sum:    sumX,
 	}, TradeFeatures{
 		Ticker: ticker,
 		Column: columnP,
@@ -223,6 +240,7 @@ func calculateFeatures(ticker string, date string, in []Result) []TradeFeatures 
 		Q2:     stat.Quantile(secondQuartile, stat.Empirical, calcInP, nil),
 		Q3:     stat.Quantile(thirdQuartile, stat.Empirical, calcInP, nil),
 		Max:    maxs.Max(columnP),
+		Sum:    math.NaN(),
 	}, TradeFeatures{
 		Ticker: ticker,
 		Column: columnZ,
@@ -238,6 +256,7 @@ func calculateFeatures(ticker string, date string, in []Result) []TradeFeatures 
 		Q2:     stat.Quantile(secondQuartile, stat.Empirical, calcInZ, nil),
 		Q3:     stat.Quantile(thirdQuartile, stat.Empirical, calcInZ, nil),
 		Max:    maxs.Max(columnZ),
+		Sum:    math.NaN(),
 	}, TradeFeatures{
 		Ticker: ticker,
 		Column: columnS,
@@ -253,6 +272,7 @@ func calculateFeatures(ticker string, date string, in []Result) []TradeFeatures 
 		Q2:     stat.Quantile(secondQuartile, stat.Empirical, calcInS, nil),
 		Q3:     stat.Quantile(thirdQuartile, stat.Empirical, calcInS, nil),
 		Max:    maxs.Max(columnS),
+		Sum:    math.NaN(),
 	})
 
 	var topC string
@@ -280,6 +300,7 @@ func calculateFeatures(ticker string, date string, in []Result) []TradeFeatures 
 		Q2:     math.NaN(),
 		Q3:     math.NaN(),
 		Max:    math.NaN(),
+		Sum:    sumC,
 	})
 	for i, v := range listCalcX {
 		if i > 20 {
@@ -290,7 +311,7 @@ func calculateFeatures(ticker string, date string, in []Result) []TradeFeatures 
 			Ticker: ticker,
 			Column: columnx,
 			Date:   date,
-			Count:  count,
+			Count:  int64(len(v)),
 			Unique: math.NaN(),
 			Top:    "NaN",
 			Freq:   math.NaN(),
@@ -301,6 +322,7 @@ func calculateFeatures(ticker string, date string, in []Result) []TradeFeatures 
 			Q2:     stat.Quantile(secondQuartile, stat.Empirical, v, nil),
 			Q3:     stat.Quantile(thirdQuartile, stat.Empirical, v, nil),
 			Max:    maxs.Max(columnx),
+			Sum:    math.NaN(),
 		})
 	}
 	for i, v := range listCalcC {
@@ -312,7 +334,7 @@ func calculateFeatures(ticker string, date string, in []Result) []TradeFeatures 
 			Ticker: ticker,
 			Column: columnc,
 			Date:   date,
-			Count:  count,
+			Count:  int64(len(v)),
 			Unique: math.NaN(),
 			Top:    "NaN",
 			Freq:   math.NaN(),
@@ -323,6 +345,7 @@ func calculateFeatures(ticker string, date string, in []Result) []TradeFeatures 
 			Q2:     stat.Quantile(secondQuartile, stat.Empirical, v, nil),
 			Q3:     stat.Quantile(thirdQuartile, stat.Empirical, v, nil),
 			Max:    maxs.Max(columnc),
+			Sum:    math.NaN(),
 		})
 	}
 	return tf
