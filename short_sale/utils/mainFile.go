@@ -134,6 +134,7 @@ func ReadFileLineByLine(nameFile string, specUrl string, db *DB) error {
 
 func ParseData(text string, arr map[string][]Short_Sale_Transactions, specUrl string) map[string][]Short_Sale_Transactions {
 
+	fmt.Println(text)
 	fields := strings.Split(text, "|")
 	dateTime, err := time.Parse("20060102", fields[2])
 	if err != nil {
