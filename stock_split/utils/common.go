@@ -299,6 +299,12 @@ func (db DB) updateChange(date string, tickers []string) error {
 		if err != nil {
 			return errors.Wrap(err, "ERROR updatechange CANNOT UPDATE "+lines[0].date.Format("2006-01-02")+" "+ticker)
 		}
+
+		c_c_change := conv2DecDigits(lines[0].close-lines[1].close) / lines[1].close * 100
+		_, err = db.Exec(`UPDATE dailybars SET c_c_change=$1 WHERE date=$2 AND ticker=$3`, c_c_change, lines[0].date.Format("2006-01-02"), ticker)
+		if err != nil {
+			return errors.Wrap(err, "ERROR updatechange CANNOT UPDATE "+lines[0].date.Format("2006-01-02")+" "+ticker)
+		}
 	}
 	return nil
 }
