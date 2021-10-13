@@ -133,29 +133,28 @@ func ReadFileLineByLine(nameFile string, specUrl string, db *DB) error {
 }
 
 func ParseData(text string, arr map[string][]Short_Sale_Transactions, specUrl string) map[string][]Short_Sale_Transactions {
-
 	fields := strings.Split(text, "|")
-	dateTime, err := time.Parse("20060102", fields[2])
-	if err != nil {
-		fmt.Println(text)
-		fmt.Println(fields[2])
-		log.Println(err)
+	if len(fields) > 7 {
+		dateTime, err := time.Parse("20060102", fields[2])
+		if err != nil {
+			log.Println(err)
+		}
+
+		dateString := dateTime.Format("2006-01-02")
+
+		trans := Short_Sale_Transactions{
+			ID:           uuid.NewString(),
+			MarketCenter: fields[0],
+			Symbol:       fields[1],
+			Time:         fields[3],
+			ShortType:    fields[4],
+			Size:         fields[5],
+			Price:        fields[6],
+			FileName:     specUrl,
+		}
+
+		arr[dateString] = append(arr[dateString], trans)
 	}
-
-	dateString := dateTime.Format("2006-01-02")
-
-	trans := Short_Sale_Transactions{
-		ID:           uuid.NewString(),
-		MarketCenter: fields[0],
-		Symbol:       fields[1],
-		Time:         fields[3],
-		ShortType:    fields[4],
-		Size:         fields[5],
-		Price:        fields[6],
-		FileName:     specUrl,
-	}
-
-	arr[dateString] = append(arr[dateString], trans)
 	return arr
 }
 
