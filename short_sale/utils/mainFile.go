@@ -118,7 +118,7 @@ func ReadFileLineByLine(nameFile string, specUrl string, db *DB) error {
 		}
 	}
 
-	inserter := workerpool.New(500)
+	inserter := workerpool.New(30)
 	for date, arr := range mapShortSale {
 		date := date
 		arr := arr
