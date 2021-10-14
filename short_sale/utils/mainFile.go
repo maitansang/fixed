@@ -32,60 +32,73 @@ type Short_Sale_Transactions struct {
 
 func MainFunc() {
 	if len(os.Args) == 1 {
-		log.Println("please enter specUrl")
-		return
-	}
-	specUrl := os.Args[1]
-
-	err := ClearFile(specUrl)
-	if err != nil {
-		log.Println(err)
-	}
-
-	resp, err := http.Get("https://cdn.finra.org/equity/regsho/monthly/" + specUrl + ".zip")
-	if err != nil {
-		fmt.Printf("err: %s", err)
-	}
-
-	defer resp.Body.Close()
-	if resp.StatusCode != 200 {
+		log.Println("please enter valid year and month (format: YYYY-MM)")
 		return
 	}
 
-	// Create the file
-	out, err := os.Create(specUrl + ".zip")
-	if err != nil {
-		fmt.Printf("err: %s", err)
+	date := os.Args[1]
+	date = strings.Replace(date, "-", "", 1)
+	specPrefix := []string{"FNSQsh%s_1", "FNSQsh%s_2", "FNSQsh%s_3", "FNSQsh%s_4", "FNQCsh%s", "FNYXsh%s"}
+
+	wp := workerpool.New(6)
+	for _, prefix := range specPrefix {
+		prefix := prefix
+
+		wp.Submit(func() {
+			specUrl := fmt.Sprintf(prefix, date)
+
+			err := ClearFile(specUrl)
+			if err != nil {
+				log.Println(err)
+			}
+
+			resp, err := http.Get("https://cdn.finra.org/equity/regsho/monthly/" + date + ".zip")
+			if err != nil {
+				fmt.Printf("err: %s", err)
+			}
+
+			defer resp.Body.Close()
+			if resp.StatusCode != 200 {
+				return
+			}
+
+			// Create the file
+			out, err := os.Create(specUrl + ".zip")
+			if err != nil {
+				fmt.Printf("err: %s", err)
+			}
+			defer out.Close()
+
+			// Write the body to file
+			_, err = io.Copy(out, resp.Body)
+
+			err = Unzip(specUrl+".zip", "extract/")
+			if err != nil {
+				log.Println("err when extract ", err)
+			}
+
+			db, err := InitDB()
+			if err != nil {
+				log.Fatalln("Can't open db", err)
+			} else {
+				log.Println("db connected ...")
+			}
+			defer db.Close()
+
+			absPath, _ := filepath.Abs("../short_sale/extract/" + specUrl + ".txt")
+
+			err = ReadFileLineByLine(absPath, specUrl, db)
+			if err != nil {
+				log.Println("can not read file")
+			}
+
+			err = ClearFile(specUrl)
+			if err != nil {
+				log.Println(err)
+			}
+		})
 	}
-	defer out.Close()
-
-	// Write the body to file
-	_, err = io.Copy(out, resp.Body)
-
-	err = Unzip(specUrl+".zip", "extract/")
-	if err != nil {
-		log.Println("err when extract ", err)
-	}
-
-	db, err := InitDB()
-	if err != nil {
-		log.Fatalln("Can't open db", err)
-	} else {
-		log.Println("db connected ...")
-	}
-	defer db.Close()
-
-	absPath, _ := filepath.Abs("../short_sale/extract/" + specUrl + ".txt")
-
-	err = ReadFileLineByLine(absPath, specUrl, db)
-	if err != nil {
-		log.Println("can not read file")
-	}
-
-	err = ClearFile(specUrl)
-	if err != nil {
-		log.Println(err)
-	}
+	wp.StopWait()
 }
 
 func ReadFileLineByLine(nameFile string, specUrl string, db *DB) error {
