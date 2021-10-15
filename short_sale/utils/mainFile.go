@@ -48,51 +48,57 @@ func MainFunc() {
 	date = strings.Replace(date, "-", "", 1)
 	specPrefix := []string{"FNSQsh%s_1", "FNSQsh%s_2", "FNSQsh%s_3", "FNSQsh%s_4", "FNQCsh%s", "FNYXsh%s"}
 
+	wp := workerpool.New(6)
 	for _, prefix := range specPrefix {
-		specUrl := fmt.Sprintf(prefix, date)
+		prefix := prefix
 
-		err := ClearFile(specUrl)
-		if err != nil {
-			log.Println(err)
-		}
+		wp.Submit(func() {
+			specUrl := fmt.Sprintf(prefix, date)
 
-		resp, err := http.Get("https://cdn.finra.org/equity/regsho/monthly/" + date + ".zip")
-		if err != nil {
-			fmt.Printf("err: %s", err)
-		}
+			err := ClearFile(specUrl)
+			if err != nil {
+				log.Println(err)
+			}
 
-		defer resp.Body.Close()
-		if resp.StatusCode != 200 {
-			return
-		}
+			resp, err := http.Get("https://cdn.finra.org/equity/regsho/monthly/" + specUrl + ".zip")
+			if err != nil {
+				fmt.Printf("err: %s", err)
+			}
 
-		// Create the file
-		out, err := os.Create(specUrl + ".zip")
-		if err != nil {
-			fmt.Printf("err: %s", err)
-		}
-		defer out.Close()
+			defer resp.Body.Close()
+			if resp.StatusCode != 200 {
+				return
+			}
 
-		// Write the body to file
-		_, err = io.Copy(out, resp.Body)
+			// Create the file
+			out, err := os.Create(specUrl + ".zip")
+			if err != nil {
+				fmt.Printf("err: %s", err)
+			}
+			defer out.Close()
 
-		err = Unzip(specUrl+".zip", "extract/")
-		if err != nil {
-			log.Println("err when extract ", err)
-		}
+			// Write the body to file
+			_, err = io.Copy(out, resp.Body)
 
-		absPath, _ := filepath.Abs("../short_sale/extract/" + specUrl + ".txt")
+			err = Unzip(specUrl+".zip", "extract/")
+			if err != nil {
+				log.Println("err when extract ", err)
+			}
 
-		err = ReadFileLineByLine(absPath, specUrl, db)
-		if err != nil {
-			log.Println("can not read file")
-		}
+			absPath, _ := filepath.Abs("../short_sale/extract/" + specUrl + ".txt")
 
-		err = ClearFile(specUrl)
-		if err != nil {
-			log.Println(err)
-		}
+			err = ReadFileLineByLine(absPath, specUrl, db)
+			if err != nil {
+				log.Println("can not read file")
+			}
+
+			err = ClearFile(specUrl)
+			if err != nil {
+				log.Println(err)
+			}
+		})
 	}
+	wp.StopWait()
 }
 
 func ReadFileLineByLine(nameFile string, specUrl string, db *DB) error {
