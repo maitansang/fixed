@@ -48,7 +48,7 @@ func MainFunc() {
 	date = strings.Replace(date, "-", "", 1)
 	specPrefix := []string{"FNSQsh%s_1", "FNQCsh%s", "FNYXsh%s"}
 
-	wp := workerpool.New(6)
+	wp := workerpool.New(3)
 	for _, prefix := range specPrefix {
 		prefix := prefix
 
