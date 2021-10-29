@@ -42,3 +42,7 @@ cd ..
 cd stock_split
 go run main.go $arg2
 cd ..
+
+cd average_volume
+go run main.go
+cd ..
