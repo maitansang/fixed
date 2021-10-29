@@ -23,7 +23,7 @@ func InitDB() (*DB, error) {
 	db.SetMaxOpenConns(150)
 	db.SetMaxIdleConns(20)
 	db.SetConnMaxLifetime(60 * time.Minute)
-
+	
 	return &DB{db}, nil
 }
 func (db DB) CheckTickerFromDB(tickerInput string) (bool, error) {
