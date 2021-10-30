@@ -112,7 +112,7 @@ func (db *DB) AverageVolume(tickers []string, start, end string) error {
 	wp := workerpool.New(10)
 
 	for k, ticker := range tickers {
-
+		ticker := ticker
 		wp.Submit(func() {
 			var volumes []string
 			var volumesSum float64
