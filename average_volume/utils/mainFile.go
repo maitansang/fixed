@@ -52,7 +52,6 @@ func (db DB) getAllTicker() ([]string, error) {
 		log.Println("Error when get all ticker ", err)
 		return nil, err
 	}
-	fmt.Println("1111111-",len(tickers))
 	return removeDuplicateValues(tickers), nil
 }
 func removeDuplicateValues(intSlice []string) []string {
@@ -85,7 +84,6 @@ func MainFunc() {
 	defer sqlDB.Close()
 
 	allTickers, err := db.getAllTicker()
-	fmt.Println("1111111",len(allTickers))
 	if err != nil {
 		log.Println("Error when get all ticker", err)
 		return
@@ -98,18 +96,18 @@ func MainFunc() {
 	// end := currentTime.AddDate(0, 0, -30).Format("2006-01-02")
 	start, _ := time.Parse("2006-01-02", os.Args[1])
 	end := start.AddDate(0, 0, -30)
-	fmt.Println("===========0", start.Format("2006-01-02"), end.Format("2006-01-02"))
+	fmt.Println("start,end", start.Format("2006-01-02"), end.Format("2006-01-02"))
 	err = db.AverageVolume(allTickers, start.Format("2006-01-02"), end.Format("2006-01-02"))
 	if err != nil {
 		log.Fatal("Error when get v from dailybars", err)
 		return
 	}
-	log.Println("======done")
+	log.Println("done")
 }
 
 func (db *DB) AverageVolume(tickers []string, start, end string) error {
-	// var averageVolumeRecords []*AverageVolume
-	wp := workerpool.New(10)
+	var averageVolumeRecords []*AverageVolume
+	wp := workerpool.New(100)
 
 	for k, ticker := range tickers {
 		ticker := ticker
@@ -131,19 +129,23 @@ func (db *DB) AverageVolume(tickers []string, start, end string) error {
 				}
 			}
 			averageVolumes = volumesSum / 30
-			fmt.Println("--------", averageVolumes)
+			fmt.Println("averageVolumes", averageVolumes)
 			averageVolumeRecord := &AverageVolume{
 				// ID:            uuid.NewString(),
 				Ticker:        ticker,
 				AverageVolume: averageVolumes,
 			}
-			if db.Model(&AverageVolume{}).Where("ticker = ?", ticker).Updates(&averageVolumeRecord).RowsAffected == 0 {
-				db.Create(&averageVolumeRecord)
-			}
+			averageVolumeRecords =append(averageVolumeRecords, averageVolumeRecord)
+			// if db.Model(&AverageVolume{}).Where("ticker = ?", ticker).Updates(&averageVolumeRecord).RowsAffected == 0 {
+			// 	db.Create(&averageVolumeRecord)
+			// }
 		})
 		
 	}
 	wp.StopWait()
-
+	//Clear old data
+	db.Exec("DELETE FROM average_volumes")
+	//Insert data array
+	db.Create(&averageVolumeRecords)
 	return nil
 }
