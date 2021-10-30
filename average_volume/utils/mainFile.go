@@ -154,24 +154,35 @@ func (db *DB) AverageVolume(tickers []string, start, end string) error {
 	numField := reflect.TypeOf(AverageVolume{}).NumField()
 	parameters := len(averageVolumeRecords) * numField
 	if parameters > 65535 {
-		loop := parameters/65535 + 1
-		for i := 0; i < loop; i++ {
-			start := len(averageVolumeRecords) * i
-			end := len(averageVolumeRecords) * (i + 1)
-			err := db.Create(averageVolumeRecords[0:20000]).Error
+		loop := (float32(parameters) / float32(65535))
+		intLoop := int(loop)
+
+		if loop > float32(intLoop) {
+			intLoop = intLoop + 1
+		}
+		err := db.Create(averageVolumeRecords[0 : len(averageVolumeRecords)/intLoop]).Error
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		for i := 1; i < intLoop; i += 1 {
+			start := (len(averageVolumeRecords) / intLoop) * i
+			end := (len(averageVolumeRecords) / intLoop) * (i + 1)
+			err := db.Create(averageVolumeRecords[start:end]).Error
 			if err != nil {
 				fmt.Println(err)
 			}
+			log.Println("start of end ", start, end)
+			log.Println("value of i ", i)
+			if i+1 > intLoop {
+				err := db.Create(averageVolumeRecords[start:len(averageVolumeRecords)]).Error
+				log.Println("value of i ", start, len(averageVolumeRecords))
+				if err != nil {
+					fmt.Println(err)
+				}
+				break
+			}
 		}
-	}
-	//Insert data array
-	err := db.Create(averageVolumeRecords[0:20000]).Error
-	if err != nil {
-		fmt.Println(err)
-	}
-	err = db.Create(averageVolumeRecords[20001:]).Error
-	if err != nil {
-		fmt.Println(err)
 	}
 	return nil
 }
