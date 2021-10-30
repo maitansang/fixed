@@ -140,7 +140,12 @@ func (db DB) getShortIneterest(date string) error {
 				log.Println(err, "ERROR loadAlltickerData StructScan")
 			}
 			short, _ := strconv.Atoi(fields[2])
-			shortRatio := (float64(short) / float64(tmp.Vol)) * 100
+			var shortRatio float64
+			if tmp.Vol == 0 {
+				shortRatio = 0
+			} else {
+				shortRatio = (float64(short) / float64(tmp.Vol)) * 100
+			}
 			s := fmt.Sprintf("%.2f", shortRatio)
 			_, err = db.Exec("INSERT INTO short_interest (date,ticker,short,shortexempt,short_ratio) VALUES($1,$2,$3,$4,$5)",
 				date, fields[1], fields[2], fields[3], s)
