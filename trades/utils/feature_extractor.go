@@ -323,11 +323,11 @@ func calculateFeatures(ticker string, date string, in []Result) []TradeFeatures 
 			Freq:   math.NaN(),
 			Mean:   stat.Mean(v, nil),
 			StdDev: stat.StdDev(v, nil),
-			Min:    mins.Min(columnx),
+			Min:    mins.Min(columnX),
 			Q1:     stat.Quantile(firstQuartile, stat.Empirical, v, nil),
 			Q2:     stat.Quantile(secondQuartile, stat.Empirical, v, nil),
 			Q3:     stat.Quantile(thirdQuartile, stat.Empirical, v, nil),
-			Max:    maxs.Max(columnx),
+			Max:    maxs.Max(columnX),
 			Sum:    sumX,
 		})
 	}
