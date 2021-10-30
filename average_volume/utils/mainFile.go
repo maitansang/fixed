@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/gammazero/workerpool"
-	"github.com/google/uuid"
+	// "github.com/google/uuid"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -17,7 +17,7 @@ type DB struct {
 	*gorm.DB
 }
 type AverageVolume struct {
-	ID            string `gorm:"primaryKey"`
+	// ID            string `gorm:"primaryKey"`
 	Ticker        string
 	AverageVolume float64
 }
@@ -52,9 +52,24 @@ func (db DB) getAllTicker() ([]string, error) {
 		log.Println("Error when get all ticker ", err)
 		return nil, err
 	}
-	return tickers, nil
+	fmt.Println("1111111-",len(tickers))
+	return removeDuplicateValues(tickers), nil
 }
-
+func removeDuplicateValues(intSlice []string) []string {
+    keys := make(map[string]bool)
+    list := []string{}
+ 
+    // If the key(values of the slice) is not equal
+    // to the already present value in new slice (list)
+    // then we append it. else we jump on another element.
+    for _, entry := range intSlice {
+        if _, value := keys[entry]; !value {
+            keys[entry] = true
+            list = append(list, entry)
+        }
+    }
+    return list
+}
 func MainFunc() {
 	db, err := InitDB()
 	if err != nil {
@@ -70,6 +85,7 @@ func MainFunc() {
 	defer sqlDB.Close()
 
 	allTickers, err := db.getAllTicker()
+	fmt.Println("1111111",len(allTickers))
 	if err != nil {
 		log.Println("Error when get all ticker", err)
 		return
@@ -81,8 +97,8 @@ func MainFunc() {
 	// start := currentTime.Format("2006-01-02")
 	// end := currentTime.AddDate(0, 0, -30).Format("2006-01-02")
 	start, _ := time.Parse("2006-01-02", os.Args[1])
-	end := start.AddDate(0, 0, 30)
-	fmt.Println("===========0",start,end)
+	end := start.AddDate(0, 0, -30)
+	fmt.Println("===========0", start.Format("2006-01-02"), end.Format("2006-01-02"))
 	err = db.AverageVolume(allTickers, start.Format("2006-01-02"), end.Format("2006-01-02"))
 	if err != nil {
 		log.Fatal("Error when get v from dailybars", err)
@@ -93,13 +109,17 @@ func MainFunc() {
 
 func (db *DB) AverageVolume(tickers []string, start, end string) error {
 	// var averageVolumeRecords []*AverageVolume
-	wp := workerpool.New(20)
+	wp := workerpool.New(10)
 
-	for _, ticker := range tickers {
-		var volumes []string
-		var volumesSum float64
-		var averageVolumes float64
-		wp.Submit(func(){
+	for k, ticker := range tickers {
+
+		wp.Submit(func() {
+			var volumes []string
+			var volumesSum float64
+			var averageVolumes float64
+			if k == len(tickers){
+				return
+			}
 			err := db.DB.Raw("select v from dailybars where ticker = ? and date>? and date<=?", ticker, end, start).Scan(&volumes).Error
 			if err != nil {
 				log.Fatal("Error when get v from dailybars", err)
@@ -111,16 +131,17 @@ func (db *DB) AverageVolume(tickers []string, start, end string) error {
 				}
 			}
 			averageVolumes = volumesSum / 30
-			fmt.Println("--------",averageVolumes)
+			fmt.Println("--------", averageVolumes)
 			averageVolumeRecord := &AverageVolume{
-				ID:            uuid.NewString(),
+				// ID:            uuid.NewString(),
 				Ticker:        ticker,
 				AverageVolume: averageVolumes,
 			}
-			if db.Model(&averageVolumeRecord).Where("ticker = ?", ticker).Updates(&averageVolumeRecord).RowsAffected == 0 {
+			if db.Model(&AverageVolume{}).Where("ticker = ?", ticker).Updates(&averageVolumeRecord).RowsAffected == 0 {
 				db.Create(&averageVolumeRecord)
 			}
 		})
+		
 	}
 	wp.StopWait()
 
