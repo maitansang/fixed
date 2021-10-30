@@ -145,7 +145,15 @@ func (db *DB) AverageVolume(tickers []string, start, end string) error {
 	wp.StopWait()
 	//Clear old data
 	db.Exec("DELETE FROM average_volumes")
+	fmt.Println("len(averageVolumeRecords)",len(averageVolumeRecords))
 	//Insert data array
-	db.Create(&averageVolumeRecords)
+	err := db.Create(averageVolumeRecords[0:len(averageVolumeRecords)/2]).Error
+	if (err != nil){
+		fmt.Println(err)
+	}
+	err = db.Create(averageVolumeRecords[len(averageVolumeRecords)/2:]).Error
+	if (err != nil){
+		fmt.Println(err)
+	}
 	return nil
 }
