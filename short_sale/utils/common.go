@@ -10,27 +10,32 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jmoiron/sqlx"
-	"github.com/pkg/errors"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 type DB struct {
-	*sqlx.DB
+	*gorm.DB
 }
 
 func InitDB() (*DB, error) {
-	db, err := sqlx.Open("postgres", "host=52.116.150.66 port=5433 user=dev_user dbname=transaction_db password=Dev$54321")
+	// handle db
+	dsn := "host=52.116.150.66 user=dev_user password=Dev$54321 dbname=transaction_db port=5433 sslmode=disable"
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		return nil, errors.Wrap(err, "connect to postgres:")
+		log.Println("can not open db")
 	}
-	db.SetMaxOpenConns(500)
-	db.SetMaxIdleConns(20000)
-	db.SetConnMaxLifetime(60 * time.Minute)
-
-	d := &DB{
+	sqlDB, err := db.DB()
+	if err != nil {
+		log.Println("Error when init sql db")
+	}
+	sqlDB.SetMaxOpenConns(150)
+	sqlDB.SetMaxIdleConns(20)
+	sqlDB.SetConnMaxLifetime(60 * time.Minute)
+	DB := &DB{
 		db,
 	}
-	return d, nil
+	return DB, nil
 }
 
 func Unzip(src, dest string) error {

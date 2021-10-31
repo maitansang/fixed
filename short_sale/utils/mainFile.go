@@ -15,11 +15,11 @@ import (
 	"github.com/gammazero/workerpool"
 	"github.com/google/uuid"
 	_ "github.com/lib/pq"
-	"github.com/pkg/errors"
 )
 
-type Short_Sale_Transactions struct {
+type ShortSale struct {
 	ID           string `gorm:"primaryKey;autoIncrement:false"`
+	Date         string `json:"date" `
 	MarketCenter string `json:"marketcenter" `
 	Symbol       string `json:"symbol" `
 	Time         string `json:"tm" `
@@ -42,7 +42,12 @@ func MainFunc() {
 	} else {
 		log.Println("db connected ...")
 	}
-	defer db.Close()
+	sqlDB, err := db.DB.DB()
+	if err != nil {
+		log.Println("Error when init sql db")
+		return
+	}
+	defer sqlDB.Close()
 
 	date := os.Args[1]
 	date = strings.Replace(date, "-", "", 1)
@@ -102,7 +107,7 @@ func MainFunc() {
 }
 
 func ReadFileLineByLine(nameFile string, specUrl string, db *DB) error {
-	var mapShortSale = make(map[string][]Short_Sale_Transactions)
+	var mapShortSale = make(map[string][]ShortSale)
 
 	file, err := os.Open(nameFile)
 
@@ -145,7 +150,7 @@ func ReadFileLineByLine(nameFile string, specUrl string, db *DB) error {
 	return err
 }
 
-func ParseData(text string, arr map[string][]Short_Sale_Transactions, specUrl string) map[string][]Short_Sale_Transactions {
+func ParseData(text string, arr map[string][]ShortSale, specUrl string) map[string][]ShortSale {
 	fields := strings.Split(text, "|")
 	if len(fields) > 7 {
 		dateTime, err := time.Parse("20060102", fields[2])
@@ -155,7 +160,7 @@ func ParseData(text string, arr map[string][]Short_Sale_Transactions, specUrl st
 
 		dateString := dateTime.Format("2006-01-02")
 
-		trans := Short_Sale_Transactions{
+		trans := ShortSale{
 			ID:           uuid.NewString(),
 			MarketCenter: fields[0],
 			Symbol:       fields[1],
@@ -173,45 +178,33 @@ func ParseData(text string, arr map[string][]Short_Sale_Transactions, specUrl st
 
 func createShortSaleTable(db *DB, date string) error {
 	dateTable := strings.Replace(date, "-", "_", 2)
-	queryStr := fmt.Sprintf("%s%s%s", "CREATE TABLE IF NOT EXISTS short_sale_", dateTable, `(
-		date date,
-		marketcenter text,
-		symbol text,
-		tm text,
-		shorttype text,
-		size integer,
-		price real,
-		filename text
-		)`)
-	_, err := db.Exec(queryStr)
-	if err != nil {
+
+	// Create new table
+	log.Println("drop table "+"short_sale" + dateTable)
+	if err := db.Migrator().DropTable("short_sales","short_sale_" + dateTable,"short_sales" + dateTable); err != nil {
+		log.Println("error drop table")
+		return err
+	}
+	log.Println("create table "+"short_sales")
+	if err := db.Migrator().CreateTable(&ShortSale{}); err != nil {
+		log.Println("error create table")
+		return err
+	}
+	log.Println("rename table short_sales to "+"short_sale_" + dateTable)
+	if err := db.Migrator().RenameTable("short_sales", "short_sale_"+dateTable); err != nil {
+		log.Println("error rename table")
 		return err
 	}
 
 	return nil
 }
 
-func insertData(db *DB, arr []Short_Sale_Transactions, date string) error {
+func insertData(db *DB, arr []ShortSale, date string) error {
 	dateTable := strings.Replace(date, "-", "_", 2)
-	qry := fmt.Sprintf(`INSERT INTO short_sale_%s (date,marketcenter,symbol,tm,shorttype,size,price,filename)
-					VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`, dateTable)
-	for _, v := range arr {
-		_, err := db.Exec(
-			qry,
-			date,
-			v.MarketCenter,
-			v.Symbol,
-			v.Time,
-			v.ShortType,
-			v.Size,
-			v.Price,
-			v.FileName,
-		)
-		if err != nil {
-			log.Println("can not insert data table: ", err)
-			errors.Wrap(err, "Cannot add query")
-		}
+	// Create bulk data
+	if err := db.Table("short_sale_" + dateTable).Create(&arr).Error; err !=nil{
+		log.Println("error create bulk data")
+		return err
 	}
-
 	return nil
 }
