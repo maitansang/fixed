@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"reflect"
 	"time"
 
 	"os"
@@ -180,17 +181,17 @@ func createShortSaleTable(db *DB, date string) error {
 	dateTable := strings.Replace(date, "-", "_", 2)
 
 	// Create new table
-	log.Println("drop table "+"short_sale" + dateTable)
-	if err := db.Migrator().DropTable("short_sales","short_sale_" + dateTable,"short_sales" + dateTable); err != nil {
+	log.Println("drop table " + "short_sale" + dateTable)
+	if err := db.Migrator().DropTable("short_sales", "short_sale_"+dateTable, "short_sales"+dateTable); err != nil {
 		log.Println("error drop table")
 		return err
 	}
-	log.Println("create table "+"short_sales")
+	log.Println("create table " + "short_sales")
 	if err := db.Migrator().CreateTable(&ShortSale{}); err != nil {
 		log.Println("error create table")
 		return err
 	}
-	log.Println("rename table short_sales to "+"short_sale_" + dateTable)
+	log.Println("rename table short_sales to " + "short_sale_" + dateTable)
 	if err := db.Migrator().RenameTable("short_sales", "short_sale_"+dateTable); err != nil {
 		log.Println("error rename table")
 		return err
@@ -202,9 +203,43 @@ func createShortSaleTable(db *DB, date string) error {
 func insertData(db *DB, arr []ShortSale, date string) error {
 	dateTable := strings.Replace(date, "-", "_", 2)
 	// Create bulk data
-	if err := db.Table("short_sale_" + dateTable).Create(&arr).Error; err !=nil{
-		log.Println("error create bulk data")
-		return err
+	numField := reflect.TypeOf(ShortSale{}).NumField()
+	parameters := len(arr) * numField
+	if parameters > 65535 {
+		loop := (float32(parameters) / float32(65535))
+		intLoop := int(loop)
+
+		if loop > float32(intLoop) {
+			intLoop = intLoop + 1
+		}
+		err := db.Table("short_sale_" + dateTable).Create(arr[0 : len(arr)/intLoop]).Error
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		for i := 1; i < intLoop; i += 1 {
+			start := (len(arr) / intLoop) * i
+			end := (len(arr) / intLoop) * (i + 1)
+			err := db.Table("short_sale_" + dateTable).Create(arr[start:end]).Error
+			if err != nil {
+				fmt.Println(err)
+			}
+			log.Println("start of end ", start, end)
+			log.Println("value of i ", i)
+			if i+1 > intLoop {
+				err := db.Table("short_sale_" + dateTable).Create(arr[start:len(arr)]).Error
+				log.Println("value of i ", start, len(arr))
+				if err != nil {
+					fmt.Println(err)
+				}
+				break
+			}
+		}
+	} else {
+		if err := db.Table("short_sale_" + dateTable).Create(&arr).Error; err != nil {
+			log.Println("error create bulk data")
+			return err
+		}
 	}
 	return nil
 }

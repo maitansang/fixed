@@ -183,6 +183,11 @@ func (db *DB) AverageVolume(tickers []string, start, end string) error {
 				break
 			}
 		}
+	} else {
+		err := db.Create(&averageVolumeRecords).Error
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 	return nil
 }
