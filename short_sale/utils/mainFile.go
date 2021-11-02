@@ -208,6 +208,7 @@ func insertData(db *DB, arr []ShortSale, date string) error {
 	if parameters > 65535 {
 		loop := (float32(parameters) / float32(65535))
 		intLoop := int(loop)
+		log.Fatal("================ LOOP", intLoop)
 
 		if loop > float32(intLoop) {
 			intLoop = intLoop + 1
