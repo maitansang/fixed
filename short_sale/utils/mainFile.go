@@ -224,6 +224,7 @@ func insertData(db *DB, arr []ShortSale, date string) error {
 		}
 		err := db.Table("short_sale_" + dateTable).Create(arr[start:end]).Error
 		if err != nil {
+			log.Println("================ err", err)
 			log.Fatal(err)
 		}
 		log.Println("================ numField", numField)
