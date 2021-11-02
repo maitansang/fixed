@@ -208,6 +208,9 @@ func insertData(db *DB, arr []ShortSale, date string) error {
 	if parameters > 65535 {
 		loop := (float32(parameters) / float32(65535))
 		intLoop := int(loop)
+		log.Println("================ numField", numField)
+		log.Println("================ parameters", parameters)
+		log.Println("================ len(arr)", len(arr))
 		log.Fatal("================ LOOP", intLoop)
 
 		if loop > float32(intLoop) {
@@ -217,29 +220,29 @@ func insertData(db *DB, arr []ShortSale, date string) error {
 		if err != nil {
 			fmt.Println(err)
 		}
-		wp := workerpool.New(intLoop)
+		// wp := workerpool.New(intLoop)
 		for i := 1; i < intLoop; i += 1 {
 			i := i
-			wp.Submit(func() {
-				start := (len(arr) / intLoop) * i
-				end := (len(arr) / intLoop) * (i + 1)
-				err := db.Table("short_sale_" + dateTable).Create(arr[start:end]).Error
+			// wp.Submit(func() {
+			start := (len(arr) / intLoop) * i
+			end := (len(arr) / intLoop) * (i + 1)
+			err := db.Table("short_sale_" + dateTable).Create(arr[start:end]).Error
+			if err != nil {
+				fmt.Println(err)
+			}
+			log.Println("start of end ", start, end)
+			log.Println("value of i ", i)
+			if i+1 > intLoop {
+				err := db.Table("short_sale_" + dateTable).Create(arr[start:len(arr)]).Error
+				log.Println("value of i ", start, len(arr))
 				if err != nil {
 					fmt.Println(err)
 				}
-				log.Println("start of end ", start, end)
-				log.Println("value of i ", i)
-				if i+1 > intLoop {
-					err := db.Table("short_sale_" + dateTable).Create(arr[start:len(arr)]).Error
-					log.Println("value of i ", start, len(arr))
-					if err != nil {
-						fmt.Println(err)
-					}
-					break
-				}
-			})
+				break
+			}
+			// })
 		}
-		wp.StopWait()
+		// wp.StopWait()
 	} else {
 		if err := db.Table("short_sale_" + dateTable).Create(&arr).Error; err != nil {
 			log.Println("error create bulk data")
