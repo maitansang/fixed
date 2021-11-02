@@ -211,7 +211,7 @@ func insertData(db *DB, arr []ShortSale, date string) error {
 		log.Println("================ numField", numField)
 		log.Println("================ parameters", parameters)
 		log.Println("================ len(arr)", len(arr))
-		log.Fatal("================ LOOP", intLoop)
+		// log.Fatal("================ LOOP", intLoop)
 		// if len(arr) > 1000000 {
 		// 	log.Println("================ len(arr)", len(arr))
 		// }
