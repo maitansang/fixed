@@ -52,9 +52,9 @@ func MainFunc() {
 
 	date := os.Args[1]
 	date = strings.Replace(date, "-", "", 1)
-	specPrefix := []string{"FNSQsh%s_1", "FNQCsh%s", "FNYXsh%s"}
+	specPrefix := []string{"FNSQsh%s_1", "FNSQsh%s_2", "FNSQsh%s_3", "FNSQsh%s_4", "FNQCsh%s", "FNYXsh%s"}
 
-	wp := workerpool.New(3)
+	wp := workerpool.New(6)
 	for _, prefix := range specPrefix {
 		prefix := prefix
 
@@ -217,25 +217,29 @@ func insertData(db *DB, arr []ShortSale, date string) error {
 		if err != nil {
 			fmt.Println(err)
 		}
-
+		wp := workerpool.New(intLoop)
 		for i := 1; i < intLoop; i += 1 {
-			start := (len(arr) / intLoop) * i
-			end := (len(arr) / intLoop) * (i + 1)
-			err := db.Table("short_sale_" + dateTable).Create(arr[start:end]).Error
-			if err != nil {
-				fmt.Println(err)
-			}
-			log.Println("start of end ", start, end)
-			log.Println("value of i ", i)
-			if i+1 > intLoop {
-				err := db.Table("short_sale_" + dateTable).Create(arr[start:len(arr)]).Error
-				log.Println("value of i ", start, len(arr))
+			i := i
+			wp.Submit(func() {
+				start := (len(arr) / intLoop) * i
+				end := (len(arr) / intLoop) * (i + 1)
+				err := db.Table("short_sale_" + dateTable).Create(arr[start:end]).Error
 				if err != nil {
 					fmt.Println(err)
 				}
-				break
-			}
+				log.Println("start of end ", start, end)
+				log.Println("value of i ", i)
+				if i+1 > intLoop {
+					err := db.Table("short_sale_" + dateTable).Create(arr[start:len(arr)]).Error
+					log.Println("value of i ", start, len(arr))
+					if err != nil {
+						fmt.Println(err)
+					}
+					break
+				}
+			})
 		}
+		wp.StopWait()
 	} else {
 		if err := db.Table("short_sale_" + dateTable).Create(&arr).Error; err != nil {
 			log.Println("error create bulk data")
