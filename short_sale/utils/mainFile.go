@@ -229,18 +229,18 @@ func insertData(db *DB, arr []ShortSale, date string) error {
 			// wp.Submit(func() {
 			start := (len(arr) / intLoop) * i
 			end := (len(arr) / intLoop) * (i + 1)
-			// err := db.Create(arr[start:end]).Error
-			// if err != nil {
-			// 	log.Fatal(err)
-			// }
+			err := db.Table("short_sale_" + dateTable).Create(arr[start:end]).Error
+			if err != nil {
+				log.Fatal(err)
+			}
 			log.Println("start of end ", start, end)
 			log.Println("value of i ", i)
 			if i+1 >= intLoop {
-				// err := db.Create(arr[start:len(arr)]).Error
-				// log.Println("value of i ", start, len(arr))
-				// if err != nil {
-				// 	log.Fatal(err)
-				// }
+				err := db.Table("short_sale_" + dateTable).Create(arr[start:len(arr)]).Error
+				log.Println("value of i ", start, len(arr))
+				if err != nil {
+					log.Fatal(err)
+				}
 				log.Println("================ numField", numField)
 				log.Println("================ parameters", parameters)
 				log.Println("================ len(arr)", len(arr))
