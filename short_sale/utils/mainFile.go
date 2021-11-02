@@ -235,7 +235,7 @@ func insertData(db *DB, arr []ShortSale, date string) error {
 			// }
 			log.Println("start of end ", start, end)
 			log.Println("value of i ", i)
-			if i+1 > intLoop {
+			if i+1 >= intLoop {
 				// err := db.Create(arr[start:len(arr)]).Error
 				// log.Println("value of i ", start, len(arr))
 				// if err != nil {
