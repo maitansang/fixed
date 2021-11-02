@@ -211,14 +211,14 @@ func insertData(db *DB, arr []ShortSale, date string) error {
 		log.Println("================ numField", numField)
 		log.Println("================ parameters", parameters)
 		log.Println("================ len(arr)", len(arr))
-		log.Fatal("================ LOOP", intLoop)
+		log.Println("================ LOOP", intLoop)
 
 		if loop > float32(intLoop) {
 			intLoop = intLoop + 1
 		}
 		err := db.Table("short_sale_" + dateTable).Create(arr[0 : len(arr)/intLoop]).Error
 		if err != nil {
-			fmt.Println(err)
+			log.Fatal(err)
 		}
 		// wp := workerpool.New(intLoop)
 		for i := 1; i < intLoop; i += 1 {
@@ -228,7 +228,7 @@ func insertData(db *DB, arr []ShortSale, date string) error {
 			end := (len(arr) / intLoop) * (i + 1)
 			err := db.Table("short_sale_" + dateTable).Create(arr[start:end]).Error
 			if err != nil {
-				fmt.Println(err)
+				log.Fatal(err)
 			}
 			log.Println("start of end ", start, end)
 			log.Println("value of i ", i)
@@ -236,7 +236,7 @@ func insertData(db *DB, arr []ShortSale, date string) error {
 				err := db.Table("short_sale_" + dateTable).Create(arr[start:len(arr)]).Error
 				log.Println("value of i ", start, len(arr))
 				if err != nil {
-					fmt.Println(err)
+					log.Fatal(err)
 				}
 				break
 			}
