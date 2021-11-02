@@ -238,6 +238,11 @@ func insertData(db *DB, arr []ShortSale, date string) error {
 				if err != nil {
 					log.Fatal(err)
 				}
+				log.Println("================ numField", numField)
+				log.Println("================ parameters", parameters)
+				log.Println("================ len(arr)", len(arr))
+				log.Println("================ LOOP", intLoop)
+				log.Fatal("value of i ", i)
 				break
 			}
 			// })
