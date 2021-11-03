@@ -139,21 +139,21 @@ func ReadFileLineByLine(nameFile string, specUrl string, db *DB) error {
 			return err
 		}
 	}
-	time.AfterFunc(30*time.Second, func() {
-		inserter := workerpool.New(30)
-		for date, arr := range mapShortSale {
-			date := date
-			arr := arr
-			inserter.Submit(func() {
-				// err := createShortSaleTable(db, date)
-				// if err != nil {
-				// 	log.Fatal(err)
-				// }
-				insertData(db, arr, date)
-			})
-		}
-		inserter.StopWait()
-	})
+	// time.AfterFunc(30*time.Second, func() {
+	inserter := workerpool.New(30)
+	for date, arr := range mapShortSale {
+		date := date
+		arr := arr
+		inserter.Submit(func() {
+			// err := createShortSaleTable(db, date)
+			// if err != nil {
+			// 	log.Fatal(err)
+			// }
+			insertData(db, arr, date)
+		})
+	}
+	inserter.StopWait()
+	// })
 	// inserter := workerpool.New(30)
 	// for date, arr := range mapShortSale {
 	// 	date := date
