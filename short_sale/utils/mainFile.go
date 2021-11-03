@@ -200,10 +200,11 @@ func ParseData(text string, arr map[string][]ShortSale, specUrl string) map[stri
 }
 
 func createShortSaleTable(db *DB, date string) error {
-	bool := db.Migrator().HasTable("short_sale_2021_09_13")
-	if bool != nil {
-		log.Fatal(bool)
-	}
+	bool1 := db.Migrator().HasTable("short_sale_2021_09_13")
+	log.Fatal(bool1)
+	// if bool != nil {
+	// 	log.Fatal(bool)
+	// }
 	dateTable := strings.Replace(date, "-", "_", 2)
 
 	// Create new table
