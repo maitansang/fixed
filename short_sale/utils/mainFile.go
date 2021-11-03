@@ -190,15 +190,10 @@ func createShortSaleTable(db *DB, date string) error {
 	dateTable := strings.Replace(date, "-", "_", 2)
 
 	// Create new table
-	log.Println("drop table " + "short_sale" + dateTable)
+	log.Println("short_sales", "drop table "+"short_sale"+dateTable)
 	if err := db.Migrator().DropTable("short_sales", "short_sale_"+dateTable, "short_sales"+dateTable); err != nil {
 		log.Println("error drop table")
 		return err
-	}
-	log.Println("create table " + "short_sales")
-	if err := db.Migrator().DropTable("short_sales").Error; err != nil {
-		log.Println("================ err", err)
-		log.Fatal(err)
 	}
 	if err := db.Migrator().CreateTable(&ShortSale{}); err != nil {
 		log.Println("error create table")
