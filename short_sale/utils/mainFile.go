@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math"
 	"net/http"
 	"reflect"
 	"time"
@@ -206,8 +207,8 @@ func insertData(db *DB, arr []ShortSale, date string) error {
 	numField := reflect.TypeOf(ShortSale{}).NumField()
 	parameters := len(arr) * numField
 	if parameters > 65535 {
-		loop := (float32(parameters) / float32(65535))
-		intLoop := int(loop)
+		loop := (float64(parameters) / float64(65535))
+		
 		log.Println("================ numField", numField)
 		log.Println("================ parameters", parameters)
 		log.Println("================ len(arr)", len(arr))
@@ -215,16 +216,14 @@ func insertData(db *DB, arr []ShortSale, date string) error {
 		// if len(arr) > 1000000 {
 		// 	log.Println("================ len(arr)", len(arr))
 		// }
-
-		if loop > float32(intLoop) {
-			intLoop = intLoop + 1
-		}
+		calLoop := math.Ceil(loop)
+		intLoop := int(calLoop)
 		err := db.Table("short_sale_" + dateTable).Create(arr[0 : len(arr)/intLoop]).Error
 		if err != nil {
 			log.Fatal(err)
 		}
 		// wp := workerpool.New(intLoop)
-		for i := 1; i < intLoop; i += 1 {
+		for i := 1; i < int(calLoop); i += 1 {
 			// i := i
 			// wp.Submit(func() {
 			start := (len(arr) / intLoop) * i
