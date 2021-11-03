@@ -130,7 +130,7 @@ func ReadFileLineByLine(nameFile string, specUrl string, db *DB) error {
 		}
 		mapShortSale = ParseData(scanner.Text(), mapShortSale, specUrl)
 	}
-
+	log.Fatal("========================", mapShortSale)
 	for date, _ := range mapShortSale {
 		err := createShortSaleTable(db, date)
 		if err != nil {
