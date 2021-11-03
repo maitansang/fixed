@@ -131,25 +131,25 @@ func ReadFileLineByLine(nameFile string, specUrl string, db *DB) error {
 		mapShortSale = ParseData(scanner.Text(), mapShortSale, specUrl)
 	}
 
-	// for date, _ := range mapShortSale {
-	// 	if date == "2021-09-15" {
-	// 		log.Fatal("========================date", date)
-	// 	}
-	// 	err := createShortSaleTable(db, date)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// }
+	for date, _ := range mapShortSale {
+		// if date == "2021-09-15" {
+		// 	log.Fatal("========================date", date)
+		// }
+		err := createShortSaleTable(db, date)
+		if err != nil {
+			return err
+		}
+	}
 
 	inserter := workerpool.New(30)
 	for date, arr := range mapShortSale {
 		date := date
 		arr := arr
 		inserter.Submit(func() {
-			err := createShortSaleTable(db, date)
-			if err != nil {
-				log.Fatal(err)
-			}
+			// err := createShortSaleTable(db, date)
+			// if err != nil {
+			// 	log.Fatal(err)
+			// }
 			insertData(db, arr, date)
 		})
 	}
