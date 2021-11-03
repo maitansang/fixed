@@ -196,8 +196,7 @@ func createShortSaleTable(db *DB, date string) error {
 		return err
 	}
 	log.Println("create table " + "short_sales")
-	err := db.Migrator().DropTable("short_sales").Error
-	if err != nil {
+	if err := db.Migrator().DropTable("short_sales").Error; err != nil {
 		log.Println("================ err", err)
 		log.Fatal(err)
 	}
