@@ -15,12 +15,11 @@ import (
 	"strings"
 
 	"github.com/gammazero/workerpool"
-	"github.com/google/uuid"
 	_ "github.com/lib/pq"
 )
 
 type ShortSale struct {
-	ID           string `gorm:"primaryKey;autoIncrement:false"`
+	// ID           string `gorm:"primaryKey;autoIncrement:false"`
 	Date         string `json:"date" `
 	MarketCenter string `json:"marketcenter" `
 	Symbol       string `json:"symbol" `
@@ -166,7 +165,7 @@ func ParseData(text string, arr map[string][]ShortSale, specUrl string) map[stri
 		dateString := dateTime.Format("2006-01-02")
 
 		trans := ShortSale{
-			ID:           uuid.NewString(),
+			// ID:           uuid.NewString(),
 			Date:         dateString,
 			MarketCenter: fields[0],
 			Symbol:       fields[1],
