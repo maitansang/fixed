@@ -212,20 +212,11 @@ func insertData(db *DB, arr []ShortSale, date string) error {
 	log.Println("================ numField", numField)
 	log.Println("================ parameters", parameters)
 	log.Println("================ len(arr)", len(arr))
-	// log.Fatal("================ LOOP", intLoop)
-	// if len(arr) > 1000000 {
-	// 	log.Println("================ len(arr)", len(arr))
-	// }
+
 	calLoop := math.Ceil(loop)
 	intLoop := int(calLoop)
-	err := db.Table("short_sale_" + dateTable).Create(arr[0 : len(arr)/intLoop]).Error
-	if err != nil {
-		log.Fatal(err)
-	}
-	// wp := workerpool.New(intLoop)
-	for i := 1; i < int(calLoop); i += 1 {
-		// i := i
-		// wp.Submit(func() {
+
+	for i := 0; i < int(calLoop); i += 1 {
 		start := (len(arr) / intLoop) * i
 		end := (len(arr) / intLoop) * (i + 1)
 		if (i + 1) >= intLoop {
