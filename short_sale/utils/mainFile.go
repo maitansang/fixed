@@ -200,11 +200,6 @@ func ParseData(text string, arr map[string][]ShortSale, specUrl string) map[stri
 }
 
 func createShortSaleTable(db *DB, date string) error {
-	bool1 := db.Migrator().HasTable("short_sale_2021_09_13")
-	log.Fatal(bool1)
-	// if bool != nil {
-	// 	log.Fatal(bool)
-	// }
 	dateTable := strings.Replace(date, "-", "_", 2)
 
 	// Create new table
@@ -240,7 +235,18 @@ func insertData(db *DB, arr []ShortSale, date string) error {
 
 	calLoop := math.Ceil(loop)
 	intLoop := int(calLoop)
-
+	existTable := db.Migrator().HasTable("short_sale_" + dateTable)
+	if existTable == true {
+	} else {
+		if err := db.Migrator().CreateTable(&ShortSale{}); err != nil {
+			log.Println("error create table")
+			return err
+		}
+		if err := db.Migrator().RenameTable("short_sales", "short_sale_"+dateTable); err != nil {
+			log.Println("error rename table")
+			return err
+		}
+	}
 	for i := 0; i < int(calLoop); i += 1 {
 		start := (len(arr) / intLoop) * i
 		end := (len(arr) / intLoop) * (i + 1)
