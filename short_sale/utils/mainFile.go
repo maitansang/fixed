@@ -171,6 +171,7 @@ func ParseData(text string, arr map[string][]ShortSale, specUrl string) map[stri
 
 		trans := ShortSale{
 			ID:           uuid.NewString(),
+			Date:         dateString,
 			MarketCenter: fields[0],
 			Symbol:       fields[1],
 			Time:         fields[3],
@@ -178,7 +179,6 @@ func ParseData(text string, arr map[string][]ShortSale, specUrl string) map[stri
 			Size:         fields[5],
 			Price:        fields[6],
 			FileName:     specUrl,
-			Date:         dateString,
 		}
 
 		arr[dateString] = append(arr[dateString], trans)
