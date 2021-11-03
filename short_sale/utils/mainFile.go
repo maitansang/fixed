@@ -146,6 +146,10 @@ func ReadFileLineByLine(nameFile string, specUrl string, db *DB) error {
 		date := date
 		arr := arr
 		inserter.Submit(func() {
+			err := createShortSaleTable(db, date)
+			if err != nil {
+				log.Fatal(err)
+			}
 			insertData(db, arr, date)
 		})
 	}
@@ -205,10 +209,6 @@ func createShortSaleTable(db *DB, date string) error {
 }
 
 func insertData(db *DB, arr []ShortSale, date string) error {
-	err := createShortSaleTable(db, date)
-	if err != nil {
-		log.Fatal(err)
-	}
 	dateTable := strings.Replace(date, "-", "_", 2)
 	// Create bulk data
 	numField := reflect.TypeOf(ShortSale{}).NumField()
