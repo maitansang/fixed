@@ -140,30 +140,33 @@ func ReadFileLineByLine(nameFile string, specUrl string, db *DB) error {
 		}
 	}
 	time.AfterFunc(30*time.Second, func() {
-		for date, _ := range mapShortSale {
-			// if date == "2021-09-15" {
-			// 	log.Fatal("========================date", date)
-			// }
-			err := createShortSaleTable(db, date)
-			if err != nil {
-				log.Println("================ err", err)
-				log.Fatal(err)
-			}
+		inserter := workerpool.New(30)
+		for date, arr := range mapShortSale {
+			date := date
+			arr := arr
+			inserter.Submit(func() {
+				// err := createShortSaleTable(db, date)
+				// if err != nil {
+				// 	log.Fatal(err)
+				// }
+				insertData(db, arr, date)
+			})
 		}
+		inserter.StopWait()
 	})
-	inserter := workerpool.New(30)
-	for date, arr := range mapShortSale {
-		date := date
-		arr := arr
-		inserter.Submit(func() {
-			// err := createShortSaleTable(db, date)
-			// if err != nil {
-			// 	log.Fatal(err)
-			// }
-			insertData(db, arr, date)
-		})
-	}
-	inserter.StopWait()
+	// inserter := workerpool.New(30)
+	// for date, arr := range mapShortSale {
+	// 	date := date
+	// 	arr := arr
+	// 	inserter.Submit(func() {
+	// 		// err := createShortSaleTable(db, date)
+	// 		// if err != nil {
+	// 		// 	log.Fatal(err)
+	// 		// }
+	// 		insertData(db, arr, date)
+	// 	})
+	// }
+	// inserter.StopWait()
 
 	file.Close()
 	return err
