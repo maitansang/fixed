@@ -114,6 +114,5 @@ func ClearFile(specUrl string) error {
 	if e != nil {
 		log.Fatal(e)
 	}
-	log.Fatal("===============")
 	return e
 }

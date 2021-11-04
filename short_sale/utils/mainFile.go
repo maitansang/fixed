@@ -62,6 +62,7 @@ func MainFunc() {
 			log.Println(err)
 		}
 	}
+	log.Fatal("==================")
 	wp := workerpool.New(6)
 	for _, prefix := range specPrefix {
 		prefix := prefix
