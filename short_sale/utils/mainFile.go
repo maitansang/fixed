@@ -56,7 +56,8 @@ func MainFunc() {
 	specPrefix := []string{"FNSQsh%s_1", "FNSQsh%s_2", "FNSQsh%s_3", "FNSQsh%s_4", "FNQCsh%s", "FNYXsh%s"}
 
 	for _, urlPath := range specPrefix {
-		err := ClearFile(urlPath)
+		specUrl := fmt.Sprintf(urlPath, date)
+		err := ClearFile(specUrl)
 		if err != nil {
 			log.Println(err)
 		}
