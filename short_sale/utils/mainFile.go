@@ -55,6 +55,12 @@ func MainFunc() {
 	date = strings.Replace(date, "-", "", 1)
 	specPrefix := []string{"FNSQsh%s_1", "FNSQsh%s_2", "FNSQsh%s_3", "FNSQsh%s_4", "FNQCsh%s", "FNYXsh%s"}
 
+	for _, urlPath := range specPrefix {
+		err := ClearFile(urlPath)
+		if err != nil {
+			log.Println(err)
+		}
+	}
 	wp := workerpool.New(6)
 	for _, prefix := range specPrefix {
 		prefix := prefix
@@ -62,10 +68,10 @@ func MainFunc() {
 		wp.Submit(func() {
 			specUrl := fmt.Sprintf(prefix, date)
 
-			err := ClearFile(specUrl)
-			if err != nil {
-				log.Println(err)
-			}
+			// err := ClearFile(specUrl)
+			// if err != nil {
+			// 	log.Println(err)
+			// }
 
 			resp, err := http.Get("https://cdn.finra.org/equity/regsho/monthly/" + specUrl + ".zip")
 			if err != nil {
