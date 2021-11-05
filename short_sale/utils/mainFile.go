@@ -62,8 +62,7 @@ func MainFunc() {
 			log.Println(err)
 		}
 	}
-	log.Fatal("==================")
-	wp := workerpool.New(6)
+	wp := workerpool.New(2)
 	for _, prefix := range specPrefix {
 		prefix := prefix
 
@@ -148,7 +147,7 @@ func ReadFileLineByLine(nameFile string, specUrl string, db *DB) error {
 		}
 	}
 	// time.AfterFunc(30*time.Second, func() {
-	inserter := workerpool.New(30)
+	inserter := workerpool.New(10)
 	for date, arr := range mapShortSale {
 		date := date
 		arr := arr
