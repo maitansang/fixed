@@ -242,23 +242,23 @@ func insertData(db *DB, arr []ShortSale, date string) error {
 
 	calLoop := math.Ceil(loop)
 	intLoop := int(calLoop)
-	existTable := db.Migrator().HasTable("short_sale_" + dateTable)
-	if existTable == true {
-	} else {
-		if err := db.Migrator().CreateTable(&ShortSale{}); err != nil {
-			log.Println("error create table")
-			return err
-		}
-		if err := db.Migrator().RenameTable("short_sales", "short_sale_"+dateTable); err != nil {
-			log.Println("error rename table")
-			return err
-		}
-	}
 	for i := 0; i < int(calLoop); i += 1 {
 		start := (len(arr) / intLoop) * i
 		end := (len(arr) / intLoop) * (i + 1)
 		if (i + 1) >= intLoop {
 			end = len(arr)
+		}
+		existTable := db.Migrator().HasTable("short_sale_" + dateTable)
+		if existTable == true {
+		} else {
+			if err := db.Migrator().CreateTable(&ShortSale{}); err != nil {
+				log.Println("error create table")
+				return err
+			}
+			if err := db.Migrator().RenameTable("short_sales", "short_sale_"+dateTable); err != nil {
+				log.Println("error rename table")
+				return err
+			}
 		}
 		err := db.Table("short_sale_" + dateTable).Create(arr[start:end]).Error
 		if err != nil {
