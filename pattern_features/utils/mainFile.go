@@ -177,7 +177,7 @@ func (db *DB) PatternFeature(tickers []string, start, last14Days, last200Days st
 	//Clear old data
 	db.Where("date = ?", start).Delete(PatternFeature{})
 	fmt.Println("len(averageVolumeRecords)", len(patternFeatureRecords))
-	chunk := 40000
+	chunk := 10000
 	i := 0
 	j := len(patternFeatureRecords)
 	for i = 0; i < j; i += chunk {
