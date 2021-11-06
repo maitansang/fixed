@@ -247,7 +247,7 @@ func insertData(db *DB, arr []ShortSale, date string) error {
 	for i := 0; i <= int(calLoop); i += 1 {
 		start := (len(arr) / intLoop) * i
 		end := (len(arr) / intLoop) * (i + 1)
-		if (i + 1) >= intLoop {
+		if (i + 1) > intLoop {
 			log.Println("=================i", i)
 			log.Println("=================start", start)
 			log.Println("=================end", end)
@@ -304,6 +304,7 @@ func insertData(db *DB, arr []ShortSale, date string) error {
 				err := db.Table("short_sale_" + dateTable).Create(arr[start:end]).Error
 				if err != nil {
 					// log.Println("================ err existTable", err, existTable)
+					log.Println("==========", len(arr))
 					log.Fatal(err, start, end)
 				}
 				log.Println("================ numField", numField)
