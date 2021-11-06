@@ -84,12 +84,12 @@ func MainFunc() {
 		return
 	}
 	defer sqlDB.Close()
-	allTickers, err := db.getAllTicker()
-	if err != nil {
-		log.Println("Error when get all ticker", err)
-		return
-	}
-	allTickers = []string{"AAPL"}
+	// allTickers, err := db.getAllTicker()
+	// if err != nil {
+	// 	log.Println("Error when get all ticker", err)
+	// 	return
+	// }
+	allTickers := []string{"AAPL", "SPY"}
 	start, _ := time.Parse("2006-01-02", os.Args[1])
 	last14Days := start.AddDate(0, 0, -14)
 	last200Days := start.AddDate(0, 0, -200)
@@ -183,7 +183,7 @@ func (db *DB) PatternFeature(tickers []string, start, last14Days, last200Days st
 	fmt.Println("len(averageVolumeRecords)", len(patternFeatureRecords))
 	chunk := 10000
 	i := 0
-	j := len(patternFeatureRecords) - 1
+	j := len(patternFeatureRecords)
 	for i = 0; i < j; i += chunk {
 		start := i
 		end := i + chunk
