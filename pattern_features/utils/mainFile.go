@@ -90,18 +90,26 @@ func MainFunc() {
 		return
 	}
 	// allTickers := []string{"AAPL", "SPY"}
-	start, _ := time.Parse("2006-01-02", os.Args[1])
-	last14Days := start.AddDate(0, 0, -14)
-	last200Days := start.AddDate(0, 0, -200)
-	log.Println("-----",start, last14Days, last200Days)
+	start, _ := time.Parse("2006-01-02", os.Args[2])
+	end, _ := time.Parse("2006-01-02", os.Args[1])
 	// Create new table average_volumes
 	db.AutoMigrate(&PatternFeature{})
-	err = db.PatternFeature(allTickers, start.Format("2006-01-02"), last14Days.Format("2006-01-02"), last200Days.Format("2006-01-02"))
-	if err != nil {
-		log.Fatal("Error when get v from dailybars", err)
-		return
+	for t := start; t.After(end); t = t.AddDate(0, 0, -1) {
+		if t.Weekday() == 0 || t.Weekday() == 6 {
+			log.Println("-----t", t)
+			continue
+		}
+		log.Println("-----start end", start, end)
+		last14Days := t.AddDate(0, 0, -14).Format("2006-01-02")
+		last200Days := t.AddDate(0, 0, -200).Format("2006-01-02")
+		log.Println("-----", start, last14Days, last200Days)
+		err = db.PatternFeature(allTickers, t.Format("2006-01-02"), last14Days, last200Days)
+		if err != nil {
+			log.Fatal("Error when get v from dailybars", err)
+			return
+		}
 	}
-	
+
 	log.Println("done")
 }
 func (db *DB) PatternFeature(tickers []string, start, last14Days, last200Days string) error {
@@ -147,7 +155,7 @@ func (db *DB) PatternFeature(tickers []string, start, last14Days, last200Days st
 			log.Println("---------0", dailyBar)
 			log.Println("---------1", last14DaysDailyBar)
 			log.Println("---------2", len(last200DaysDailyBar))
-			log.Println("---------3",closePriceSum, averagePrices)
+			log.Println("---------3", closePriceSum, averagePrices)
 
 			//1. c_o : Value would be either 0 or 1 , if today’s close is greater than today's open its 1 else 0
 			if dailyBar.C > dailyBar.O {
@@ -156,10 +164,10 @@ func (db *DB) PatternFeature(tickers []string, start, last14Days, last200Days st
 
 			//2. 14_days_change_pct : change in closing price in percentage from 14 days ago close to todays close (formula is 14 day's close - today's close / 1
 			value14DaysChangePct = ((dailyBar.C - last14DaysDailyBar.C) / last14DaysDailyBar.C) * 100
-			log.Println("---------4",dailyBar.C ,last14DaysDailyBar.C)
-			if (dailyBar.C == 0 || last14DaysDailyBar.C ==0){
-				value14DaysChangePct =0
-			} 
+			log.Println("---------4", dailyBar.C, last14DaysDailyBar.C)
+			if dailyBar.C == 0 || last14DaysDailyBar.C == 0 {
+				value14DaysChangePct = 0
+			}
 			//3. above_200ma : value would be 0 or 1, 0 when its below or less than last 200 days average closing price else 1
 			if dailyBar.C > averagePrices {
 				above200Ma = true
