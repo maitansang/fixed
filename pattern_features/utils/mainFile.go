@@ -84,12 +84,12 @@ func MainFunc() {
 		return
 	}
 	defer sqlDB.Close()
-	// allTickers, err := db.getAllTicker()
-	// if err != nil {
-	// 	log.Println("Error when get all ticker", err)
-	// 	return
-	// }
-	allTickers := []string{"AAPL", "SPY"}
+	allTickers, err := db.getAllTicker()
+	if err != nil {
+		log.Println("Error when get all ticker", err)
+		return
+	}
+	// allTickers := []string{"AAPL", "SPY"}
 	start, _ := time.Parse("2006-01-02", os.Args[1])
 	last14Days := start.AddDate(0, 0, -14)
 	last200Days := start.AddDate(0, 0, -200)
