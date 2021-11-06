@@ -245,7 +245,7 @@ func insertData(db *DB, arr []ShortSale, date string) error {
 	intLoop := int(calLoop)
 	var listStartEndPoint = make(map[int64]int64)
 	log.Println("listStartEndPoint", listStartEndPoint)
-	for i := 0; i < int(calLoop); i += 1 {
+	for i := 0; i <= int(calLoop); i += 1 {
 		start := (len(arr) / intLoop) * i
 		end := (len(arr) / intLoop) * (i + 1)
 		if (i + 1) >= intLoop {
