@@ -230,7 +230,7 @@ func createShortSaleTable(db *DB, date string) error {
 }
 
 func insertData(db *DB, arr []ShortSale, date string) error {
-	dateTable := strings.Replace(date, "-", "_", 2)
+	// dateTable := strings.Replace(date, "-", "_", 2)
 	// Create bulk data
 	numField := reflect.TypeOf(ShortSale{}).NumField()
 	parameters := len(arr) * numField
