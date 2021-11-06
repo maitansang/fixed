@@ -311,7 +311,8 @@ func insertData(db *DB, arr []ShortSale, date string) error {
 			// log.Println("value of i ", i)
 		})
 		// }
-		insertDatabase.StopWait()
 	}
+	insertDatabase.StopWait()
+
 	return nil
 }
