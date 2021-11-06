@@ -179,12 +179,12 @@ func (db *DB) PatternFeature(tickers []string, start, last14Days, last200Days st
 	fmt.Println("len(averageVolumeRecords)", len(patternFeatureRecords))
 	chunk := 10000
 	i := 0
-	j := len(patternFeatureRecords)
+	j := len(patternFeatureRecords) - 1
 	for i = 0; i < j; i += chunk {
 		start := i
 		end := i+ chunk
-		if i> j {
-			end = j-1
+		if j-i<chunk {
+			end = j
 		}
 		temporary := patternFeatureRecords[start : end]
 		log.Println("lllllll", i, "---", len(temporary))
