@@ -248,8 +248,13 @@ func insertData(db *DB, arr []ShortSale, date string) error {
 		start := (len(arr) / intLoop) * i
 		end := (len(arr) / intLoop) * (i + 1)
 		if (i + 1) >= intLoop {
+			log.Println("=================i", i)
+			log.Println("=================start", start)
+			log.Println("=================end", end)
+			log.Println("=================len(arr)", len(arr))
 			end = len(arr)
 		}
+		log.Println("=================start end", start, end)
 		listStartEndPoint[int64(start)] = int64(end)
 		// existTable := db.Migrator().HasTable("short_sale_" + dateTable)
 		// if existTable == true {
@@ -274,6 +279,8 @@ func insertData(db *DB, arr []ShortSale, date string) error {
 		// log.Println("start of end ", start, end)
 		// log.Println("value of i ", i)
 	}
+	log.Println("=================int(calLoop)", int(calLoop))
+	log.Fatal("=================intLoop", intLoop)
 	for i := 100; i <= len(listStartEndPoint); i += 100 {
 		log.Println("================ workerpool i", i)
 		insertDatabase := workerpool.New(i)
