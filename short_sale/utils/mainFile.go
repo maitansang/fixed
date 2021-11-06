@@ -53,7 +53,8 @@ func MainFunc() {
 
 	date := os.Args[1]
 	date = strings.Replace(date, "-", "", 1)
-	specPrefix := []string{"FNSQsh%s_1", "FNSQsh%s_2", "FNSQsh%s_3", "FNSQsh%s_4", "FNQCsh%s", "FNYXsh%s"}
+	specPrefix := []string{"FNSQsh%s_1"}
+	// specPrefix := []string{"FNSQsh%s_1", "FNSQsh%s_2", "FNSQsh%s_3", "FNSQsh%s_4", "FNQCsh%s", "FNYXsh%s"}
 
 	for _, urlPath := range specPrefix {
 		specUrl := fmt.Sprintf(urlPath, date)
