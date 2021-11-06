@@ -53,7 +53,8 @@ func MainFunc() {
 
 	date := os.Args[1]
 	date = strings.Replace(date, "-", "", 1)
-	specPrefix := []string{"FNSQsh%s_1", "FNSQsh%s_2", "FNSQsh%s_3", "FNSQsh%s_4", "FNQCsh%s", "FNYXsh%s"}
+	specPrefix := []string{"FNSQsh%s_1"}
+	// specPrefix := []string{"FNSQsh%s_1", "FNSQsh%s_2", "FNSQsh%s_3", "FNSQsh%s_4", "FNQCsh%s", "FNYXsh%s"}
 
 	for _, urlPath := range specPrefix {
 		specUrl := fmt.Sprintf(urlPath, date)
@@ -62,57 +63,57 @@ func MainFunc() {
 			log.Println(err)
 		}
 	}
-	wp := workerpool.New(2)
+	// wp := workerpool.New(6)
 	for _, prefix := range specPrefix {
-		prefix := prefix
+		// prefix := prefix
 
-		wp.Submit(func() {
-			specUrl := fmt.Sprintf(prefix, date)
+		// wp.Submit(func() {
+		specUrl := fmt.Sprintf(prefix, date)
 
-			// err := ClearFile(specUrl)
-			// if err != nil {
-			// 	log.Println(err)
-			// }
+		// err := ClearFile(specUrl)
+		// if err != nil {
+		// 	log.Println(err)
+		// }
 
-			resp, err := http.Get("https://cdn.finra.org/equity/regsho/monthly/" + specUrl + ".zip")
-			if err != nil {
-				fmt.Printf("err: %s", err)
-			}
+		resp, err := http.Get("https://cdn.finra.org/equity/regsho/monthly/" + specUrl + ".zip")
+		if err != nil {
+			fmt.Printf("err: %s", err)
+		}
 
-			defer resp.Body.Close()
-			if resp.StatusCode != 200 {
-				return
-			}
+		defer resp.Body.Close()
+		if resp.StatusCode != 200 {
+			return
+		}
 
-			// Create the file
-			out, err := os.Create(specUrl + ".zip")
-			if err != nil {
-				fmt.Printf("err: %s", err)
-			}
-			defer out.Close()
+		// Create the file
+		out, err := os.Create(specUrl + ".zip")
+		if err != nil {
+			fmt.Printf("err: %s", err)
+		}
+		defer out.Close()
 
-			// Write the body to file
-			_, err = io.Copy(out, resp.Body)
+		// Write the body to file
+		_, err = io.Copy(out, resp.Body)
 
-			err = Unzip(specUrl+".zip", "extract/")
-			if err != nil {
-				log.Println("err when extract ", err)
-			}
+		err = Unzip(specUrl+".zip", "extract/")
+		if err != nil {
+			log.Println("err when extract ", err)
+		}
 
-			absPath, _ := filepath.Abs("../short_sale/extract/" + specUrl + ".txt")
+		absPath, _ := filepath.Abs("../short_sale/extract/" + specUrl + ".txt")
 
-			err = ReadFileLineByLine(absPath, specUrl, db)
-			if err != nil {
-				log.Println("can not read file")
-			}
+		err = ReadFileLineByLine(absPath, specUrl, db)
+		if err != nil {
+			log.Println("can not read file")
+		}
 
-			err = ClearFile(specUrl)
-			if err != nil {
-				log.Println(err)
-			}
-		})
+		err = ClearFile(specUrl)
+		if err != nil {
+			log.Println(err)
+		}
+		// })
 	}
-	wp.StopWait()
+	// wp.StopWait()
 }
 
 func ReadFileLineByLine(nameFile string, specUrl string, db *DB) error {
@@ -147,19 +148,19 @@ func ReadFileLineByLine(nameFile string, specUrl string, db *DB) error {
 		}
 	}
 	// time.AfterFunc(30*time.Second, func() {
-	inserter := workerpool.New(10)
+	// inserter := workerpool.New(30)
 	for date, arr := range mapShortSale {
-		date := date
-		arr := arr
-		inserter.Submit(func() {
-			// err := createShortSaleTable(db, date)
-			// if err != nil {
-			// 	log.Fatal(err)
-			// }
-			insertData(db, arr, date)
-		})
+		// date := date
+		// arr := arr
+		// inserter.Submit(func() {
+		// err := createShortSaleTable(db, date)
+		// if err != nil {
+		// 	log.Fatal(err)
+		// }
+		insertData(db, arr, date)
+		// })
 	}
-	inserter.StopWait()
+	// inserter.StopWait()
 	// })
 	// inserter := workerpool.New(30)
 	// for date, arr := range mapShortSale {
@@ -242,35 +243,70 @@ func insertData(db *DB, arr []ShortSale, date string) error {
 
 	calLoop := math.Ceil(loop)
 	intLoop := int(calLoop)
-	existTable := db.Migrator().HasTable("short_sale_" + dateTable)
-	if existTable == true {
-	} else {
-		if err := db.Migrator().CreateTable(&ShortSale{}); err != nil {
-			log.Println("error create table")
-			return err
-		}
-		if err := db.Migrator().RenameTable("short_sales", "short_sale_"+dateTable); err != nil {
-			log.Println("error rename table")
-			return err
-		}
-	}
+	var listStartEndPoint = make(map[int64]int64)
 	for i := 0; i < int(calLoop); i += 1 {
 		start := (len(arr) / intLoop) * i
 		end := (len(arr) / intLoop) * (i + 1)
 		if (i + 1) >= intLoop {
 			end = len(arr)
 		}
-		err := db.Table("short_sale_" + dateTable).Create(arr[start:end]).Error
-		if err != nil {
-			log.Println("================ err", err)
-			log.Fatal(err)
-		}
-		log.Println("================ numField", numField)
-		log.Println("================ parameters", parameters)
-		log.Println("================ len(arr)", len(arr))
-		log.Println("start of end ", start, end)
-		log.Println("value of i ", i)
+		listStartEndPoint[int64(start)] = int64(end)
+		// existTable := db.Migrator().HasTable("short_sale_" + dateTable)
+		// if existTable == true {
+		// } else {
+		// 	if err := db.Migrator().CreateTable(&ShortSale{}); err != nil {
+		// 		log.Println("error create table")
+		// 		return err
+		// 	}
+		// 	if err := db.Migrator().RenameTable("short_sales", "short_sale_"+dateTable); err != nil {
+		// 		log.Println("error rename table")
+		// 		return err
+		// 	}
+		// }
+		// err := db.Table("short_sale_" + dateTable).Create(arr[start:end]).Error
+		// if err != nil {
+		// 	log.Println("================ err existTable", err, existTable)
+		// 	log.Fatal(err)
+		// }
+		// log.Println("================ numField", numField)
+		// log.Println("================ parameters", parameters)
+		// log.Println("================ len(arr)", len(arr))
+		// log.Println("start of end ", start, end)
+		// log.Println("value of i ", i)
 	}
-
+	// log.Fatal("listStartEndPoint", listStartEndPoint)
+	for i := 100; i <= len(listStartEndPoint); i += 100 {
+		log.Println("================ workerpool i", i)
+		insertDatabase := workerpool.New(i)
+		for start, end := range listStartEndPoint {
+			start := start
+			end := end
+			insertDatabase.Submit(func() {
+				// existTable := db.Migrator().HasTable("short_sale_" + dateTable)
+				// if existTable == true {
+				// } else {
+				// 	if err := db.Migrator().CreateTable(&ShortSale{}); err != nil {
+				// 		log.Println("error create table")
+				// 		// return err
+				// 	}
+				// 	if err := db.Migrator().RenameTable("short_sales", "short_sale_"+dateTable); err != nil {
+				// 		log.Println("error rename table")
+				// 		// return err
+				// 	}
+				// }
+				err := db.Table("short_sale_" + dateTable).Create(arr[start:end]).Error
+				if err != nil {
+					// log.Println("================ err existTable", err, existTable)
+					log.Fatal(err)
+				}
+				log.Println("================ numField", numField)
+				log.Println("================ parameters", parameters)
+				log.Println("================ len(arr)", len(arr))
+				log.Println("start of end ", start, end)
+				// log.Println("value of i ", i)
+			})
+		}
+		insertDatabase.StopWait()
+	}
 	return nil
 }
