@@ -184,7 +184,7 @@ func (db *DB) PatternFeature(tickers []string, start, last14Days, last200Days st
 		start := i
 		end := i+ chunk
 		if i> j {
-			end = j
+			end = j-1
 		}
 		temporary := patternFeatureRecords[start : end]
 		log.Println("lllllll", i, "---", len(temporary))
