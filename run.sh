@@ -44,5 +44,9 @@ go run main.go $arg2
 cd ..
 
 cd average_volume
-go run main.go
+go run main.go $arg2
+cd ..
+
+cd pattern_features
+go run main.go $arg2
 cd ..
