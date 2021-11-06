@@ -274,7 +274,7 @@ func insertData(db *DB, arr []ShortSale, date string) error {
 		// log.Println("start of end ", start, end)
 		// log.Println("value of i ", i)
 	}
-	// log.Fatal("listStartEndPoint", listStartEndPoint)
+	log.Fatal("listStartEndPoint", listStartEndPoint)
 	for i := 100; i <= len(listStartEndPoint); i += 100 {
 		log.Println("================ workerpool i", i)
 		insertDatabase := workerpool.New(i)
