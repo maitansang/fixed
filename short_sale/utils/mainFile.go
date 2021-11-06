@@ -249,6 +249,7 @@ func insertData(db *DB, arr []ShortSale, date string) error {
 		start := (len(arr) / intLoop) * i
 		end := (len(arr) / intLoop) * (i + 1)
 		if (i + 1) >= intLoop {
+			log.Println("=================start", start)
 			log.Println("=================end", end)
 			log.Println("=================len(arr)", len(arr))
 			// end = len(arr)
