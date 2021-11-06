@@ -281,7 +281,7 @@ func insertData(db *DB, arr []ShortSale, date string) error {
 		for start, end := range listStartEndPoint {
 			start := start
 			end := end
-			log.Fatal("=====================", start, end)
+			// log.Fatal("=====================", start, end)
 			insertDatabase.Submit(func() {
 				// existTable := db.Migrator().HasTable("short_sale_" + dateTable)
 				// if existTable == true {
