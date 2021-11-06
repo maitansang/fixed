@@ -89,11 +89,11 @@ func MainFunc() {
 		log.Println("Error when get all ticker", err)
 		return
 	}
-	// allTickers = []string{"AAPL"}
+	allTickers = []string{"AAPL"}
 	start, _ := time.Parse("2006-01-02", os.Args[1])
 	last14Days := start.AddDate(0, 0, -14)
 	last200Days := start.AddDate(0, 0, -200)
-
+	log.Println("-----",start, last14Days, last200Days)
 	// Create new table average_volumes
 	db.AutoMigrate(&PatternFeature{})
 	err = db.PatternFeature(allTickers, start.Format("2006-01-02"), last14Days.Format("2006-01-02"), last200Days.Format("2006-01-02"))
@@ -101,6 +101,7 @@ func MainFunc() {
 		log.Fatal("Error when get v from dailybars", err)
 		return
 	}
+	
 	log.Println("done")
 }
 func (db *DB) PatternFeature(tickers []string, start, last14Days, last200Days string) error {
@@ -146,7 +147,7 @@ func (db *DB) PatternFeature(tickers []string, start, last14Days, last200Days st
 			log.Println("---------0", dailyBar)
 			log.Println("---------1", last14DaysDailyBar)
 			log.Println("---------2", len(last200DaysDailyBar))
-			log.Println("---------3", averagePrices)
+			log.Println("---------3",closePriceSum, averagePrices)
 
 			//1. c_o : Value would be either 0 or 1 , if today’s close is greater than today's open its 1 else 0
 			if dailyBar.C > dailyBar.O {
@@ -154,11 +155,14 @@ func (db *DB) PatternFeature(tickers []string, start, last14Days, last200Days st
 			}
 
 			//2. 14_days_change_pct : change in closing price in percentage from 14 days ago close to todays close (formula is 14 day's close - today's close / 1
-			value14DaysChangePct = (last14DaysDailyBar.C - dailyBar.C) / last14DaysDailyBar.C
-
+			value14DaysChangePct = ((dailyBar.C - last14DaysDailyBar.C) / last14DaysDailyBar.C) * 100
+			log.Println("---------4",dailyBar.C ,last14DaysDailyBar.C)
+			if (dailyBar.C == 0 || last14DaysDailyBar.C ==0){
+				value14DaysChangePct =0
+			} 
 			//3. above_200ma : value would be 0 or 1, 0 when its below or less than last 200 days average closing price else 1
 			if dailyBar.C > averagePrices {
-				co = true
+				above200Ma = true
 			}
 			patternFeatureRecord := &PatternFeature{
 				Ticker:               ticker,
@@ -182,12 +186,12 @@ func (db *DB) PatternFeature(tickers []string, start, last14Days, last200Days st
 	j := len(patternFeatureRecords) - 1
 	for i = 0; i < j; i += chunk {
 		start := i
-		end := i+ chunk
-		if j-i<chunk {
+		end := i + chunk
+		if j-i < chunk {
 			end = j
 		}
-		temporary := patternFeatureRecords[start : end]
-		log.Println("lllllll", i, "---", len(temporary))
+		temporary := patternFeatureRecords[start:end]
+		log.Println("lllllll", start, "---", end)
 		err := db.Create(temporary).Error
 		if err != nil {
 			fmt.Println(err)
