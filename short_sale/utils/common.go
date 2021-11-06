@@ -108,12 +108,11 @@ func ClearFile(specUrl string) error {
 
 	e := os.Remove(absPath1)
 	if e != nil {
-		log.Fatal(e)
+		log.Println(e)
 	}
 	e = os.Remove(absPath2)
 	if e != nil {
-		log.Fatal(e)
+		log.Println(e)
 	}
-	log.Fatal("===============")
 	return e
 }
