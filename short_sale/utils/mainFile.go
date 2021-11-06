@@ -280,7 +280,7 @@ func insertData(db *DB, arr []ShortSale, date string) error {
 		// log.Println("value of i ", i)
 	}
 	log.Println("=================int(calLoop)", int(calLoop))
-	log.Fatal("=================intLoop", intLoop)
+	// log.Fatal("=================intLoop", intLoop)
 	for i := 100; i <= len(listStartEndPoint); i += 100 {
 		log.Println("================ workerpool i", i)
 		insertDatabase := workerpool.New(i)
