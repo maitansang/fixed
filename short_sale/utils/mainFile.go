@@ -243,35 +243,38 @@ func insertData(db *DB, arr []ShortSale, date string) error {
 
 	calLoop := math.Ceil(loop)
 	intLoop := int(calLoop)
+	var listStartEndPoint = make(map[int64]int64)
 	for i := 0; i < int(calLoop); i += 1 {
 		start := (len(arr) / intLoop) * i
 		end := (len(arr) / intLoop) * (i + 1)
 		if (i + 1) >= intLoop {
 			end = len(arr)
 		}
-		existTable := db.Migrator().HasTable("short_sale_" + dateTable)
-		if existTable == true {
-		} else {
-			if err := db.Migrator().CreateTable(&ShortSale{}); err != nil {
-				log.Println("error create table")
-				return err
-			}
-			if err := db.Migrator().RenameTable("short_sales", "short_sale_"+dateTable); err != nil {
-				log.Println("error rename table")
-				return err
-			}
-		}
-		err := db.Table("short_sale_" + dateTable).Create(arr[start:end]).Error
-		if err != nil {
-			log.Println("================ err existTable", err, existTable)
-			log.Fatal(err)
-		}
-		log.Println("================ numField", numField)
-		log.Println("================ parameters", parameters)
-		log.Println("================ len(arr)", len(arr))
-		log.Println("start of end ", start, end)
-		log.Println("value of i ", i)
+		listStartEndPoint[int64(start)] = int64(end)
+		// existTable := db.Migrator().HasTable("short_sale_" + dateTable)
+		// if existTable == true {
+		// } else {
+		// 	if err := db.Migrator().CreateTable(&ShortSale{}); err != nil {
+		// 		log.Println("error create table")
+		// 		return err
+		// 	}
+		// 	if err := db.Migrator().RenameTable("short_sales", "short_sale_"+dateTable); err != nil {
+		// 		log.Println("error rename table")
+		// 		return err
+		// 	}
+		// }
+		// err := db.Table("short_sale_" + dateTable).Create(arr[start:end]).Error
+		// if err != nil {
+		// 	log.Println("================ err existTable", err, existTable)
+		// 	log.Fatal(err)
+		// }
+		// log.Println("================ numField", numField)
+		// log.Println("================ parameters", parameters)
+		// log.Println("================ len(arr)", len(arr))
+		// log.Println("start of end ", start, end)
+		// log.Println("value of i ", i)
 	}
+	log.Fatal("listStartEndPoint", listStartEndPoint)
 
 	return nil
 }
