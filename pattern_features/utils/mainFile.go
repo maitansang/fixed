@@ -94,7 +94,7 @@ func MainFunc() {
 	end, _ := time.Parse("2006-01-02", os.Args[1])
 	// Create new table average_volumes
 	db.AutoMigrate(&PatternFeature{})
-	wp := workerpool.New(100)
+	wp := workerpool.New(6)
 	for t := start; t.After(end); t = t.AddDate(0, 0, -1) {
 		t := t
 		wp.Submit(func() {
