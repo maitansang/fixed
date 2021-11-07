@@ -94,22 +94,27 @@ func MainFunc() {
 	end, _ := time.Parse("2006-01-02", os.Args[1])
 	// Create new table average_volumes
 	db.AutoMigrate(&PatternFeature{})
+	wp := workerpool.New(100)
 	for t := start; t.After(end); t = t.AddDate(0, 0, -1) {
-		if t.Weekday() == 0 || t.Weekday() == 6 {
-			log.Println("-----t", t)
-			continue
-		}
-		log.Println("-----start end", start, end)
-		last20Days := t.AddDate(0, 0, -20).Format("2006-01-02")
-		last200Days := t.AddDate(0, 0, -200).Format("2006-01-02")
-		log.Println("-----", start, last20Days, last200Days)
-		err = db.PatternFeature(allTickers, t.Format("2006-01-02"), last20Days, last200Days)
-		if err != nil {
-			log.Fatal("Error when get v from dailybars", err)
-			return
-		}
+		t := t
+		wp.Submit(func() {
+			if t.Weekday() == 0 || t.Weekday() == 6 {
+				log.Println("-----t", t)
+				// continue
+			} else {
+				log.Println("-----start end", start, end)
+				last20Days := t.AddDate(0, 0, -20).Format("2006-01-02")
+				last200Days := t.AddDate(0, 0, -200).Format("2006-01-02")
+				log.Println("-----", start, last20Days, last200Days)
+				err = db.PatternFeature(allTickers, t.Format("2006-01-02"), last20Days, last200Days)
+				if err != nil {
+					log.Fatal("Error when get v from dailybars", err)
+					return
+				}
+			}
+		})
 	}
-
+	wp.StopWait()
 	log.Println("done")
 }
 func (db *DB) PatternFeature(tickers []string, start, last20Days, last200Days string) error {
