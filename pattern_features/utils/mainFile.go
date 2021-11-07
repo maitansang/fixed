@@ -15,7 +15,7 @@ type PatternFeature struct {
 	Ticker               string
 	Date                 string
 	CO                   bool
-	Value14DaysChangePct string
+	Value20DaysChangePct string
 	Above200Ma           bool
 }
 type DailyBar struct {
@@ -100,10 +100,10 @@ func MainFunc() {
 			continue
 		}
 		log.Println("-----start end", start, end)
-		last14Days := t.AddDate(0, 0, -14).Format("2006-01-02")
+		last20Days := t.AddDate(0, 0, -20).Format("2006-01-02")
 		last200Days := t.AddDate(0, 0, -200).Format("2006-01-02")
-		log.Println("-----", start, last14Days, last200Days)
-		err = db.PatternFeature(allTickers, t.Format("2006-01-02"), last14Days, last200Days)
+		log.Println("-----", start, last20Days, last200Days)
+		err = db.PatternFeature(allTickers, t.Format("2006-01-02"), last20Days, last200Days)
 		if err != nil {
 			log.Fatal("Error when get v from dailybars", err)
 			return
@@ -112,7 +112,7 @@ func MainFunc() {
 
 	log.Println("done")
 }
-func (db *DB) PatternFeature(tickers []string, start, last14Days, last200Days string) error {
+func (db *DB) PatternFeature(tickers []string, start, last20Days, last200Days string) error {
 	var patternFeatureRecords []*PatternFeature
 	wp := workerpool.New(100)
 
@@ -120,7 +120,7 @@ func (db *DB) PatternFeature(tickers []string, start, last14Days, last200Days st
 		ticker := ticker
 		wp.Submit(func() {
 			var dailyBar DailyBar
-			var last14DaysDailyBar DailyBar
+			var last20DaysDailyBar DailyBar
 			var last200DaysDailyBar []DailyBar
 			var closePriceSum float64
 			var averagePrices float64
@@ -133,7 +133,7 @@ func (db *DB) PatternFeature(tickers []string, start, last14Days, last200Days st
 				log.Fatal("Error when get v from dailybars", err)
 				return
 			}
-			err = db.DB.Raw("select o,c from dailybars where ticker = ? and date=?", ticker, last14Days).Scan(&last14DaysDailyBar).Error
+			err = db.DB.Raw("select o,c from dailybars where ticker = ? and date=?", ticker, last20Days).Scan(&last20DaysDailyBar).Error
 			if err != nil {
 				log.Fatal("Error when get v from dailybars", err)
 				return
@@ -151,9 +151,9 @@ func (db *DB) PatternFeature(tickers []string, start, last14Days, last200Days st
 
 			above200Ma := false
 			co := false
-			var value14DaysChangePct float64
+			var value20DaysChangePct float64
 			log.Println("---------0", dailyBar)
-			log.Println("---------1", last14DaysDailyBar)
+			log.Println("---------1", last20DaysDailyBar)
 			log.Println("---------2", len(last200DaysDailyBar))
 			log.Println("---------3", closePriceSum, averagePrices)
 
@@ -162,11 +162,11 @@ func (db *DB) PatternFeature(tickers []string, start, last14Days, last200Days st
 				co = true
 			}
 
-			//2. 14_days_change_pct : change in closing price in percentage from 14 days ago close to todays close (formula is 14 day's close - today's close / 1
-			value14DaysChangePct = ((dailyBar.C - last14DaysDailyBar.C) / last14DaysDailyBar.C) * 100
-			log.Println("---------4", dailyBar.C, last14DaysDailyBar.C)
-			if dailyBar.C == 0 || last14DaysDailyBar.C == 0 {
-				value14DaysChangePct = 0
+			//2. 20_days_change_pct : change in closing price in percentage from 20 days ago close to todays close (formula is 20 day's close - today's close / 1
+			value20DaysChangePct = ((dailyBar.C - last20DaysDailyBar.C) / last20DaysDailyBar.C) * 100
+			log.Println("---------4", dailyBar.C, last20DaysDailyBar.C)
+			if dailyBar.C == 0 || last20DaysDailyBar.C == 0 {
+				value20DaysChangePct = 0
 			}
 			//3. above_200ma : value would be 0 or 1, 0 when its below or less than last 200 days average closing price else 1
 			if dailyBar.C > averagePrices {
@@ -176,7 +176,7 @@ func (db *DB) PatternFeature(tickers []string, start, last14Days, last200Days st
 				Ticker:               ticker,
 				Date:                 start,
 				CO:                   co,
-				Value14DaysChangePct: fmt.Sprintf("%f", value14DaysChangePct),
+				Value20DaysChangePct: fmt.Sprintf("%f", value20DaysChangePct),
 				Above200Ma:           above200Ma,
 			}
 			log.Println("===========0", patternFeatureRecord)
