@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/pkg/errors"
 )
@@ -21,51 +20,6 @@ func arrayToString(a []int, delim string) string {
 	return strings.Trim(strings.Replace(fmt.Sprint(a), " ", delim, -1), "[]")
 }
 
-func (db TransDB) InsertDataTableTransactions(ticker string, r *[]Result) error {
-	if len(*r) == 0 {
-		return nil
-	}
-	dateInsert := (*r)[0].T
-	timeName := time.Unix(0, dateInsert)
-	timeInsert := timeName.Format("2006-01-02")
-	timeString := strings.Replace(timeInsert, "-", "_", 2)
-
-	for _, data := range *r {
-		timeHuman := time.Unix(data.T/1000000000, 0)
-
-		qry := fmt.Sprintf(`INSERT INTO transactions_%s (date,ticker,t,q,i,c,p,s,e,x,r,z,time,transaction_type)
-					VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`, timeString)
-		layout := "2006-01-02"
-		t, err := time.Parse(layout, timeInsert)
-
-		if err != nil {
-			fmt.Println(err)
-		}
-		_, err = db.Exec(
-			qry,
-			t,
-			ticker,
-			data.T,
-			data.Q,
-			data.I,
-			arrayToString(data.C, ","),
-			data.P,
-			data.S,
-			data.E,
-			data.X,
-			data.R,
-			data.Z,
-			timeHuman,
-			1,
-		)
-		if err != nil {
-			log.Println("can not insert data table: ", err, data.I)
-			errors.Wrap(err, "Cannot add query")
-		}
-		// break
-	}
-	return nil
-}
 func (db *DB) getTickers() ([]string, error) {
 	res, err := http.Get(URL_TICKERS)
 	if err != nil {

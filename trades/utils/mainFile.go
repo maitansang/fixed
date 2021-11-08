@@ -50,38 +50,38 @@ func InitDB() (*DB, *TransDB, error) {
 	return d, transDB, nil
 }
 
-func createTransactionTable(transDB *TransDB, timeString string) error {
-	dropTable := fmt.Sprintf("%s%s", "DROP TABLE IF EXISTS transactions_", timeString)
-	_, err := transDB.Exec(dropTable)
-	if err != nil {
-		log.Println("can not drop table: ", err)
-	}
-	queryStr := fmt.Sprintf("%s%s%s", "CREATE TABLE IF NOT EXISTS transactions_", timeString, `(
-		date date,
-		ticker text,
-		t bigint,
-		q integer,
-		i bigint,
-		c text,
-		p numeric,
-		s numeric,
-		e integer,
-		x integer,
-		r integer,
-		z integer,
-		time time without time zone,
-		transaction_type integer
-		)`)
-	result, err := transDB.Exec(queryStr)
-	if err != nil {
-		return err
-	}
-	if result != nil {
-		return err
-	}
+// func createTransactionTable(transDB *TransDB, timeString string) error {
+// 	dropTable := fmt.Sprintf("%s%s", "DROP TABLE IF EXISTS transactions_", timeString)
+// 	_, err := transDB.Exec(dropTable)
+// 	if err != nil {
+// 		log.Println("can not drop table: ", err)
+// 	}
+// 	queryStr := fmt.Sprintf("%s%s%s", "CREATE TABLE IF NOT EXISTS transactions_", timeString, `(
+// 		date date,
+// 		ticker text,
+// 		t bigint,
+// 		q integer,
+// 		i bigint,
+// 		c text,
+// 		p numeric,
+// 		s numeric,
+// 		e integer,
+// 		x integer,
+// 		r integer,
+// 		z integer,
+// 		time time without time zone,
+// 		transaction_type integer
+// 		)`)
+// 	result, err := transDB.Exec(queryStr)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	if result != nil {
+// 		return err
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
 func MainFunc() {
 	loc, err := time.LoadLocation("America/New_York")
@@ -118,10 +118,10 @@ func MainFunc() {
 		timeString := t.Format("2006-01-02")
 		timeString = strings.Replace(timeString, "-", "_", 2)
 
-		err := createTransactionTable(transDB, timeString)
-		if err != nil {
-			log.Fatalln("Can't create table", err)
-		}
+		// err := createTransactionTable(transDB, timeString)
+		// if err != nil {
+		// 	log.Fatalln("Can't create table", err)
+		// }
 	}
 
 	wp := workerpool.New(500)
@@ -132,7 +132,7 @@ func MainFunc() {
 				if t.Weekday() == 0 || t.Weekday() == 6 {
 					continue
 				}
-				db.getTrades(tickerSUB, t, transDB)
+				db.getTrades(tickerSUB, t)
 			}
 		})
 	}
@@ -147,18 +147,28 @@ const URL_TRADES_ADDITIONAL = `https://api.polygon.io/v2/ticks/stocks/trades/%s/
 
 // json fields in struct must be exported
 type Result struct {
+	// II int64   `json:"I,omitempy"`
 	X int64   `json:"x"` // x
 	P float64 `json:"p"` //  p*s
-	I string  `json:"i"`
-	E int64   `json:"e"`
-	R int64   `json:"r"`
-	T int64   `json:"t"` //
-	// 	Y int64   `json:"y"`
-	// 	F int64   `json:"f"`
-	Q int64 `json:"q"`
+	//I string  `json:"i"`
+	// E  int64   `json:"e"`
+	// R  int64   `json:"r"`
+	T int64 `json:"t"` //
+	// Y  int64   `json:"y"`
+	// F  int64   `json:"f"`
+	// Q  int64   `json:"q"`
 	C []int `json:"c"` // c
 	S int64 `json:"s"` // s
 	Z int64 `json:"z"`
+	/*
+		x integer,
+		i bigint,
+		z integer,
+		p real,
+		s bigint,
+		c integer[],
+		t bigint
+	*/
 }
 type TradesData struct {
 	Ticker       string   `json:"ticker"`
@@ -169,7 +179,7 @@ type TradesData struct {
 	//Map          map[string]interface{} `json:"map"`
 }
 
-func (db DB) getTrades(ticker string, start time.Time, transDB *TransDB) {
+func (db DB) getTrades(ticker string, start time.Time) {
 	log.Println("============", ticker)
 	var newRes []Result
 
@@ -211,9 +221,9 @@ func (db DB) getTrades(ticker string, start time.Time, transDB *TransDB) {
 	// log.Println("got data", ticker, start)
 
 	// return
-	if err := transDB.InsertDataTableTransactions(ticker, &newRes); err != nil {
-		log.Println("Can not insert data table transaction")
-	}
+	// if err := transDB.InsertDataTableTransactions(ticker, &newRes); err != nil {
+	// 	log.Println("Can not insert data table transaction")
+	// }
 
 	var largestOrder Result
 	var sum int64
