@@ -39,14 +39,14 @@ func main() {
 	c := cron.New()
 	c.Start()
 	c.AddFunc("TZ=America/New_York 00 30 22 * * *", func() {
-		db.Exec("SELECT 
+		db.Exec(`SELECT 
 		pg_terminate_backend(pid)   
 		FROM 
 		pg_stat_activity 
 		WHERE 
 		  pid <> pg_backend_pid()
 		 AND datname = 'stockmarket'
-		AND state IN ('idle','idle in transaction','idle in transaction (aborted)');")
+		AND state IN ('idle','idle in transaction','idle in transaction (aborted)');`)
 		loc, _ := time.LoadLocation("America/New_York")
 		currentTime := time.Now().In(loc)
 		start = currentTime.AddDate(0, 0, -1).Format("2006-01-02")
