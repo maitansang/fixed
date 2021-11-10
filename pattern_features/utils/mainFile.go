@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"strconv"
 	"time"
 
@@ -86,17 +87,22 @@ func MainFunc() {
 		return
 	}
 	defer sqlDB.Close()
-	// allTickers, err := db.getAllTicker()
-	// if err != nil {
-	// 	log.Println("Error when get all ticker", err)
-	// 	return
-	// }
-	allTickers := []string{"AAPL", "SPY"}
+	allTickers, err := db.getAllTicker()
+	if err != nil {
+		log.Println("Error when get all ticker", err)
+		return
+	}
+	// allTickers := []string{"AAPL", "SPY"}
 	start, _ := time.Parse("2006-01-02", os.Args[2])
 	end, _ := time.Parse("2006-01-02", os.Args[1])
 	// Create new table average_volumes
 	db.AutoMigrate(&PatternFeature{})
-	wp := workerpool.New(6)
+	// Remove old file
+	e := os.Remove("data.csv")
+    if e != nil {
+        log.Println(e)
+    }
+	wp := workerpool.New(100)
 	lines:= []string{"ticker,date,co,value20_days_change_pct,above_200_ma"}
 	for t := start; t.After(end); t = t.AddDate(0, 0, -1) {
 		t := t
@@ -118,14 +124,14 @@ func MainFunc() {
 		})
 	}
 	wp.StopWait()
-	if err:=writeLines([]string{"ticker,date,co,value20_days_change_pct,above200_ma"},"data.csv");err !=nil{
-		log.Println("eeeeeeee",err)
-		return
-	}
 	if err:=writeLines(lines,"data.csv");err !=nil{
-		log.Println("eeeeeeee1",err)
-		return
+		log.Fatal("error",err)
 	}
+	cmd := exec.Command("sh", "run.sh")
+	if err := cmd.Run(); err !=nil{
+		log.Fatal(err)
+	}
+
 	log.Println("done")
 }
 func (db *DB) PatternFeature(tickers []string, start, last20Days, last200Days string) ([]string,error) {
