@@ -1,0 +1,3 @@
+ticker,date,co,value20_days_change_pct,above200_ma
+SPY,2021-11-09,false,3.308946,true
+AAPL,2021-11-09,true,1.038458,true
