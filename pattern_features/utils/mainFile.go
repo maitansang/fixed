@@ -101,7 +101,7 @@ func MainFunc() {
     if e != nil {
         log.Println(e)
     }
-	wp := workerpool.New(100)
+	wp := workerpool.New(20)
 	lines:= []string{"ticker,date,co,value20_days_change_pct,above_200_ma"}
 	for t := start; t.After(end); t = t.AddDate(0, 0, -1) {
 		t := t
