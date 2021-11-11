@@ -102,7 +102,7 @@ func MainFunc() {
         log.Println(e)
     }
 	wp := workerpool.New(20)
-	lines:= []string{"ticker,date,co,value20_days_change_pct,above_200_ma"}
+	var linesTotal []string
 	for t := start; t.After(end); t = t.AddDate(0, 0, -1) {
 		t := t
 		wp.Submit(func() {
@@ -114,16 +114,17 @@ func MainFunc() {
 				last20Days := t.AddDate(0, 0, -20).Format("2006-01-02")
 				last200Days := t.AddDate(0, 0, -200).Format("2006-01-02")
 				log.Println("-----", start, last20Days, last200Days)
-				lines,err = db.PatternFeature(allTickers, t.Format("2006-01-02"), last20Days, last200Days)
+				lines,err := db.PatternFeature(allTickers, t.Format("2006-01-02"), last20Days, last200Days)
 				if err != nil {
 					log.Fatal("Error when get v from dailybars", err)
 					return
 				}
-			}
+				linesTotal = append(linesTotal, lines...)
+						}
 		})
 	}
 	wp.StopWait()
-	if err:=writeLines(lines,"data.csv");err !=nil{
+	if err:=writeLines(linesTotal,"data.csv");err !=nil{
 		log.Fatal("error",err)
 	}
 	cmd := exec.Command("sh", "run.sh")
