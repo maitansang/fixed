@@ -31,8 +31,7 @@ type DB struct {
 
 func (db DB) getAllTicker() ([]string, error) {
 	var tickers []string
-	if err := db.DB.Table("tickers").
-		Select("symbol").Scan(&tickers).Error; err != nil {
+	if 	err := db.DB.Raw("SELECT DISTINCT ticker  FROM dailybars where ticker is not null ").Scan(&tickers).Error; err!=nil{
 		log.Println("Error when get all ticker ", err)
 		return nil, err
 	}
