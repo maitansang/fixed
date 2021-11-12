@@ -1,9 +1,12 @@
 package utils
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
+	"strconv"
 	"time"
 
 	"github.com/gammazero/workerpool"
@@ -14,9 +17,9 @@ import (
 type PatternFeature struct {
 	Ticker               string
 	Date                 string
-	CO                   bool
+	CO                   string
 	Value20DaysChangePct string
-	Above200Ma           bool
+	Above200Ma           string
 }
 type DailyBar struct {
 	O float64
@@ -28,8 +31,7 @@ type DB struct {
 
 func (db DB) getAllTicker() ([]string, error) {
 	var tickers []string
-	if err := db.DB.Table("tickers").
-		Select("symbol").Scan(&tickers).Error; err != nil {
+	if err := db.DB.Raw("SELECT DISTINCT ticker  FROM dailybars where ticker is not null ").Scan(&tickers).Error; err != nil {
 		log.Println("Error when get all ticker ", err)
 		return nil, err
 	}
@@ -94,7 +96,13 @@ func MainFunc() {
 	end, _ := time.Parse("2006-01-02", os.Args[1])
 	// Create new table average_volumes
 	db.AutoMigrate(&PatternFeature{})
-	wp := workerpool.New(100)
+	// Remove old file
+	e := os.Remove("data.csv")
+	if e != nil {
+		log.Println(e)
+	}
+	wp := workerpool.New(20)
+	var linesTotal []string
 	for t := start; t.After(end); t = t.AddDate(0, 0, -1) {
 		t := t
 		wp.Submit(func() {
@@ -106,21 +114,29 @@ func MainFunc() {
 				last20Days := t.AddDate(0, 0, -20).Format("2006-01-02")
 				last200Days := t.AddDate(0, 0, -200).Format("2006-01-02")
 				log.Println("-----", start, last20Days, last200Days)
-				err = db.PatternFeature(allTickers, t.Format("2006-01-02"), last20Days, last200Days)
+				lines, err := db.PatternFeature(allTickers, t.Format("2006-01-02"), last20Days, last200Days)
 				if err != nil {
 					log.Fatal("Error when get v from dailybars", err)
 					return
 				}
+				linesTotal = append(linesTotal, lines...)
 			}
 		})
 	}
 	wp.StopWait()
+	if err := writeLines(linesTotal, "data.csv"); err != nil {
+		log.Fatal("error", err)
+	}
+	cmd := exec.Command("sh", "run.sh")
+	if err := cmd.Run(); err != nil {
+		log.Fatal(err)
+	}
+
 	log.Println("done")
 }
-func (db *DB) PatternFeature(tickers []string, start, last20Days, last200Days string) error {
-	var patternFeatureRecords []*PatternFeature
+func (db *DB) PatternFeature(tickers []string, start, last20Days, last200Days string) ([]string, error) {
 	wp := workerpool.New(100)
-
+	var lines []string
 	for k, ticker := range tickers {
 		ticker := ticker
 		wp.Submit(func() {
@@ -157,10 +173,6 @@ func (db *DB) PatternFeature(tickers []string, start, last20Days, last200Days st
 			above200Ma := false
 			co := false
 			var value20DaysChangePct float64
-			log.Println("---------0", dailyBar)
-			log.Println("---------1", last20DaysDailyBar)
-			log.Println("---------2", len(last200DaysDailyBar))
-			log.Println("---------3", closePriceSum, averagePrices)
 
 			//1. c_o : Value would be either 0 or 1 , if today’s close is greater than today's open its 1 else 0
 			if dailyBar.C > dailyBar.O {
@@ -169,7 +181,6 @@ func (db *DB) PatternFeature(tickers []string, start, last20Days, last200Days st
 
 			//2. 20_days_change_pct : change in closing price in percentage from 20 days ago close to todays close (formula is 20 day's close - today's close / 1
 			value20DaysChangePct = ((dailyBar.C - last20DaysDailyBar.C) / last20DaysDailyBar.C) * 100
-			log.Println("---------4", dailyBar.C, last20DaysDailyBar.C)
 			if dailyBar.C == 0 || last20DaysDailyBar.C == 0 {
 				value20DaysChangePct = 0
 			}
@@ -177,40 +188,30 @@ func (db *DB) PatternFeature(tickers []string, start, last20Days, last200Days st
 			if dailyBar.C > averagePrices {
 				above200Ma = true
 			}
-			patternFeatureRecord := &PatternFeature{
-				Ticker:               ticker,
-				Date:                 start,
-				CO:                   co,
-				Value20DaysChangePct: fmt.Sprintf("%f", value20DaysChangePct),
-				Above200Ma:           above200Ma,
-			}
-			log.Println("===========0", patternFeatureRecord)
-			patternFeatureRecords = append(patternFeatureRecords, patternFeatureRecord)
+			line := ticker + "," + start + "," + strconv.FormatBool(co) + "," + fmt.Sprintf("%f", value20DaysChangePct) + "," + strconv.FormatBool(above200Ma)
+			lines = append(lines, line)
 		})
-
 	}
 	wp.StopWait()
 
 	//Clear old data
 	db.Where("date = ?", start).Delete(PatternFeature{})
-	fmt.Println("len(averageVolumeRecords)", len(patternFeatureRecords))
-	chunk := 10000
-	i := 0
-	j := len(patternFeatureRecords)
-	for i = 0; i < j; i += chunk {
-		start := i
-		end := i + chunk
-		if j-i < chunk {
-			end = j
-		}
-		temporary := patternFeatureRecords[start:end]
-		log.Println("lllllll", start, "---", end)
-		err := db.Create(temporary).Error
-		if err != nil {
-			fmt.Println(err)
-		}
-		// do whatever
-	}
+	// ExcuteCopyFileCsv("../data.csv")
 
-	return nil
+	return lines, nil
+}
+
+// writeLines writes the lines to the given file.
+func writeLines(lines []string, path string) error {
+	file, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	w := bufio.NewWriter(file)
+	for _, line := range lines {
+		fmt.Fprintln(w, line)
+	}
+	return w.Flush()
 }
