@@ -103,20 +103,21 @@ func MainFunc() {
 	if e != nil {
 		log.Println(e)
 	}
-	wp := workerpool.New(20)
+	wp := workerpool.New(100)
 	var linesTotal []string
-	for t := start; t.After(end); t = t.AddDate(0, 0, -1) {
-		t := t
+	for _, ticker := range allTickers {
+		ticker := ticker
 		wp.Submit(func() {
-			if t.Weekday() == 0 || t.Weekday() == 6 {
-				log.Println("-----t", t)
-				// continue
-			} else {
+			for t := start; t.After(end); t = t.AddDate(0, 0, -1) {
+				if t.Weekday() == 0 || t.Weekday() == 6 {
+					log.Println("-----t", t)
+					continue
+				}
 				log.Println("-----start end", start, end)
 				last20Days := t.AddDate(0, 0, -20).Format("2006-01-02")
 				last200Days := t.AddDate(0, 0, -200).Format("2006-01-02")
 				log.Println("-----", start, last20Days, last200Days)
-				lines, err := db.PatternFeature(allTickers, t.Format("2006-01-02"), last20Days, last200Days)
+				lines, err := db.PatternFeature(ticker, t.Format("2006-01-02"), last20Days, last200Days)
 				if err != nil {
 					log.Fatal("Error when get v from dailybars", err)
 					return
@@ -136,72 +137,65 @@ func MainFunc() {
 
 	log.Println("done")
 }
-func (db *DB) PatternFeature(tickers []string, start, last20Days, last200Days string) ([]string, error) {
-	wp := workerpool.New(100)
+func (db *DB) PatternFeature(ticker string, start, last20Days, last200Days string) ([]string, error) {
 	var lines []string
-	for k, ticker := range tickers {
-		ticker := ticker
-		wp.Submit(func() {
-			var dailyBar DailyBar
-			var last20DaysDailyBar DailyBar
-			var last200DaysDailyBar []DailyBar
-			var closePriceSum float64
-			var averagePrices float64
+	var dailyBar DailyBar
+	var last20DaysDailyBar DailyBar
+	var last200DaysDailyBar []DailyBar
+	var closePriceSum float64
+	var averagePrices float64
 
-			if k == len(tickers) {
-				return
-			}
-			// err := db.DB.Raw("select o,c from dailybars where ticker = ? and date=?", ticker, start).Scan(&dailyBar).Error
-			// if err != nil {
-			// 	log.Fatal("Error when get v from dailybars", err)
-			// 	return
-			// }
-			// err = db.DB.Raw("select o,c from dailybars where ticker = ? and date=?", ticker, last20Days).Scan(&last20DaysDailyBar).Error
-			// if err != nil {
-			// 	log.Fatal("Error when get v from dailybars", err)
-			// 	return
-			// }
-			err := db.DB.Raw("select * from dailybars where ticker = ?  and date>? and date<=?", ticker, last200Days, start).Scan(&last200DaysDailyBar).Error
-			if err != nil {
-				log.Fatal("Error when get v from dailybars", err)
-				return
-			}
-
-			for _, v := range last200DaysDailyBar {
-				closePriceSum = closePriceSum + v.C
-				if v.Date.Format("2006-01-02") == start {
-					dailyBar = v
-				}
-				if v.Date.Format("2006-01-02") == last20Days {
-					last20DaysDailyBar = v
-				}
-			}
-
-			averagePrices = closePriceSum / float64(len(last200DaysDailyBar))
-
-			above200Ma := false
-			co := false
-			var value20DaysChangePct float64
-
-			//1. c_o : Value would be either 0 or 1 , if today’s close is greater than today's open its 1 else 0
-			if dailyBar.C > dailyBar.O {
-				co = true
-			}
-
-			//2. 20_days_change_pct : change in closing price in percentage from 20 days ago close to todays close (formula is 20 day's close - today's close / 1
-			value20DaysChangePct = ((dailyBar.C - last20DaysDailyBar.C) / last20DaysDailyBar.C) * 100
-			if dailyBar.C == 0 || last20DaysDailyBar.C == 0 {
-				value20DaysChangePct = 0
-			}
-			//3. above_200ma : value would be 0 or 1, 0 when its below or less than last 200 days average closing price else 1
-			if dailyBar.C > averagePrices {
-				above200Ma = true
-			}
-			line := ticker + "," + start + "," + strconv.FormatBool(co) + "," + fmt.Sprintf("%f", value20DaysChangePct) + "," + strconv.FormatBool(above200Ma)
-			lines = append(lines, line)
-		})
+	// if k == len(tickers) {
+	// 	return
+	// }
+	// err := db.DB.Raw("select o,c from dailybars where ticker = ? and date=?", ticker, start).Scan(&dailyBar).Error
+	// if err != nil {
+	// 	log.Fatal("Error when get v from dailybars", err)
+	// 	return
+	// }
+	// err = db.DB.Raw("select o,c from dailybars where ticker = ? and date=?", ticker, last20Days).Scan(&last20DaysDailyBar).Error
+	// if err != nil {
+	// 	log.Fatal("Error when get v from dailybars", err)
+	// 	return
+	// }
+	err := db.DB.Raw("select * from dailybars where ticker = ?  and date>? and date<=?", ticker, last200Days, start).Scan(&last200DaysDailyBar).Error
+	if err != nil {
+		log.Fatal("Error when get v from dailybars", err)
+		return nil, err
 	}
-	wp.StopWait()
+
+	for _, v := range last200DaysDailyBar {
+		closePriceSum = closePriceSum + v.C
+		if v.Date.Format("2006-01-02") == start {
+			dailyBar = v
+		}
+		if v.Date.Format("2006-01-02") == last20Days {
+			last20DaysDailyBar = v
+		}
+	}
+
+	averagePrices = closePriceSum / float64(len(last200DaysDailyBar))
+
+	above200Ma := false
+	co := false
+	var value20DaysChangePct float64
+
+	//1. c_o : Value would be either 0 or 1 , if today’s close is greater than today's open its 1 else 0
+	if dailyBar.C > dailyBar.O {
+		co = true
+	}
+
+	//2. 20_days_change_pct : change in closing price in percentage from 20 days ago close to todays close (formula is 20 day's close - today's close / 1
+	value20DaysChangePct = ((dailyBar.C - last20DaysDailyBar.C) / last20DaysDailyBar.C) * 100
+	if dailyBar.C == 0 || last20DaysDailyBar.C == 0 {
+		value20DaysChangePct = 0
+	}
+	//3. above_200ma : value would be 0 or 1, 0 when its below or less than last 200 days average closing price else 1
+	if dailyBar.C > averagePrices {
+		above200Ma = true
+	}
+	line := ticker + "," + start + "," + strconv.FormatBool(co) + "," + fmt.Sprintf("%f", value20DaysChangePct) + "," + strconv.FormatBool(above200Ma)
+	lines = append(lines, line)
 
 	//Clear old data
 	db.Where("date = ?", start).Delete(PatternFeature{})
