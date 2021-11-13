@@ -22,8 +22,10 @@ type PatternFeature struct {
 	Above200Ma           string
 }
 type DailyBar struct {
-	O float64
-	C float64
+	Ticker string
+	Date   time.Time
+	O      float64
+	C      float64
 }
 type DB struct {
 	*gorm.DB
@@ -149,17 +151,17 @@ func (db *DB) PatternFeature(tickers []string, start, last20Days, last200Days st
 			if k == len(tickers) {
 				return
 			}
-			err := db.DB.Raw("select o,c from dailybars where ticker = ? and date=?", ticker, start).Scan(&dailyBar).Error
-			if err != nil {
-				log.Fatal("Error when get v from dailybars", err)
-				return
-			}
-			err = db.DB.Raw("select o,c from dailybars where ticker = ? and date=?", ticker, last20Days).Scan(&last20DaysDailyBar).Error
-			if err != nil {
-				log.Fatal("Error when get v from dailybars", err)
-				return
-			}
-			err = db.DB.Raw("select o,c from dailybars where ticker = ?  and date>? and date<=?", ticker, last200Days, start).Scan(&last200DaysDailyBar).Error
+			// err := db.DB.Raw("select o,c from dailybars where ticker = ? and date=?", ticker, start).Scan(&dailyBar).Error
+			// if err != nil {
+			// 	log.Fatal("Error when get v from dailybars", err)
+			// 	return
+			// }
+			// err = db.DB.Raw("select o,c from dailybars where ticker = ? and date=?", ticker, last20Days).Scan(&last20DaysDailyBar).Error
+			// if err != nil {
+			// 	log.Fatal("Error when get v from dailybars", err)
+			// 	return
+			// }
+			err := db.DB.Raw("select * from dailybars where ticker = ?  and date>? and date<=?", ticker, last200Days, start).Scan(&last200DaysDailyBar).Error
 			if err != nil {
 				log.Fatal("Error when get v from dailybars", err)
 				return
@@ -167,7 +169,14 @@ func (db *DB) PatternFeature(tickers []string, start, last20Days, last200Days st
 
 			for _, v := range last200DaysDailyBar {
 				closePriceSum = closePriceSum + v.C
+				if v.Date.Format("2006-01-02") == start {
+					dailyBar = v
+				}
+				if v.Date.Format("2006-01-02") == last20Days {
+					last20DaysDailyBar = v
+				}
 			}
+
 			averagePrices = closePriceSum / float64(len(last200DaysDailyBar))
 
 			above200Ma := false
