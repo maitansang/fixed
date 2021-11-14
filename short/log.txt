@@ -1,0 +1,523 @@
+2021/03/04 07:59:51 time= 2021-03-04 07:59:51.116880208 -0500 EST m=+0.001311383
+2021/03/04 07:59:51 getting  http://regsho.finra.org/CNMSshvol20210303.txt
+ len= 9558
+2021/03/04 07:59:53 getting  http://regsho.finra.org/CNMSshvol20210302.txt
+ len= 9563
+2021/03/04 07:59:56 getting  http://regsho.finra.org/CNMSshvol20210301.txt
+ len= 9581
+2021/03/04 07:59:58 getting  http://regsho.finra.org/CNMSshvol20210226.txt
+ len= 9568
+2021/03/04 08:00:01 getting  http://regsho.finra.org/CNMSshvol20210225.txt
+ len= 9552
+2021/03/04 08:00:05 getting  http://regsho.finra.org/CNMSshvol20210224.txt
+ len= 9541
+2021/03/04 08:00:07 getting  http://regsho.finra.org/CNMSshvol20210223.txt
+ len= 9563
+2021/03/04 08:00:10 getting  http://regsho.finra.org/CNMSshvol20210222.txt
+ len= 9521
+2021/03/04 08:00:12 getting  http://regsho.finra.org/CNMSshvol20210219.txt
+ len= 9493
+2021/03/04 08:00:14 getting  http://regsho.finra.org/CNMSshvol20210218.txt
+ len= 9471
+2021/03/04 08:00:17 getting  http://regsho.finra.org/CNMSshvol20210217.txt
+ len= 9499
+2021/03/04 08:00:19 getting  http://regsho.finra.org/CNMSshvol20210216.txt
+ len= 9525
+2021/03/04 08:00:21 getting  http://regsho.finra.org/CNMSshvol20210215.txt
+ len= 10
+2021/03/04 08:00:21 getting  http://regsho.finra.org/CNMSshvol20210212.txt
+ len= 9489
+2021/03/04 08:00:24 getting  http://regsho.finra.org/CNMSshvol20210211.txt
+ len= 9444
+2021/03/04 08:00:26 getting  http://regsho.finra.org/CNMSshvol20210210.txt
+ len= 9437
+2021/03/04 08:00:28 getting  http://regsho.finra.org/CNMSshvol20210209.txt
+ len= 9450
+2021/03/04 08:00:30 getting  http://regsho.finra.org/CNMSshvol20210208.txt
+ len= 9475
+2021/03/04 08:00:33 getting  http://regsho.finra.org/CNMSshvol20210205.txt
+ len= 9352
+2021/03/04 08:00:35 getting  http://regsho.finra.org/CNMSshvol20210204.txt
+ len= 9328
+2021/03/04 08:00:37 getting  http://regsho.finra.org/CNMSshvol20210203.txt
+ len= 9310
+2021/03/04 08:00:39 getting  http://regsho.finra.org/CNMSshvol20210202.txt
+ len= 9358
+2021/03/04 08:00:42 getting  http://regsho.finra.org/CNMSshvol20210201.txt
+ len= 9316
+2021/03/04 08:00:44 getting  http://regsho.finra.org/CNMSshvol20210129.txt
+ len= 9300
+2021/03/04 08:00:46 getting  http://regsho.finra.org/CNMSshvol20210128.txt
+ len= 9263
+2021/03/04 08:00:48 getting  http://regsho.finra.org/CNMSshvol20210127.txt
+ len= 9314
+2021/03/04 08:00:51 getting  http://regsho.finra.org/CNMSshvol20210126.txt
+ len= 9288
+2021/03/04 08:00:53 getting  http://regsho.finra.org/CNMSshvol20210125.txt
+ len= 9277
+2021/03/04 08:00:55 getting  http://regsho.finra.org/CNMSshvol20210122.txt
+ len= 9202
+2021/03/04 08:00:57 getting  http://regsho.finra.org/CNMSshvol20210121.txt
+ len= 9209
+2021/03/04 08:01:00 getting  http://regsho.finra.org/CNMSshvol20210120.txt
+ len= 9240
+2021/03/04 08:01:02 getting  http://regsho.finra.org/CNMSshvol20210119.txt
+ len= 9243
+2021/03/04 08:01:04 getting  http://regsho.finra.org/CNMSshvol20210118.txt
+ len= 10
+2021/03/04 08:01:04 getting  http://regsho.finra.org/CNMSshvol20210115.txt
+ len= 9195
+2021/03/04 08:01:07 getting  http://regsho.finra.org/CNMSshvol20210114.txt
+ len= 9198
+2021/03/04 08:01:09 getting  http://regsho.finra.org/CNMSshvol20210113.txt
+ len= 9121
+2021/03/04 08:01:11 getting  http://regsho.finra.org/CNMSshvol20210112.txt
+ len= 9160
+2021/03/04 08:01:13 getting  http://regsho.finra.org/CNMSshvol20210111.txt
+ len= 9156
+2021/03/04 08:01:16 getting  http://regsho.finra.org/CNMSshvol20210108.txt
+ len= 9142
+2021/03/04 08:01:18 getting  http://regsho.finra.org/CNMSshvol20210107.txt
+ len= 9125
+2021/03/04 08:01:21 getting  http://regsho.finra.org/CNMSshvol20210106.txt
+ len= 9089
+2021/03/04 08:01:23 getting  http://regsho.finra.org/CNMSshvol20210105.txt
+ len= 9087
+2021/03/04 08:01:26 getting  http://regsho.finra.org/CNMSshvol20210104.txt
+ len= 9154
+2021/03/04 08:01:28 getting  http://regsho.finra.org/CNMSshvol20210101.txt
+ len= 10
+2021/03/04 08:01:28 getting  http://regsho.finra.org/CNMSshvol20201231.txt
+ len= 9085
+2021/03/04 08:01:31 getting  http://regsho.finra.org/CNMSshvol20201230.txt
+ len= 9059
+2021/03/04 08:01:33 getting  http://regsho.finra.org/CNMSshvol20201229.txt
+ len= 9074
+2021/03/04 08:01:36 getting  http://regsho.finra.org/CNMSshvol20201228.txt
+ len= 9075
+2021/03/04 08:01:38 getting  http://regsho.finra.org/CNMSshvol20201225.txt
+ len= 10
+2021/03/04 08:01:38 getting  http://regsho.finra.org/CNMSshvol20201224.txt
+ len= 8850
+2021/03/04 08:01:41 getting  http://regsho.finra.org/CNMSshvol20201223.txt
+ len= 9054
+2021/03/04 08:01:43 getting  http://regsho.finra.org/CNMSshvol20201222.txt
+ len= 9045
+2021/03/04 08:01:45 getting  http://regsho.finra.org/CNMSshvol20201221.txt
+ len= 9039
+2021/03/04 08:01:48 getting  http://regsho.finra.org/CNMSshvol20201218.txt
+ len= 8973
+2021/03/04 08:01:50 getting  http://regsho.finra.org/CNMSshvol20201217.txt
+ len= 8944
+2021/03/04 08:01:53 getting  http://regsho.finra.org/CNMSshvol20201216.txt
+ len= 8901
+2021/03/04 08:01:55 getting  http://regsho.finra.org/CNMSshvol20201215.txt
+ len= 8977
+2021/03/04 08:01:58 getting  http://regsho.finra.org/CNMSshvol20201214.txt
+ len= 9001
+2021/03/04 08:02:00 getting  http://regsho.finra.org/CNMSshvol20201211.txt
+ len= 8981
+2021/03/04 08:02:03 getting  http://regsho.finra.org/CNMSshvol20201210.txt
+ len= 8943
+2021/03/04 08:02:05 getting  http://regsho.finra.org/CNMSshvol20201209.txt
+ len= 8936
+2021/03/04 08:02:08 getting  http://regsho.finra.org/CNMSshvol20201208.txt
+ len= 8927
+2021/03/04 08:02:10 getting  http://regsho.finra.org/CNMSshvol20201207.txt
+ len= 8951
+2021/03/04 08:02:13 getting  http://regsho.finra.org/CNMSshvol20201204.txt
+ len= 8885
+2021/03/04 08:02:15 getting  http://regsho.finra.org/CNMSshvol20201203.txt
+ len= 8851
+2021/03/04 08:02:17 getting  http://regsho.finra.org/CNMSshvol20201202.txt
+ len= 8836
+2021/03/04 08:02:20 getting  http://regsho.finra.org/CNMSshvol20201201.txt
+ len= 8867
+2021/03/04 08:02:22 getting  http://regsho.finra.org/CNMSshvol20201130.txt
+ len= 8902
+2021/03/04 08:02:25 getting  http://regsho.finra.org/CNMSshvol20201127.txt
+ len= 8561
+2021/03/04 08:02:27 getting  http://regsho.finra.org/CNMSshvol20201126.txt
+ len= 10
+2021/03/04 08:02:27 getting  http://regsho.finra.org/CNMSshvol20201125.txt
+ len= 8751
+2021/03/04 08:02:30 getting  http://regsho.finra.org/CNMSshvol20201124.txt
+ len= 8802
+2021/03/04 08:02:33 getting  http://regsho.finra.org/CNMSshvol20201123.txt
+ len= 8765
+2021/03/04 08:02:35 getting  http://regsho.finra.org/CNMSshvol20201120.txt
+ len= 8634
+2021/03/04 08:02:37 getting  http://regsho.finra.org/CNMSshvol20201119.txt
+ len= 8717
+2021/03/04 08:02:40 getting  http://regsho.finra.org/CNMSshvol20201118.txt
+ len= 8706
+2021/03/04 08:02:42 getting  http://regsho.finra.org/CNMSshvol20201117.txt
+ len= 8653
+2021/03/04 08:02:44 getting  http://regsho.finra.org/CNMSshvol20201116.txt
+ len= 8691
+2021/03/04 08:02:47 getting  http://regsho.finra.org/CNMSshvol20201113.txt
+ len= 8585
+2021/03/04 08:02:49 getting  http://regsho.finra.org/CNMSshvol20201112.txt
+ len= 8567
+2021/03/04 08:02:51 getting  http://regsho.finra.org/CNMSshvol20201111.txt
+ len= 8534
+2021/03/04 08:02:54 getting  http://regsho.finra.org/CNMSshvol20201110.txt
+ len= 8602
+2021/03/04 08:02:56 getting  http://regsho.finra.org/CNMSshvol20201109.txt
+ len= 8635
+2021/03/04 08:02:59 getting  http://regsho.finra.org/CNMSshvol20201106.txt
+ len= 8519
+2021/03/04 08:03:01 getting  http://regsho.finra.org/CNMSshvol20201105.txt
+ len= 8545
+2021/03/04 08:03:04 getting  http://regsho.finra.org/CNMSshvol20201104.txt
+ len= 8463
+2021/03/04 08:03:06 getting  http://regsho.finra.org/CNMSshvol20201103.txt
+ len= 8521
+2021/03/04 08:03:09 getting  http://regsho.finra.org/CNMSshvol20201102.txt
+ len= 8586
+2021/03/04 08:03:11 getting  http://regsho.finra.org/CNMSshvol20201030.txt
+ len= 8541
+2021/03/04 08:03:13 getting  http://regsho.finra.org/CNMSshvol20201029.txt
+ len= 8565
+2021/03/04 08:03:16 getting  http://regsho.finra.org/CNMSshvol20201028.txt
+ len= 8553
+2021/03/04 08:03:18 getting  http://regsho.finra.org/CNMSshvol20201027.txt
+ len= 8464
+2021/03/04 08:03:20 getting  http://regsho.finra.org/CNMSshvol20201026.txt
+ len= 8546
+2021/03/04 08:03:22 getting  http://regsho.finra.org/CNMSshvol20201023.txt
+ len= 8461
+2021/03/04 08:03:25 getting  http://regsho.finra.org/CNMSshvol20201022.txt
+ len= 8484
+2021/03/04 08:03:27 getting  http://regsho.finra.org/CNMSshvol20201021.txt
+ len= 8455
+2021/03/04 08:03:29 getting  http://regsho.finra.org/CNMSshvol20201020.txt
+ len= 8480
+2021/03/04 08:03:32 getting  http://regsho.finra.org/CNMSshvol20201019.txt
+ len= 8501
+2021/03/04 08:03:34 getting  http://regsho.finra.org/CNMSshvol20201016.txt
+ len= 8495
+2021/03/04 08:03:36 getting  http://regsho.finra.org/CNMSshvol20201015.txt
+ len= 8452
+2021/03/04 08:03:38 getting  http://regsho.finra.org/CNMSshvol20201014.txt
+ len= 8470
+2021/03/04 08:03:41 getting  http://regsho.finra.org/CNMSshvol20201013.txt
+ len= 8462
+2021/03/04 08:03:43 getting  http://regsho.finra.org/CNMSshvol20201012.txt
+ len= 8494
+2021/03/04 08:03:45 getting  http://regsho.finra.org/CNMSshvol20201009.txt
+ len= 8492
+2021/03/04 08:03:48 getting  http://regsho.finra.org/CNMSshvol20201008.txt
+ len= 8515
+2021/03/04 08:03:52 getting  http://regsho.finra.org/CNMSshvol20201007.txt
+ len= 8491
+2021/03/04 08:03:54 getting  http://regsho.finra.org/CNMSshvol20201006.txt
+ len= 8523
+2021/03/04 08:03:57 getting  http://regsho.finra.org/CNMSshvol20201005.txt
+ len= 8514
+2021/03/04 08:03:59 getting  http://regsho.finra.org/CNMSshvol20201002.txt
+ len= 8489
+2021/03/04 08:04:01 getting  http://regsho.finra.org/CNMSshvol20201001.txt
+ len= 8564
+2021/03/04 08:04:04 getting  http://regsho.finra.org/CNMSshvol20200930.txt
+ len= 8540
+2021/03/04 08:04:06 getting  http://regsho.finra.org/CNMSshvol20200929.txt
+ len= 8495
+2021/03/04 08:04:09 getting  http://regsho.finra.org/CNMSshvol20200928.txt
+ len= 8514
+2021/03/04 08:04:11 getting  http://regsho.finra.org/CNMSshvol20200925.txt
+ len= 8472
+2021/03/04 08:04:14 getting  http://regsho.finra.org/CNMSshvol20200924.txt
+ len= 8487
+2021/03/04 08:04:16 getting  http://regsho.finra.org/CNMSshvol20200923.txt
+ len= 8442
+2021/03/04 08:04:18 getting  http://regsho.finra.org/CNMSshvol20200922.txt
+ len= 8461
+2021/03/04 08:04:21 getting  http://regsho.finra.org/CNMSshvol20200921.txt
+ len= 8526
+2021/03/04 08:04:23 getting  http://regsho.finra.org/CNMSshvol20200918.txt
+ len= 8416
+2021/03/04 08:04:25 getting  http://regsho.finra.org/CNMSshvol20200917.txt
+ len= 8472
+2021/03/04 08:04:28 getting  http://regsho.finra.org/CNMSshvol20200916.txt
+ len= 8453
+2021/03/04 08:04:30 getting  http://regsho.finra.org/CNMSshvol20200915.txt
+ len= 8447
+2021/03/04 08:04:33 getting  http://regsho.finra.org/CNMSshvol20200914.txt
+ len= 8438
+2021/03/04 08:04:35 getting  http://regsho.finra.org/CNMSshvol20200911.txt
+ len= 8382
+2021/03/04 08:04:37 getting  http://regsho.finra.org/CNMSshvol20200910.txt
+ len= 8394
+2021/03/04 08:04:40 getting  http://regsho.finra.org/CNMSshvol20200909.txt
+ len= 8427
+2021/03/04 08:04:42 getting  http://regsho.finra.org/CNMSshvol20200908.txt
+ len= 8469
+2021/03/04 08:04:44 getting  http://regsho.finra.org/CNMSshvol20200907.txt
+ len= 10
+2021/03/04 08:04:45 getting  http://regsho.finra.org/CNMSshvol20200904.txt
+ len= 8459
+2021/03/04 08:04:47 getting  http://regsho.finra.org/CNMSshvol20200903.txt
+ len= 8450
+2021/03/04 08:04:49 getting  http://regsho.finra.org/CNMSshvol20200902.txt
+ len= 8409
+2021/03/04 08:04:51 getting  http://regsho.finra.org/CNMSshvol20200901.txt
+ len= 8452
+2021/03/04 08:04:54 getting  http://regsho.finra.org/CNMSshvol20200831.txt
+ len= 8432
+2021/03/04 08:04:56 getting  http://regsho.finra.org/CNMSshvol20200828.txt
+ len= 8370
+2021/03/04 08:04:58 getting  http://regsho.finra.org/CNMSshvol20200827.txt
+ len= 8410
+2021/03/04 08:05:01 getting  http://regsho.finra.org/CNMSshvol20200826.txt
+ len= 8381
+2021/03/04 08:05:03 getting  http://regsho.finra.org/CNMSshvol20200825.txt
+ len= 8353
+2021/03/04 08:05:05 getting  http://regsho.finra.org/CNMSshvol20200824.txt
+ len= 8375
+2021/03/04 08:05:08 getting  http://regsho.finra.org/CNMSshvol20200821.txt
+ len= 8326
+2021/03/04 08:05:10 getting  http://regsho.finra.org/CNMSshvol20200820.txt
+ len= 8359
+2021/03/04 08:05:12 getting  http://regsho.finra.org/CNMSshvol20200819.txt
+ len= 8343
+2021/03/04 08:05:14 getting  http://regsho.finra.org/CNMSshvol20200818.txt
+ len= 8366
+2021/03/04 08:05:16 getting  http://regsho.finra.org/CNMSshvol20200817.txt
+ len= 8366
+2021/03/04 08:05:19 getting  http://regsho.finra.org/CNMSshvol20200814.txt
+ len= 8315
+2021/03/04 08:05:21 getting  http://regsho.finra.org/CNMSshvol20200813.txt
+ len= 8325
+2021/03/04 08:05:23 getting  http://regsho.finra.org/CNMSshvol20200812.txt
+ len= 8342
+2021/03/04 08:05:25 getting  http://regsho.finra.org/CNMSshvol20200811.txt
+ len= 8365
+2021/03/04 08:05:27 getting  http://regsho.finra.org/CNMSshvol20200810.txt
+ len= 8359
+2021/03/04 08:05:30 getting  http://regsho.finra.org/CNMSshvol20200807.txt
+ len= 8337
+2021/03/04 08:05:32 getting  http://regsho.finra.org/CNMSshvol20200806.txt
+ len= 8304
+2021/03/04 08:05:34 getting  http://regsho.finra.org/CNMSshvol20200805.txt
+ len= 8340
+2021/03/04 08:05:36 getting  http://regsho.finra.org/CNMSshvol20200804.txt
+ len= 8336
+2021/03/04 08:05:38 getting  http://regsho.finra.org/CNMSshvol20200803.txt
+ len= 8405
+2021/03/04 08:05:41 getting  http://regsho.finra.org/CNMSshvol20200731.txt
+ len= 8370
+2021/03/04 08:05:43 getting  http://regsho.finra.org/CNMSshvol20200730.txt
+ len= 8313
+2021/03/04 08:05:45 getting  http://regsho.finra.org/CNMSshvol20200729.txt
+ len= 8303
+2021/03/04 08:05:47 getting  http://regsho.finra.org/CNMSshvol20200728.txt
+ len= 8284
+2021/03/04 08:05:49 getting  http://regsho.finra.org/CNMSshvol20200727.txt
+ len= 8325
+2021/03/04 08:05:51 getting  http://regsho.finra.org/CNMSshvol20200724.txt
+ len= 8282
+2021/03/04 08:05:54 getting  http://regsho.finra.org/CNMSshvol20200723.txt
+ len= 8319
+2021/03/04 08:05:56 getting  http://regsho.finra.org/CNMSshvol20200722.txt
+ len= 8296
+2021/03/04 08:05:58 getting  http://regsho.finra.org/CNMSshvol20200721.txt
+ len= 8332
+2021/03/04 08:06:00 getting  http://regsho.finra.org/CNMSshvol20200720.txt
+ len= 8321
+2021/03/04 08:06:03 getting  http://regsho.finra.org/CNMSshvol20200717.txt
+ len= 8265
+2021/03/04 08:06:05 getting  http://regsho.finra.org/CNMSshvol20200716.txt
+ len= 8261
+2021/03/04 08:06:07 getting  http://regsho.finra.org/CNMSshvol20200715.txt
+ len= 8337
+2021/03/04 08:06:09 getting  http://regsho.finra.org/CNMSshvol20200714.txt
+ len= 8263
+2021/03/04 08:06:12 getting  http://regsho.finra.org/CNMSshvol20200713.txt
+ len= 8365
+2021/03/04 08:06:14 getting  http://regsho.finra.org/CNMSshvol20200710.txt
+ len= 8328
+2021/03/04 08:06:16 getting  http://regsho.finra.org/CNMSshvol20200709.txt
+ len= 8301
+2021/03/04 08:06:18 getting  http://regsho.finra.org/CNMSshvol20200708.txt
+ len= 8283
+2021/03/04 08:06:21 getting  http://regsho.finra.org/CNMSshvol20200707.txt
+ len= 8312
+2021/03/04 08:06:23 getting  http://regsho.finra.org/CNMSshvol20200706.txt
+ len= 8345
+2021/03/04 08:06:25 getting  http://regsho.finra.org/CNMSshvol20200703.txt
+ len= 10
+2021/03/04 08:06:25 getting  http://regsho.finra.org/CNMSshvol20200702.txt
+ len= 8314
+2021/03/04 08:06:28 getting  http://regsho.finra.org/CNMSshvol20200701.txt
+ len= 8355
+2021/03/04 08:06:30 getting  http://regsho.finra.org/CNMSshvol20200630.txt
+ len= 8356
+2021/03/04 08:06:32 getting  http://regsho.finra.org/CNMSshvol20200629.txt
+ len= 8346
+2021/03/04 08:06:34 getting  http://regsho.finra.org/CNMSshvol20200626.txt
+ len= 8292
+2021/03/04 08:06:37 getting  http://regsho.finra.org/CNMSshvol20200625.txt
+ len= 8299
+2021/03/04 08:06:39 getting  http://regsho.finra.org/CNMSshvol20200624.txt
+ len= 8330
+2021/03/04 08:06:41 getting  http://regsho.finra.org/CNMSshvol20200623.txt
+ len= 8310
+2021/03/04 08:06:43 getting  http://regsho.finra.org/CNMSshvol20200622.txt
+ len= 8341
+2021/03/04 08:06:45 getting  http://regsho.finra.org/CNMSshvol20200619.txt
+ len= 8280
+2021/03/04 08:06:47 getting  http://regsho.finra.org/CNMSshvol20200618.txt
+ len= 8256
+2021/03/04 08:06:50 getting  http://regsho.finra.org/CNMSshvol20200617.txt
+ len= 8331
+2021/03/04 08:06:52 getting  http://regsho.finra.org/CNMSshvol20200616.txt
+ len= 8295
+2021/03/04 08:06:54 getting  http://regsho.finra.org/CNMSshvol20200615.txt
+ len= 8292
+2021/03/04 08:06:56 getting  http://regsho.finra.org/CNMSshvol20200612.txt
+ len= 8276
+2021/03/04 08:06:59 getting  http://regsho.finra.org/CNMSshvol20200611.txt
+ len= 8357
+2021/03/04 08:07:01 getting  http://regsho.finra.org/CNMSshvol20200610.txt
+ len= 8385
+2021/03/04 08:07:03 getting  http://regsho.finra.org/CNMSshvol20200609.txt
+ len= 8331
+2021/03/04 08:07:05 getting  http://regsho.finra.org/CNMSshvol20200608.txt
+ len= 8351
+2021/03/04 08:07:08 getting  http://regsho.finra.org/CNMSshvol20200605.txt
+ len= 8331
+2021/03/04 08:07:10 getting  http://regsho.finra.org/CNMSshvol20200604.txt
+ len= 8238
+2021/03/04 08:07:12 getting  http://regsho.finra.org/CNMSshvol20200603.txt
+ len= 8271
+2021/03/04 08:07:14 getting  http://regsho.finra.org/CNMSshvol20200602.txt
+ len= 8200
+2021/03/04 08:07:16 getting  http://regsho.finra.org/CNMSshvol20200601.txt
+ len= 8230
+2021/03/04 08:07:18 getting  http://regsho.finra.org/CNMSshvol20200529.txt
+ len= 8177
+2021/03/04 08:07:20 getting  http://regsho.finra.org/CNMSshvol20200528.txt
+ len= 8201
+2021/03/04 08:07:23 getting  http://regsho.finra.org/CNMSshvol20200527.txt
+ len= 8154
+2021/03/04 08:07:25 getting  http://regsho.finra.org/CNMSshvol20200526.txt
+ len= 8210
+2021/03/04 08:07:27 getting  http://regsho.finra.org/CNMSshvol20200525.txt
+ len= 10
+2021/03/04 08:07:27 getting  http://regsho.finra.org/CNMSshvol20200522.txt
+ len= 8089
+2021/03/04 08:07:29 getting  http://regsho.finra.org/CNMSshvol20200521.txt
+ len= 8109
+2021/03/04 08:07:31 getting  http://regsho.finra.org/CNMSshvol20200520.txt
+ len= 8162
+2021/03/04 08:07:33 getting  http://regsho.finra.org/CNMSshvol20200519.txt
+ len= 8164
+2021/03/04 08:07:35 getting  http://regsho.finra.org/CNMSshvol20200518.txt
+ len= 8319
+2021/03/04 08:07:38 getting  http://regsho.finra.org/CNMSshvol20200515.txt
+ len= 8083
+2021/03/04 08:07:40 getting  http://regsho.finra.org/CNMSshvol20200514.txt
+ len= 8202
+2021/03/04 08:07:42 getting  http://regsho.finra.org/CNMSshvol20200513.txt
+ len= 8133
+2021/03/04 08:07:44 getting  http://regsho.finra.org/CNMSshvol20200512.txt
+ len= 8081
+2021/03/04 08:07:46 getting  http://regsho.finra.org/CNMSshvol20200511.txt
+ len= 8134
+2021/03/04 08:07:50 getting  http://regsho.finra.org/CNMSshvol20200508.txt
+ len= 8112
+2021/03/04 08:07:53 getting  http://regsho.finra.org/CNMSshvol20200507.txt
+ len= 8119
+2021/03/04 08:07:55 getting  http://regsho.finra.org/CNMSshvol20200506.txt
+ len= 8066
+2021/03/04 08:07:57 getting  http://regsho.finra.org/CNMSshvol20200505.txt
+ len= 8063
+2021/03/04 08:07:59 getting  http://regsho.finra.org/CNMSshvol20200504.txt
+ len= 8065
+2021/03/04 08:08:01 getting  http://regsho.finra.org/CNMSshvol20200501.txt
+ len= 8124
+2021/03/04 08:08:03 getting  http://regsho.finra.org/CNMSshvol20200430.txt
+ len= 8141
+2021/03/04 08:08:06 getting  http://regsho.finra.org/CNMSshvol20200429.txt
+ len= 8159
+2021/03/04 08:08:08 getting  http://regsho.finra.org/CNMSshvol20200428.txt
+ len= 8150
+2021/03/04 08:08:10 getting  http://regsho.finra.org/CNMSshvol20200427.txt
+ len= 8162
+2021/03/04 08:08:12 getting  http://regsho.finra.org/CNMSshvol20200424.txt
+ len= 8112
+2021/03/04 08:08:14 getting  http://regsho.finra.org/CNMSshvol20200423.txt
+ len= 8105
+2021/03/04 08:08:16 getting  http://regsho.finra.org/CNMSshvol20200422.txt
+ len= 8108
+2021/03/04 08:08:18 getting  http://regsho.finra.org/CNMSshvol20200421.txt
+ len= 8127
+2021/03/04 08:08:20 getting  http://regsho.finra.org/CNMSshvol20200420.txt
+ len= 8155
+2021/03/04 08:08:22 getting  http://regsho.finra.org/CNMSshvol20200417.txt
+ len= 8138
+2021/03/04 08:08:25 getting  http://regsho.finra.org/CNMSshvol20200416.txt
+ len= 8116
+2021/03/04 08:08:27 getting  http://regsho.finra.org/CNMSshvol20200415.txt
+ len= 8127
+2021/03/04 08:08:29 getting  http://regsho.finra.org/CNMSshvol20200414.txt
+ len= 8183
+2021/03/04 08:08:31 getting  http://regsho.finra.org/CNMSshvol20200413.txt
+ len= 8159
+2021/03/04 08:08:33 getting  http://regsho.finra.org/CNMSshvol20200410.txt
+ len= 10
+2021/03/04 08:08:33 getting  http://regsho.finra.org/CNMSshvol20200409.txt
+ len= 8227
+2021/03/04 08:08:35 getting  http://regsho.finra.org/CNMSshvol20200408.txt
+ len= 8144
+2021/03/04 08:08:38 getting  http://regsho.finra.org/CNMSshvol20200407.txt
+ len= 8167
+2021/03/04 08:08:40 getting  http://regsho.finra.org/CNMSshvol20200406.txt
+ len= 8120
+2021/03/04 08:08:42 getting  http://regsho.finra.org/CNMSshvol20200403.txt
+ len= 8077
+2021/03/04 08:08:44 getting  http://regsho.finra.org/CNMSshvol20200402.txt
+ len= 8038
+2021/03/04 08:08:46 getting  http://regsho.finra.org/CNMSshvol20200401.txt
+ len= 8168
+2021/03/04 08:08:48 getting  http://regsho.finra.org/CNMSshvol20200331.txt
+ len= 8175
+2021/03/04 08:08:50 getting  http://regsho.finra.org/CNMSshvol20200330.txt
+ len= 8166
+2021/03/04 08:08:53 getting  http://regsho.finra.org/CNMSshvol20200327.txt
+ len= 8240
+2021/03/04 08:08:55 getting  http://regsho.finra.org/CNMSshvol20200326.txt
+ len= 8261
+2021/03/04 08:08:57 getting  http://regsho.finra.org/CNMSshvol20200325.txt
+ len= 8243
+2021/03/04 08:08:59 getting  http://regsho.finra.org/CNMSshvol20200324.txt
+ len= 8224
+2021/03/04 08:09:01 getting  http://regsho.finra.org/CNMSshvol20200323.txt
+ len= 8230
+2021/03/04 08:09:03 getting  http://regsho.finra.org/CNMSshvol20200320.txt
+ len= 8234
+2021/03/04 08:09:06 getting  http://regsho.finra.org/CNMSshvol20200319.txt
+ len= 8241
+2021/03/04 08:09:08 getting  http://regsho.finra.org/CNMSshvol20200318.txt
+ len= 8241
+2021/03/04 08:09:10 getting  http://regsho.finra.org/CNMSshvol20200317.txt
+ len= 8211
+2021/03/04 08:09:12 getting  http://regsho.finra.org/CNMSshvol20200316.txt
+ len= 8208
+2021/03/04 08:09:14 getting  http://regsho.finra.org/CNMSshvol20200313.txt
+ len= 8278
+2021/03/04 08:09:17 getting  http://regsho.finra.org/CNMSshvol20200312.txt
+ len= 8293
+2021/03/04 08:09:19 getting  http://regsho.finra.org/CNMSshvol20200311.txt
+ len= 8193
+2021/03/04 08:09:21 getting  http://regsho.finra.org/CNMSshvol20200310.txt
+ len= 8187
+2021/03/04 08:09:23 getting  http://regsho.finra.org/CNMSshvol20200309.txt
+ len= 8274
+2021/03/04 08:09:25 getting  http://regsho.finra.org/CNMSshvol20200306.txt
+ len= 8175
+2021/03/04 08:09:27 getting  http://regsho.finra.org/CNMSshvol20200305.txt
+ len= 8115
+2021/03/04 08:09:29 getting  http://regsho.finra.org/CNMSshvol20200304.txt
+ len= 8091
