@@ -24,10 +24,12 @@ exports.patternFeatures = (req, res) => {
       const { stdout, stderr } = await exec('cd .. && cd pattern_features && pwd && go run main.go 2021-01-01 2021-01-02');
       console.log('stdout:', stdout);
       console.log('stderr:', stderr);
+      res.status(200).send("success");
+
     } catch (e) {
       console.error(e); // should contain code (exit code) and signal (that caused the termination).
+      res.status(500).send("fail");
     }
   }
   lsExample()
-  res.status(200).send("pattern features.");
 };
