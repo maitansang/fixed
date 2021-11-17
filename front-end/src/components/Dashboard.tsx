@@ -1,14 +1,19 @@
-import React from "react";
+import React,{useState} from "react";
 import { getCurrentUser } from "../services/auth.service";
 import ExecComponent from "./ExecComponent";
 
 const Dashboard: React.FC = () => {
   const currentUser = getCurrentUser();
+  const [runScript, setRunScript] = useState('');
+
+  function buttonHandler(text : any) : any {
+    setRunScript(text);
+  };
 
   return (
     <div className="container">
       <div className="right-menu-container">
-        <div className="mm-item" >
+        <div className="mm-item" onClick={buttonHandler('dashboard')}>
           <a href="">
             <span className="">Dashboard</span>
           </a>
