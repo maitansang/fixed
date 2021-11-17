@@ -18,10 +18,13 @@ exports.moderatorBoard = (req, res) => {
 };
 
 exports.patternFeatures = (req, res) => {
+  const ticker = req.body.ticker
+  const startDate = req.body.startDate
+  const endDate = req.body.endDate
   async function lsExample() {
     try {
       await exec('cd ..');
-      const { stdout, stderr } = await exec('cd .. && cd pattern_features && pwd && go run main.go 2021-01-01 2021-01-02');
+      const { stdout, stderr } = await exec(`cd .. && cd pattern_features && pwd && go run main.go ${ticker} ${endDate} ${startDate}`);
       console.log('stdout:', stdout);
       console.log('stderr:', stderr);
       res.status(200).send("success");

@@ -88,14 +88,21 @@ func MainFunc() {
 		return
 	}
 	defer sqlDB.Close()
-	allTickers, err := db.getAllTicker()
-	if err != nil {
-		log.Println("Error when get all ticker", err)
-		return
+	var allTickers []string
+	ticker := os.Args[1]
+	if ticker == "all" {
+		allTickers, err = db.getAllTicker()
+		if err != nil {
+			log.Println("Error when get all ticker", err)
+			return
+		}
+	}else{
+		allTickers= append(allTickers,ticker )
 	}
-	// allTickers := []string{"AAPL", "SPY"}
-	start, _ := time.Parse("2006-01-02", os.Args[2])
-	end, _ := time.Parse("2006-01-02", os.Args[1])
+
+	start, _ := time.Parse("2006-01-02", os.Args[3])
+	end, _ := time.Parse("2006-01-02", os.Args[2])
+	// log.Fatal("-----000 ",start, end, allTickers)
 	// Create new table average_volumes
 	db.AutoMigrate(&PatternFeature{})
 	// Remove old file

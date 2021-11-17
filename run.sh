@@ -48,5 +48,5 @@ go run main.go $arg2
 cd ..
 
 cd pattern_features
-go run main.go $arg2
+go run main.go "all" $arg1 $arg2 
 cd ..
