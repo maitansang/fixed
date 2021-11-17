@@ -1,94 +1,51 @@
-import React,{useState} from "react";
+import React, { useEffect, useState } from "react";
 import { getCurrentUser } from "../services/auth.service";
 import ExecComponent from "./ExecComponent";
 
 const Dashboard: React.FC = () => {
   const currentUser = getCurrentUser();
-  const [runScript, setRunScript] = useState('');
+  const [runScript, setRunScript] = useState("");;
+  const [menus, setMenus] = useState([
+    { id: 0, name: "Dashboard" },
+    { id: 1, name: "Aggreagates" },
+    { id: 2, name: "Average Volume" },
+    { id: 3, name: "Trades" },
+    { id: 4, name: "Breakouthis" },
+    { id: 5, name: "Changepct" },
+    { id: 6, name: "Changepctall" },
+    { id: 7, name: "Lob" },
+    { id: 8, name: "Lov" },
+    { id: 9, name: "Pattern Features" },
+    { id: 10, name: "Short" },
+    { id: 11, name: "Shot Sale" },
+    { id: 12, name: "Stock Split" },
+    { id: 13, name: "Tickers" },
+    { id: 14, name: "Transactions" },
+  ]);
 
-  const buttonHandler = (text : any) => {
+  const buttonHandler = (text: any) => {
+    console.log("=====",  text);;
     setRunScript(text);
   };
+  useEffect(() => {
+    setRunScript(runScript);
+  }, [menus])
   return (
     <div className="container">
       <div className="right-menu-container">
-        <div className="mm-item" onClick={() => buttonHandler("dashboard")} >
-          <a href="">
-            <span className="">Dashboard</span>
-          </a>
-        </div>
-        <div className="mm-item" onClick={() => buttonHandler("dashboard")}>
-          <a href="">
-            <span className="">Aggreagates</span>
-          </a>
-        </div>
-        <div className="mm-item" onClick={() => buttonHandler("dashboard")}>
-          <a href="">
-            <span className="">Average Volume</span>
-          </a>
-        </div>
-        <div className="mm-item" onClick={() => buttonHandler("dashboard")}>
-          <a href="">
-            <span className="">Trades</span>
-          </a>
-        </div>
-        <div className="mm-item" onClick={() => buttonHandler("dashboard")}>
-          <a href="">
-            <span className="">Breakouthis</span>
-          </a>
-        </div>
-        <div className="mm-item" onClick={() => buttonHandler("dashboard")}>
-          <a href="">
-            <span className="">Changepct</span>
-          </a>
-        </div>
-        <div className="mm-item" onClick={() => buttonHandler("dashboard")}>
-          <a href="">
-            <span className="">Changepctall</span>
-          </a>
-        </div>
-        <div className="mm-item" onClick={() => buttonHandler("dashboard")}>
-          <a href="">
-            <span className="">Lob</span>
-          </a>
-        </div>
-        <div className="mm-item" onClick={() => buttonHandler("dashboard")}>
-          <a href="">
-            <span className="">Lov</span>
-          </a>
-        </div>
-        <div className="mm-item" onClick={() => buttonHandler("dashboard")}>
-          <a href="">
-            <span className="">Pattern Features</span>
-          </a>
-        </div>
-        <div className="mm-item" onClick={() => buttonHandler("dashboard")}  >
-          <a href="">
-            <span className="">Short</span>
-          </a>
-        </div>
-        <div className="mm-item" onClick={() => buttonHandler("dashboard")}>
-          <a href="">
-            <span className="">Shot Sale</span>
-          </a>
-        </div>
-        <div className="mm-item" onClick={() => buttonHandler("dashboard")}>
-          <a href="">
-            <span className="">Stock Split</span>
-          </a>
-        </div>
-        <div className="mm-item" onClick={() => buttonHandler("dashboard")}>
-          <a href="">
-            <span className="">Tickers</span>
-          </a>
-        </div>
-        <div className="mm-item" onClick={() => buttonHandler("dashboard")}>
-          <a href="">
-            <span className="">Transactions</span>
-          </a>
-        </div>
+        {menus.map((item, index) => {
+          return (
+            <div className="mm-item" onClick={() => buttonHandler(item.name)}>
+              <a href="">
+                <span className="">{item.name}</span>
+              </a>
+            </div>
+          );
+        })}
+
       </div>
-      <ExecComponent></ExecComponent>
+      <ExecComponent key="" value={runScript}></ExecComponent>
+
     </div>
   );
 };

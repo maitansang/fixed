@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { getCurrentUser } from "../services/auth.service";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
 
-const ExecComponent: React.FC = () => {
+const ExecComponent: React.FC<{value:string,key:string}> = ({children, key,value}) => {
   const currentUser = getCurrentUser();
+  const [script, setScript] = useState<string>(value)
+
   const initialValues: {
     startDate: string;
     endDate: string;
@@ -18,13 +20,19 @@ const ExecComponent: React.FC = () => {
     startDate: Yup.string().required("This field is required!"),
     endDate: Yup.string().required("This field is required!"),
   });
-
+  useEffect(() => {
+   setScript(value)
+    
+  },[value])
   const runScript = (formValue: { startDate: string; endDate: string; ticker : string; }) => {
     const { startDate, endDate,ticker } = formValue;
   };
   return (
     <div className="container">
       <div className="content-exec">
+        <div>
+          {script}
+        </div>
       <Formik
           initialValues={initialValues}
           validationSchema={validationSchema}
