@@ -23,7 +23,7 @@ exports.script = (req, res) => {
   async function lsExample() {
     try {
       await exec('cd ..');
-      const { stdout, stderr } = await exec(`cd .. && cd ${script} && pwd && go run main.go ${ticker} ${endDate} ${startDate}`);
+      const { stdout, stderr } = await exec(`cd .. && cd ${script} && pwd && go run main.go ${startDate} ${endDate} ${ticker}`);
       console.log('stdout:', stdout);
       console.log('stderr:', stderr);
       res.status(200).send("success");
