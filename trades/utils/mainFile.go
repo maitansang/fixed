@@ -101,14 +101,19 @@ func MainFunc() {
 	defer db.Close()
 	defer transDB.Close()
 
-	tickers, err := db.GetTickersFromDB()
-	// tickers := []string{"AAPL"}
-	if err != nil {
-		log.Fatalln("Can't get tickers", err)
+	var allTickers []string
+	ticker := os.Args[1]
+	if ticker == "all" {
+		allTickers, err = db.GetTickersFromDB()
+		if err != nil {
+			log.Println("Error when get all ticker", err)
+			return
+		}
+	}else{
+		allTickers= append(allTickers,strings.Split(ticker,",")... )
 	}
-
-	start, _ := time.Parse("2006-01-02", os.Args[2])
-	end, _ := time.Parse("2006-01-02", os.Args[1])
+	start, _ := time.Parse("2006-01-02", os.Args[3])
+	end, _ := time.Parse("2006-01-02", os.Args[2])
 
 	for t := start; t.After(end); t = t.AddDate(0, 0, -1) {
 		if t.Weekday() == 0 || t.Weekday() == 6 {
@@ -125,7 +130,7 @@ func MainFunc() {
 	}
 
 	wp := workerpool.New(500)
-	for _, ticker := range tickers {
+	for _, ticker := range allTickers {
 		tickerSUB := ticker // create copy of ticker
 		wp.Submit(func() {
 			for t := start; t.After(end); t = t.AddDate(0, 0, -1) {

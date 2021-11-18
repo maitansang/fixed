@@ -80,7 +80,7 @@ func (db DB) loadDailyBarsMem() {
 	tickers := []string{}
 
 	if len(os.Args) > 3 {
-		tickerInput := os.Args[3]
+		tickerInput := os.Args[1]
 
 		checkExistTicker, err := db.CheckTickerFromDB(tickerInput)
 		if err != nil {
@@ -117,8 +117,8 @@ func (db DB) loadDailyBarsMem() {
 	dailyBars.dates = make(map[string]datetickerinfo)
 	// load the new ones
 	// endDate := time.Now()
-	endDate, _ := time.Parse("2006-01-02", os.Args[2])
-	startDate, _ := time.Parse("2006-01-02", os.Args[1])
+	endDate, _ := time.Parse("2006-01-02", os.Args[3])
+	startDate, _ := time.Parse("2006-01-02", os.Args[2])
 	startDate.AddDate(0, 0, 1)
 	startFrom := startDate.AddDate(0, 0, -254)
 	log.Println("startDate:", startDate, "endDate:", endDate, "startFrom", startFrom)

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -29,8 +30,18 @@ func GetStockSplit() {
 	}
 	defer db.Close()
 	wp := workerpool.New(100)
-	tickers, err := db.GetTickersFromDB()
-
+	var allTickers []string
+	ticker := os.Args[1]
+	log.Println("=====",ticker,strings.Split(ticker,","))
+	if ticker == "all" {
+		allTickers, err = db.GetTickersFromDB()
+		if err != nil {
+			log.Println("Error when get all ticker", err)
+			return
+		}
+	}else{
+		allTickers= append(allTickers,strings.Split(ticker,",")... )
+	}
 	loc, err := time.LoadLocation("America/New_York")
 	if err != nil {
 		log.Fatalln("Can't set timezone", err)
@@ -38,9 +49,9 @@ func GetStockSplit() {
 	time.Local = loc // -> this is setting the global timezone
 	log.Println("time=", time.Now())
 
-	splitEnd, err := time.Parse("2006-01-02", os.Args[1])
+	splitEnd, err := time.Parse("2006-01-02", os.Args[2])
 	if err != nil {
-		log.Fatalln("Can't parse time", err, os.Args[1], "Time must be in the format 2006-01-02")
+		log.Fatalln("Can't parse time", err, os.Args[2], "Time must be in the format 2006-01-02")
 	}
 
 	f, err := os.OpenFile("tickerlog", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
@@ -54,7 +65,7 @@ func GetStockSplit() {
 	log.Println("----------", splitEnd.Format("2006-01-02"), "----------")
 	log.Println("--------------------------------")
 
-	for _, ticker := range tickers {
+	for _, ticker := range allTickers {
 		ticker := ticker
 		wp.Submit(func() {
 			stockSplit, err := db.getStockSplits(ticker)

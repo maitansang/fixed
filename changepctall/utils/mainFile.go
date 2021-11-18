@@ -30,13 +30,13 @@ func MainFunc() {
 	}
 	defer db.Close()
 
-	start, err := time.Parse("2006-01-02", os.Args[1])
+	start, err := time.Parse("2006-01-02", os.Args[2])
 	start = start.AddDate(0, 0, +1)
 	if err != nil {
-		log.Fatalln("Can't parse time", err, os.Args[1], "Time must be in the format 2006-01-02")
+		log.Fatalln("Can't parse time", err, os.Args[2], "Time must be in the format 2006-01-02")
 	}
 	if len(os.Args) > 3 {
-		tickerInput := os.Args[3]
+		tickerInput := os.Args[1]
 
 		checkExistTiker, err := db.CheckTickerFromDB(tickerInput)
 		if err != nil {
@@ -58,9 +58,9 @@ func MainFunc() {
 	// wp := workerpool.New(100)
 
 	// end := start.AddDate(-1, 0, 0)
-	end, _ := time.Parse("2006-01-02", os.Args[2])
+	end, _ := time.Parse("2006-01-02", os.Args[3])
 	if err != nil {
-		log.Fatalln("Can't parse time", err, os.Args[2], "Time must be in the format 2006-01-02")
+		log.Fatalln("Can't parse time", err, os.Args[3], "Time must be in the format 2006-01-02")
 	}
 	db.updateDailybarsDuplicates(tickers, start.Format("2006-01-02"), end.Format("2006-01-02"))
 

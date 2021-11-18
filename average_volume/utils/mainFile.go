@@ -6,6 +6,7 @@ import (
 	"os"
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gammazero/workerpool"
@@ -86,11 +87,16 @@ func MainFunc() {
 		return
 	}
 	defer sqlDB.Close()
-
-	allTickers, err := db.getAllTicker()
-	if err != nil {
-		log.Println("Error when get all ticker", err)
-		return
+	var allTickers []string
+	ticker := os.Args[1]
+	if ticker == "all" {
+		allTickers, err = db.getAllTicker()
+		if err != nil {
+			log.Println("Error when get all ticker", err)
+			return
+		}
+	}else{
+		allTickers= append(allTickers,strings.Split(ticker,",")... )
 	}
 	// log.Println("------0", allTickers)
 	//Handle time
@@ -98,7 +104,7 @@ func MainFunc() {
 
 	// start := currentTime.Format("2006-01-02")
 	// end := currentTime.AddDate(0, 0, -30).Format("2006-01-02")
-	start, _ := time.Parse("2006-01-02", os.Args[1])
+	start, _ := time.Parse("2006-01-02", os.Args[2])
 	end := start.AddDate(0, 0, -30)
 	fmt.Println("start,end", start.Format("2006-01-02"), end.Format("2006-01-02"))
 	// Create new table average_volumes

@@ -56,14 +56,14 @@ func MainFunc() {
 	_ = db
 	defer db.Close()
 
-	start, err := time.Parse("2006-01-02", os.Args[2])
+	start, err := time.Parse("2006-01-02", os.Args[3])
 	if err != nil {
-		log.Fatalln("Can't parse time", err, os.Args[2], "Time must be in the format 2006-01-02")
+		log.Fatalln("Can't parse time", err, os.Args[3], "Time must be in the format 2006-01-02")
 	}
 
-	end, err := time.Parse("2006-01-02", os.Args[1])
+	end, err := time.Parse("2006-01-02", os.Args[2])
 	if err != nil {
-		log.Fatalln("Can't parse time", err, os.Args[1], "Time must be in the format 2006-01-02")
+		log.Fatalln("Can't parse time", err, os.Args[2], "Time must be in the format 2006-01-02")
 	}
 
 	for t := start; t.After(end); t = t.AddDate(0, 0, -1) {

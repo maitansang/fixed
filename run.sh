@@ -8,43 +8,43 @@ go run main.go
 cd ..
 
 cd aggregates
-go run main.go $arg1 $arg2
+go run main.go "all" $arg1 $arg2
 cd ..
 
 cd breakouthist
-go run main.go $arg1 $arg2
+go run main.go "all" $arg1 $arg2
 cd ..
 
 cd changepct
-go run main.go $arg1 $arg2
+go run main.go "all" $arg1 $arg2
 cd ..
 
 cd changepctall
-go run main.go $arg3 $arg2
+go run main.go "all" $arg3 $arg2
 cd ..
 
 cd trades
-go run main.go $arg1 $arg2
+go run main.go "all" $arg1 $arg2
 cd ..
 
 cd lob
-go run main.go $arg1 $arg2
+go run main.go "all" $arg1 $arg2
 cd ..
 
 cd lov
-go run main.go $arg1 $arg2
+go run main.go "all" $arg1 $arg2
 cd ..
 
 cd short
-go run main.go $arg1 $arg2
+go run main.go "all" $arg1 $arg2
 cd ..
 
 cd stock_split
-go run main.go $arg2
+go run main.go "all" $arg2
 cd ..
 
 cd average_volume
-go run main.go $arg2
+go run main.go "all" $arg2
 cd ..
 
 cd pattern_features

@@ -91,6 +91,7 @@ func MainFunc() {
 	defer sqlDB.Close()
 	var allTickers []string
 	ticker := os.Args[1]
+	log.Println("=====",ticker,strings.Split(ticker,","))
 	if ticker == "all" {
 		allTickers, err = db.getAllTicker()
 		if err != nil {
@@ -100,7 +101,7 @@ func MainFunc() {
 	}else{
 		allTickers= append(allTickers,strings.Split(ticker,",")... )
 	}
-
+	// log.Fatal("tickers",allTickers)
 	start, _ := time.Parse("2006-01-02", os.Args[3])
 	end, _ := time.Parse("2006-01-02", os.Args[2])
 	// Create new table average_volumes

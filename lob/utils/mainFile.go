@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -73,9 +74,18 @@ func MainFunc() {
 }
 
 func (db DB) loadDailyBarsMem() {
-	tickers, err := db.GetTickersFromDB()
-	if err != nil {
-		log.Fatalln("error getting tickers", err)
+	var err error
+	var allTickers []string
+	ticker := os.Args[1]
+	log.Println("=====",ticker,strings.Split(ticker,","))
+	if ticker == "all" {
+		allTickers, err = db.GetTickersFromDB()
+		if err != nil {
+			log.Println("Error when get all ticker", err)
+			return
+		}
+	}else{
+		allTickers= append(allTickers,strings.Split(ticker,",")... )
 	}
 	// tickers = []string{"AAPL"}
 	log.Println("START updateDailyBarsMem")
@@ -93,8 +103,8 @@ func (db DB) loadDailyBarsMem() {
 	dailyBars.dates = make(map[string]datetickerinfo)
 	// load the new ones
 	// endDate := time.Now()
-	endDate, _ := time.Parse("2006-01-02", os.Args[2])
-	startDate, _ := time.Parse("2006-01-02", os.Args[1])
+	endDate, _ := time.Parse("2006-01-02", os.Args[3])
+	startDate, _ := time.Parse("2006-01-02", os.Args[2])
 	startFrom := startDate.AddDate(0, 0, -254)
 	log.Println("startDate:", startDate, "endDate:", endDate, "startFrom", startFrom)
 
@@ -140,7 +150,7 @@ func (db DB) loadDailyBarsMem() {
 			log.Println("Channel closed for values")
 		})
 	}
-	for _, ticker := range tickers {
+	for _, ticker := range allTickers {
 		ticker := ticker
 		wploadbars.Submit(func() {
 

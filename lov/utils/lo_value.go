@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gammazero/workerpool"
@@ -43,21 +44,29 @@ func GetLos() {
 	defer db.Close()
 
 	// get tickers
-	tickers, err := db.GetTickersFromDB()
-	if err != nil {
-		log.Fatalln("can not get data", err)
-	}
 
+	var allTickers []string
+	ticker := os.Args[1]
+	log.Println("=====",ticker,strings.Split(ticker,","))
+	if ticker == "all" {
+		allTickers, err = db.GetTickersFromDB()
+		if err != nil {
+			log.Println("Error when get all ticker", err)
+			return
+		}
+	}else{
+		allTickers= append(allTickers,strings.Split(ticker,",")... )
+	}
 	// start := time.Now() //.AddDate(0, 0, -3)
-	start, _ := time.Parse("2006-01-02", os.Args[2])
+	start, _ := time.Parse("2006-01-02", os.Args[3])
 
 	// end := start.AddDate(0, 0, -4)
 	// end, _ := time.Parse("2006-01-02", "2019-01-01")
-	end, _ := time.Parse("2006-01-02", os.Args[1])
+	end, _ := time.Parse("2006-01-02", os.Args[2])
 
 	// for each ticker update
 	wpavgPrice := workerpool.New(100)
-	for _, ticker := range tickers {
+	for _, ticker := range allTickers {
 		ticker := ticker
 		wpavgPrice.Submit(func() {
 			// get largestorder

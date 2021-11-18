@@ -76,7 +76,7 @@ func MainFunc() {
 
 	scriptStart := time.Now()
 	if len(os.Args) > 3 {
-		tickerInput := os.Args[3]
+		tickerInput := os.Args[1]
 
 		checkExistTiker, err := db.CheckTickerFromDB(tickerInput)
 		if err != nil {
@@ -102,9 +102,9 @@ func MainFunc() {
 	// start, _ := time.Parse("2006-01-02", "2021-04-21")
 	// end, _ := time.Parse("2006-01-02", "2021-05-09")
 
-	start, _ := time.Parse("2006-01-02", os.Args[1])
+	start, _ := time.Parse("2006-01-02", os.Args[2])
 	start = start.AddDate(0, 0, +1)
-	end, _ := time.Parse("2006-01-02", os.Args[2])
+	end, _ := time.Parse("2006-01-02", os.Args[3])
 	// end := time.Now()
 	log.Println("start: ", start, "end: ", end)
 	db.deleteDataBeforeInsert(res, start.Format("2006-01-02"), end.Format("2006-01-02"))
