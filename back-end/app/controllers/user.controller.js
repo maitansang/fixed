@@ -18,12 +18,12 @@ exports.moderatorBoard = (req, res) => {
 };
 
 exports.script = (req, res) => {
-  const {ticker,startDate,endDate,script} = req.body
-  console.log("--------", {ticker,startDate,endDate,script})
+  const {tickerInput,startDate,endDate,script} = req.body
+  console.log("--------", {tickerInput,startDate,endDate,script})
   async function lsExample() {
     try {
       await exec('cd ..');
-      const { stdout, stderr } = await exec(`cd .. && cd ${script} && pwd && go run main.go ${startDate} ${endDate} ${ticker}`);
+      const { stdout, stderr } = await exec(`cd .. && cd ${script} && pwd && go run main.go ${tickerInput} ${endDate} ${startDate}`);
       console.log('stdout:', stdout);
       console.log('stderr:', stderr);
       res.status(200).send("success");

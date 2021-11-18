@@ -35,17 +35,20 @@ func MainFunc() {
 	}
 	if len(os.Args) > 3 {
 		tickerInput := os.Args[1]
-
-		checkExistTiker, err := db.CheckTickerFromDB(tickerInput)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		if checkExistTiker {
-			tickers = []string{tickerInput}
+		if tickerInput == "all" {
+			tickers, _ = db.GetTickersFromDB()
 		} else {
-			tickers, err = db.GetTickersFromDB()
+			checkExistTiker, err := db.CheckTickerFromDB(tickerInput)
 			if err != nil {
-				log.Fatalln("Can not get tickers from db", err)
+				log.Fatalln(err)
+			}
+			if checkExistTiker {
+				tickers = []string{tickerInput}
+			} else {
+				tickers, err = db.GetTickersFromDB()
+				if err != nil {
+					log.Fatalln("Can not get tickers from db", err)
+				}
 			}
 		}
 	} else {

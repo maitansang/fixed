@@ -24,24 +24,24 @@ const ExecComponent: React.FC<{value:string,key:string}> = ({children, key,value
   });
   useEffect(() => {
    setScript(value)
-    
   },[value])
   const runScript = (formValue: { startDate: string; endDate: string; ticker : string; }) => {
     const { startDate, endDate,ticker } = formValue;
+    var tickerInput = 'all'
+    if ((ticker != '') && ticker != null && (ticker != undefined)) {
+      tickerInput = ticker
+    }
     axios
     .post(API_URL + "script", {
       startDate,
       endDate,
-      ticker,
+      tickerInput,
       script
     })
     .then((response) => {
-      // if (response.data.accessToken) {
-      //   localStorage.setItem("user", JSON.stringify(response.data));
-      // }
-      return response.data;
+      // return response.data;
     });
-    console.log("-----123", { startDate, endDate, ticker });
+    console.log("-----123", { startDate, endDate, tickerInput });
   };
   return (
     <div className="container">
@@ -63,6 +63,11 @@ const ExecComponent: React.FC<{value:string,key:string}> = ({children, key,value
                 aria-describedby="startDateHelp"
                 placeholder="Enter start date"
               />
+               <ErrorMessage
+                name="startDate"
+                component="div"
+                className="alert alert-danger"
+              />
               <small
                 id="startDateHelp"
                 className="form-text text-muted"
@@ -77,6 +82,11 @@ const ExecComponent: React.FC<{value:string,key:string}> = ({children, key,value
                 id="exampleInputEndDate"
                 placeholder="Enter end date"
               />
+               <ErrorMessage
+                name="endDate"
+                component="div"
+                className="alert alert-danger"
+              />
             </div>
             <div className="form-group">
               <label htmlFor="exampleInputTicker">Ticker</label>
@@ -88,10 +98,6 @@ const ExecComponent: React.FC<{value:string,key:string}> = ({children, key,value
                 placeholder="Enter ticker"
               />
             </div>
-            {/* <div className="form-check">
-          <Field type="checkbox" className="form-check-input" id="exampleCheck1"/>
-          <label className="form-check-label" htmlFor="exampleCheck1">Check me out</label>
-        </div> */}
             <button type="submit" className="btn btn-primary">
               Run
             </button>

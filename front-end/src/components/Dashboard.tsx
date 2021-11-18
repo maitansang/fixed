@@ -7,7 +7,7 @@ const Dashboard: React.FC = () => {
   const [runScript, setRunScript] = useState("");
   const menus = [
     { id: 0, name: ["Dashboard","dashboard"] },
-    { id: 1, name: ["Aggreagates","aggreagates"] },
+    { id: 1, name: ["Aggregates","aggregates"] },
     { id: 2, name: ["Average Volume","average_volume"] },
     { id: 3, name: ["Trades","trades"] },
     { id: 4, name: ["Breakouthist","breakouthist"]},
@@ -17,7 +17,7 @@ const Dashboard: React.FC = () => {
     { id: 8, name: ["Lov","lov"] },
     { id: 9, name: ["Pattern Features","pattern_features"] },
     { id: 10, name: ["Short","short"] },
-    { id: 11, name: ["Shot Sale","shot_sale"] },
+    { id: 11, name: ["Shot Sale","short_sale"] },
     { id: 12, name: ["Stock Split","stock_split"] },
     { id: 13, name: ["Tickers","tickers"] },
     { id: 14, name: ["Transactions","transactions"] },

@@ -77,15 +77,18 @@ func MainFunc() {
 	scriptStart := time.Now()
 	if len(os.Args) > 3 {
 		tickerInput := os.Args[1]
-
-		checkExistTiker, err := db.CheckTickerFromDB(tickerInput)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		if checkExistTiker {
-			res = []string{tickerInput}
-		} else {
+		if tickerInput == "all" {
 			res, err = db.GetTickersFromDB()
+		} else {
+			checkExistTiker, err := db.CheckTickerFromDB(tickerInput)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			if checkExistTiker {
+				res = []string{tickerInput}
+			} else {
+				res, err = db.GetTickersFromDB()
+			}
 		}
 	} else {
 		res, err = db.GetTickersFromDB()

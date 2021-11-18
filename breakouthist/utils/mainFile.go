@@ -81,16 +81,20 @@ func (db DB) loadDailyBarsMem() {
 
 	if len(os.Args) > 3 {
 		tickerInput := os.Args[1]
-
-		checkExistTicker, err := db.CheckTickerFromDB(tickerInput)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		if checkExistTicker {
-			tickers = []string{tickerInput}
+		if tickerInput == "all" {
+			tickers, _ = db.GetTickersFromDB()
 		} else {
-			tickers, err = db.GetTickersFromDB()
+			checkExistTicker, err := db.CheckTickerFromDB(tickerInput)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			if checkExistTicker {
+				tickers = []string{tickerInput}
+			} else {
+				tickers, err = db.GetTickersFromDB()
+			}
 		}
+
 	} else {
 		var err error
 		tickers, err = db.GetTickersFromDB()
