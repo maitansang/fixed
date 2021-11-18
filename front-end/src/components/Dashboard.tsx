@@ -4,8 +4,8 @@ import ExecComponent from "./ExecComponent";
 
 const Dashboard: React.FC = () => {
   const currentUser = getCurrentUser();
-  const [runScript, setRunScript] = useState("");;
-  const [menus, setMenus] = useState([
+  const [runScript, setRunScript] = useState("");
+  const menus = [
     { id: 0, name: "Dashboard" },
     { id: 1, name: "Aggreagates" },
     { id: 2, name: "Average Volume" },
@@ -21,33 +21,33 @@ const Dashboard: React.FC = () => {
     { id: 12, name: "Stock Split" },
     { id: 13, name: "Tickers" },
     { id: 14, name: "Transactions" },
-  ]);
+  ];
 
   const buttonHandler = (text: any) => {
-    console.log("=====",  text);;
+    console.log("=====", text);
     setRunScript(text);
   };
-  useEffect(() => {
-    setRunScript(runScript);
-  }, [menus])
+
   return (
     <div className="container">
       <div className="right-menu-container">
         {menus.map((item, index) => {
           return (
-            <div className="mm-item" onClick={() => buttonHandler(item.name)}>
-              <a href="">
+            <div
+              className="mm-item"
+              onClick={() => buttonHandler(item.name)}
+              key={index}
+            >
+              <a>
                 <span className="">{item.name}</span>
               </a>
             </div>
           );
         })}
-
       </div>
       <ExecComponent key="" value={runScript}></ExecComponent>
-
     </div>
   );
-};
+};;;
 
 export default Dashboard;
