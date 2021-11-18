@@ -6,21 +6,21 @@ const Dashboard: React.FC = () => {
   const currentUser = getCurrentUser();
   const [runScript, setRunScript] = useState("");
   const menus = [
-    { id: 0, name: "Dashboard" },
-    { id: 1, name: "Aggreagates" },
-    { id: 2, name: "Average Volume" },
-    { id: 3, name: "Trades" },
-    { id: 4, name: "Breakouthis" },
-    { id: 5, name: "Changepct" },
-    { id: 6, name: "Changepctall" },
-    { id: 7, name: "Lob" },
-    { id: 8, name: "Lov" },
-    { id: 9, name: "Pattern Features" },
-    { id: 10, name: "Short" },
-    { id: 11, name: "Shot Sale" },
-    { id: 12, name: "Stock Split" },
-    { id: 13, name: "Tickers" },
-    { id: 14, name: "Transactions" },
+    { id: 0, name: ["Dashboard","dashboard"] },
+    { id: 1, name: ["Aggreagates","aggreagates"] },
+    { id: 2, name: ["Average Volume","average_volume"] },
+    { id: 3, name: ["Trades","trades"] },
+    { id: 4, name: ["Breakouthist","breakouthist"]},
+    { id: 5, name: ["Changepct","changepct"] },
+    { id: 6, name: ["Changepctall","changepctall"] },
+    { id: 7, name: ["Lob","lob"] },
+    { id: 8, name: ["Lov","lov"] },
+    { id: 9, name: ["Pattern Features","pattern_features"] },
+    { id: 10, name: ["Short","short"] },
+    { id: 11, name: ["Shot Sale","shot_sale"] },
+    { id: 12, name: ["Stock Split","stock_split"] },
+    { id: 13, name: ["Tickers","tickers"] },
+    { id: 14, name: ["Transactions","transactions"] },
   ];
 
   const buttonHandler = (text: any) => {
@@ -35,11 +35,11 @@ const Dashboard: React.FC = () => {
           return (
             <div
               className="mm-item"
-              onClick={() => buttonHandler(item.name)}
+              onClick={() => buttonHandler(item.name[1])}
               key={index}
             >
               <a>
-                <span className="">{item.name}</span>
+                <span className="">{item.name[0]}</span>
               </a>
             </div>
           );

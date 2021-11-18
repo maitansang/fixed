@@ -2,10 +2,12 @@ import React, { useEffect, useState } from "react";
 import { getCurrentUser } from "../services/auth.service";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import axios from "axios";
 
 const ExecComponent: React.FC<{value:string,key:string}> = ({children, key,value}) => {
   const currentUser = getCurrentUser();
   const [script, setScript] = useState<string>(value)
+  const API_URL = "http://localhost:8080/api/";
 
   const initialValues: {
     startDate: string;
@@ -26,6 +28,19 @@ const ExecComponent: React.FC<{value:string,key:string}> = ({children, key,value
   },[value])
   const runScript = (formValue: { startDate: string; endDate: string; ticker : string; }) => {
     const { startDate, endDate,ticker } = formValue;
+    axios
+    .post(API_URL + "script", {
+      startDate,
+      endDate,
+      ticker,
+      script
+    })
+    .then((response) => {
+      // if (response.data.accessToken) {
+      //   localStorage.setItem("user", JSON.stringify(response.data));
+      // }
+      return response.data;
+    });
     console.log("-----123", { startDate, endDate, ticker });
   };
   return (
