@@ -103,7 +103,6 @@ func MainFunc() {
 
 	start, _ := time.Parse("2006-01-02", os.Args[3])
 	end, _ := time.Parse("2006-01-02", os.Args[2])
-	// log.Fatal("-----000 ",start, end, allTickers)
 	// Create new table average_volumes
 	db.AutoMigrate(&PatternFeature{})
 	// Remove old file
@@ -118,13 +117,13 @@ func MainFunc() {
 		wp.Submit(func() {
 			for t := start; t.After(end); t = t.AddDate(0, 0, -1) {
 				if t.Weekday() == 0 || t.Weekday() == 6 {
-					log.Println("-----t", t)
+					log.Println("Saturday || Sunday", t)
 					continue
 				}
-				log.Println("-----start end", start, end)
+				log.Println("start:", start," --- end: ", end)
 				last20Days := t.AddDate(0, 0, -20).Format("2006-01-02")
 				last200Days := t.AddDate(0, 0, -200).Format("2006-01-02")
-				log.Println("-----", start, last20Days, last200Days)
+				log.Println("last20Days: ", last20Days," --- last200Days: ", last200Days)
 				lines, err := db.PatternFeature(ticker, t.Format("2006-01-02"), last20Days, last200Days)
 				if err != nil {
 					log.Fatal("Error when get v from dailybars", err)

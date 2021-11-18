@@ -27,7 +27,7 @@ module.exports = function(app) {
   );
 
   app.post(
-    "/api/pattern-features",
-    controller.patternFeatures
+    "/api/script",
+    controller.script
   );
 };
