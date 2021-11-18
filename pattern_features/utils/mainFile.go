@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gammazero/workerpool"
@@ -97,7 +98,7 @@ func MainFunc() {
 			return
 		}
 	}else{
-		allTickers= append(allTickers,ticker )
+		allTickers= append(allTickers,strings.Split(ticker,",")... )
 	}
 
 	start, _ := time.Parse("2006-01-02", os.Args[3])
