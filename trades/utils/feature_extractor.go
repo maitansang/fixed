@@ -224,7 +224,7 @@ func calculateFeatures(ticker string, date string, in []Result) []TradeFeatures 
 		Q2:     stat.Quantile(secondQuartile, stat.Empirical, calcInX, nil),
 		Q3:     stat.Quantile(thirdQuartile, stat.Empirical, calcInX, nil),
 		Max:    maxs.Max(columnX),
-		Sum:    sumX,
+		Sum:    math.Round(sumX),
 	}, TradeFeatures{
 		Ticker: ticker,
 		Column: columnP,
@@ -300,7 +300,7 @@ func calculateFeatures(ticker string, date string, in []Result) []TradeFeatures 
 		Q2:     math.NaN(),
 		Q3:     math.NaN(),
 		Max:    math.NaN(),
-		Sum:    sumC,
+		Sum:    math.Round(sumC),
 	})
 	for i, v := range listCalcX {
 		if i > 20 {
@@ -328,7 +328,7 @@ func calculateFeatures(ticker string, date string, in []Result) []TradeFeatures 
 			Q2:     stat.Quantile(secondQuartile, stat.Empirical, v, nil),
 			Q3:     stat.Quantile(thirdQuartile, stat.Empirical, v, nil),
 			Max:    maxs.Max(columnX),
-			Sum:    sumX,
+			Sum:    math.Round(sumX),
 		})
 	}
 	for i, v := range listCalcC {
@@ -357,7 +357,7 @@ func calculateFeatures(ticker string, date string, in []Result) []TradeFeatures 
 			Q2:     stat.Quantile(secondQuartile, stat.Empirical, v, nil),
 			Q3:     stat.Quantile(thirdQuartile, stat.Empirical, v, nil),
 			Max:    maxs.Max(columnc),
-			Sum:    sumC,
+			Sum:    math.Round(sumC),
 		})
 	}
 	return tf
