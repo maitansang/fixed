@@ -7,7 +7,7 @@ import axios from "axios";
 const ExecComponent: React.FC<{value:string,key:string}> = ({children, key,value}) => {
   const currentUser = getCurrentUser();
   const [script, setScript] = useState<string>(value)
-  const API_URL = "http://localhost:8080/api/";
+  const API_URL = "http://52.116.150.66:8080/api/";
 
   const initialValues: {
     startDate: string;
