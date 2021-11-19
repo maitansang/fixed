@@ -109,8 +109,8 @@ func MainFunc() {
 			log.Println("Error when get all ticker", err)
 			return
 		}
-	}else{
-		allTickers= append(allTickers,strings.Split(ticker,",")... )
+	} else {
+		allTickers = append(allTickers, strings.Split(ticker, ",")...)
 	}
 	start, _ := time.Parse("2006-01-02", os.Args[3])
 	end, _ := time.Parse("2006-01-02", os.Args[2])
@@ -259,6 +259,12 @@ func (db DB) getTrades(ticker string, start time.Time) {
 	// if err != nil {
 	// 	log.Println(err, "Begin TX")
 	// }
+	_, err = db.Exec(`DELETE FROM largestorders WHERE date = $1 and ticker = $2`,
+		date, ticker)
+	if err != nil {
+		//	tx.Rollback()
+		log.Println(err, fmt.Sprintln("ERROR CANT delete old largestorders", date, ticker))
+	}
 	_, err = db.Exec(`INSERT INTO largestorders (
 			date,
 			ticker,
@@ -287,7 +293,12 @@ func (db DB) getTrades(ticker string, start time.Time) {
 		//	tx.Rollback()
 		log.Println(err, fmt.Sprintf("CANT UPSERT LARGE ORDER %d %s", largestOrder.T, ticker))
 	}
-
+	_, err = db.Exec(`DELETE FROM averages WHERE date = $1 and ticker = $2`,
+		date, ticker)
+	if err != nil {
+		//	tx.Rollback()
+		log.Println(err, fmt.Sprintln("ERROR CANT delete old averages", date, ticker))
+	}
 	_, err = db.Exec(`INSERT INTO averages (date, ticker, avg, stddev, mean, count, avg_price) VALUES($1,$2,$3,$4,$5,$6,$7)`,
 		date, ticker, average, stddev, mean, count, averagePrice)
 	if err != nil {
