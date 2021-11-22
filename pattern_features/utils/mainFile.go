@@ -91,15 +91,15 @@ func MainFunc() {
 	defer sqlDB.Close()
 	var allTickers []string
 	ticker := os.Args[1]
-	log.Println("=====",ticker,strings.Split(ticker,","))
+	log.Println("=====", ticker, strings.Split(ticker, ","))
 	if ticker == "all" {
 		allTickers, err = db.getAllTicker()
 		if err != nil {
 			log.Println("Error when get all ticker", err)
 			return
 		}
-	}else{
-		allTickers= append(allTickers,strings.Split(ticker,",")... )
+	} else {
+		allTickers = append(allTickers, strings.Split(ticker, ",")...)
 	}
 	// log.Fatal("tickers",allTickers)
 	start, _ := time.Parse("2006-01-02", os.Args[3])
@@ -107,24 +107,30 @@ func MainFunc() {
 	// Create new table average_volumes
 	db.AutoMigrate(&PatternFeature{})
 	// Remove old file
-	e := os.Remove("data.csv")
-	if e != nil {
-		log.Println(e)
+	for _, ticker := range allTickers {
+		e := os.RemoveAll(ticker + "_data.csv")
+		if e != nil {
+			log.Println(e)
+		}
 	}
-	wp := workerpool.New(100)
-	var linesTotal []string
+
+	// log.Fatal()
+	wp := workerpool.New(200)
 	for _, ticker := range allTickers {
 		ticker := ticker
+
 		wp.Submit(func() {
+			var linesTotal []string
+
 			for t := start; t.After(end); t = t.AddDate(0, 0, -1) {
 				if t.Weekday() == 0 || t.Weekday() == 6 {
 					log.Println("Saturday || Sunday", t)
 					continue
 				}
-				log.Println("start:", start," --- end: ", end)
+				log.Println("start:", start, " --- end: ", end)
 				last20Days := t.AddDate(0, 0, -20).Format("2006-01-02")
 				last200Days := t.AddDate(0, 0, -200).Format("2006-01-02")
-				log.Println("last20Days: ", last20Days," --- last200Days: ", last200Days)
+				log.Println("last20Days: ", last20Days, " --- last200Days: ", last200Days)
 				lines, err := db.PatternFeature(ticker, t.Format("2006-01-02"), last20Days, last200Days)
 				if err != nil {
 					log.Fatal("Error when get v from dailybars", err)
@@ -132,16 +138,23 @@ func MainFunc() {
 				}
 				linesTotal = append(linesTotal, lines...)
 			}
+
+			if err := writeLines(linesTotal, ticker+"_data.csv"); err != nil {
+				log.Fatal("error", err)
+			}
+			cmd := exec.Command("sh", "run.sh", ticker+"_data.csv")
+			if err := cmd.Run(); err != nil {
+				log.Fatal(err)
+			}
+			e := os.RemoveAll(ticker + "_data.csv")
+			if e != nil {
+				log.Println(e)
+			}
+			log.Println("done ticker " + ticker)
+
 		})
 	}
 	wp.StopWait()
-	if err := writeLines(linesTotal, "data.csv"); err != nil {
-		log.Fatal("error", err)
-	}
-	cmd := exec.Command("sh", "run.sh")
-	if err := cmd.Run(); err != nil {
-		log.Fatal(err)
-	}
 
 	log.Println("done")
 }
@@ -152,7 +165,8 @@ func (db *DB) PatternFeature(ticker string, start, last20Days, last200Days strin
 	var last200DaysDailyBar []DailyBar
 	var closePriceSum float64
 	var averagePrices float64
-
+	//Clear old data
+	db.Where("date = ?", start).Delete(PatternFeature{})
 	// if k == len(tickers) {
 	// 	return
 	// }
@@ -205,8 +219,6 @@ func (db *DB) PatternFeature(ticker string, start, last20Days, last200Days strin
 	line := ticker + "," + start + "," + strconv.FormatBool(co) + "," + fmt.Sprintf("%f", value20DaysChangePct) + "," + strconv.FormatBool(above200Ma)
 	lines = append(lines, line)
 
-	//Clear old data
-	db.Where("date = ?", start).Delete(PatternFeature{})
 	// ExcuteCopyFileCsv("../data.csv")
 
 	return lines, nil
