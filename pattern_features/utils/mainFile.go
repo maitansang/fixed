@@ -115,7 +115,7 @@ func MainFunc() {
 	}
 
 	// log.Fatal()
-	wp := workerpool.New(200)
+	wp := workerpool.New(100)
 	for _, ticker := range allTickers {
 		ticker := ticker
 
