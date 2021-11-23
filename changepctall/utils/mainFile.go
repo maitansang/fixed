@@ -99,7 +99,7 @@ func (db *DB) updateDailybarsDuplicates(tickers []string, start string, end stri
 				log.Println("unable to delete from duplicates")
 				return
 			}
-
+			_, err = db.Exec("SELECT setval('dailybars_duplicate_id_seq', (SELECT MAX(is) FROM the_table)+1)")
 			_, err = db.Exec("insert into dailybars_duplicate select * from dailybars where ticker=$1 and date>=$2 and date<=$3", ticker, start, end)
 			if err != nil {
 				log.Println("Unable to insert into duplicates")
