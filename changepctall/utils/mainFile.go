@@ -138,7 +138,6 @@ func (db DB) updateChange(date string, tickers []string) error {
 				lines = append(lines, l)
 			}
 			if len(lines) < 2 {
-				log.Println("ERRORORORO", len(lines), ticker, date)
 				return
 				//continue errors.New("ERROR updatechange NOT ENOUGH RAWS " + ticker)
 			}
