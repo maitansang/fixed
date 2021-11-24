@@ -50,7 +50,7 @@ func MainFunc() {
 	} else {
 		tickers, err = db.GetTickersFromDB()
 	}
-	// tickers := []string{"AAPL"}
+	// tickers = []string{"AAPL"}
 	if err != nil {
 		log.Fatalln("Cant get tickers", err)
 	}
@@ -96,11 +96,11 @@ func (db *DB) updateDailybarsDuplicates(tickers []string, start string, end stri
 				log.Println("unable to delete from duplicates")
 				return
 			}
-
-			_, err = db.Exec("insert into dailybars_duplicate select * from dailybars where ticker=$1 and date>=$2 and date<=$3", ticker, start, end)
+			_, err = db.Exec("insert into dailybars_duplicate select * from dailybars where ticker=$1 and date>=$2 and date<=$3 ON CONFLICT DO NOTHING ", ticker, start, end)
 			if err != nil {
-				log.Println("Unable to insert into duplicates")
+				log.Println("Unable to insert into duplicates", err)
 			}
+			log.Println("Nothing", err)
 		})
 	}
 	wpUpdateDuplicates.StopWait()
@@ -138,11 +138,11 @@ func (db DB) updateChange(date string, tickers []string) error {
 				lines = append(lines, l)
 			}
 			if len(lines) < 2 {
-				return
 				//continue errors.New("ERROR updatechange NOT ENOUGH RAWS " + ticker)
+			} else {
+				updateChangeAll(lines, db, ticker)
 			}
 			// ReverseSlice(lines)
-			updateChange(lines, db, ticker)
 
 		})
 	}
@@ -182,7 +182,7 @@ var changesQry = map[int]string{
 	13: "UPDATE dailybars_duplicate SET change14=$1 WHERE date=$2 AND ticker=$3",
 }
 
-func updateChange(lines []line, db DB, ticker string) {
+func updateChangeAll(lines []line, db DB, ticker string) {
 	date := lines[0].date.Format("2006-01-02")
 	first := lines[0]
 
