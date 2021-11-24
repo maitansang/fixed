@@ -50,7 +50,7 @@ func MainFunc() {
 	} else {
 		tickers, err = db.GetTickersFromDB()
 	}
-	// tickers = []string{"AAPL"}
+	tickers = []string{"AAPL"}
 	if err != nil {
 		log.Fatalln("Cant get tickers", err)
 	}
@@ -96,7 +96,7 @@ func (db *DB) updateDailybarsDuplicates(tickers []string, start string, end stri
 				log.Println("unable to delete from duplicates")
 				return
 			}
-			_, err = db.Exec("insert into dailybars_duplicate select * from dailybars where ticker=$1 and date>=$2 and date<=$3 ON CONFLICT DO NOTHING ", ticker, start, end)
+			_, err = db.Exec("insert into dailybars_duplicate (date,ticker,o,h,l,c,v,oneminvol,change,c_c_change) select date,ticker,o,h,l,c,v,oneminvol,change,c_c_change from dailybars where ticker=$1 and date>=$2 and date<=$3 ON CONFLICT DO NOTHING ", ticker, start, end)
 			if err != nil {
 				log.Println("Unable to insert into duplicates", err)
 			}
