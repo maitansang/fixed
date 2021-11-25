@@ -100,7 +100,6 @@ func (db *DB) updateDailybarsDuplicates(tickers []string, start string, end stri
 			if err != nil {
 				log.Println("Unable to insert into duplicates", err)
 			}
-			log.Println("Nothing", err)
 		})
 	}
 	wpUpdateDuplicates.StopWait()
