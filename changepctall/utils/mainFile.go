@@ -50,7 +50,7 @@ func MainFunc() {
 	} else {
 		tickers, err = db.GetTickersFromDB()
 	}
-	tickers = []string{"AAPL"}
+	// tickers = []string{"AAPL"}
 	if err != nil {
 		log.Fatalln("Cant get tickers", err)
 	}
